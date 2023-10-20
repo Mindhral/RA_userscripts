@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_HideHardcoreUnlockedCheevos
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Allows to hide achievements unlocked in hardcore only.
 // @author       Mindhral
 // @match        https://retroachievements.org/game/*
@@ -17,6 +17,8 @@
     const unlockedItems = [...document.getElementsByClassName('unlocked-row')]
     if (unlockedItems.length == 0) return
 
+    let initialValue = 'none'
+
     const changeVisibility = value => {
         unlockedItems.forEach(row => {
             if (value === 'unlocked' || (value === 'hardcore' && row.getElementsByClassName('goldimagebig').length > 0)) {
@@ -25,14 +27,15 @@
                 row.classList.remove('hidden')
             }
         })
+        localStorage.HideCheevosType = value
     }
 
-    const createRadioLabel = (value, checked) => {
+    const createRadioLabel = value => {
         const input = document.createElement('input')
         input.type = 'radio'
         input.name = 'hideCheevos'
         input.value = value
-        input.checked = checked
+        input.checked = value === initialValue
         input.addEventListener('change', () => changeVisibility(value))
         const label = document.createElement('label')
         label.append(input, '\n', value, '\n')
@@ -40,7 +43,7 @@
     }
 
     const span = document.createElement('span')
-    span.append('Hide:\n', createRadioLabel('unlocked', false), createRadioLabel('hardcore', false), createRadioLabel('none', true))
+    span.append('Hide:\n', createRadioLabel('unlocked'), createRadioLabel('hardcore'), createRadioLabel('none'))
     const parentDiv = checkbox.parentElement.parentElement
     parentDiv.replaceWith(span)
 })();
