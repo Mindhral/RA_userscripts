@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_ScrollProfileAwards
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Set a max height for the game award section on profile pages, and a scroll bar if necessary
 // @author       Mindhral
 // @match        https://retroachievements.org/user/*
@@ -11,11 +11,13 @@
 // ==/UserScript==
 
 const Settings = {
-    maxHeight: '75em'
+    maxHeight: '75em',
+    minGameCount: 100
 };
 
 (function() {
     const awardsDiv = document.querySelector('div#gameawards div.component');
+    if (awardsDiv.children.length < Settings.minGameCount) return;
     awardsDiv.style['overflow-y'] = 'auto';
     awardsDiv.style['max-height'] = Settings.maxHeight;
     awardsDiv.style['padding-left'] = '0.75rem';
