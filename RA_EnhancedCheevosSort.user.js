@@ -4,6 +4,7 @@
 // @version      0.1
 // @description  Adds some possibilities to the sorting of achievements on game page, and do it locally without requesting the server
 // @author       Mindhral
+// @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp

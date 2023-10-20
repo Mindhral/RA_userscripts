@@ -4,6 +4,7 @@
 // @version      0.3
 // @description  Allows to hide achievements unlocked in hardcore only, or with missable tag
 // @author       Mindhral
+// @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp

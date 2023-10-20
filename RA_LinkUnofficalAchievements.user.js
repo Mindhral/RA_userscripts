@@ -4,6 +4,7 @@
 // @version      0.1
 // @description  Adds a link to unofficial achievements on a game's page
 // @author       Mindhral
+// @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp

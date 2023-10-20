@@ -4,6 +4,7 @@
 // @version      0.2
 // @description  Adds a button to progress section on profile page to copy the data in JSON format
 // @author       Mindhral
+// @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp

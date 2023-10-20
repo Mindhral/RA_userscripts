@@ -4,6 +4,7 @@
 // @version      0.2
 // @description  Set a max height for the game award section on profile pages, and a scroll bar if necessary
 // @author       Mindhral
+// @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp

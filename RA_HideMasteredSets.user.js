@@ -4,6 +4,7 @@
 // @version      0.3
 // @description  Allows to hide mastered sets only on user profiles.
 // @author       Mindhral
+// @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
