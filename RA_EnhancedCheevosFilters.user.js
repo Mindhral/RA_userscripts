@@ -11,7 +11,7 @@
 // ==/UserScript==
 
 const Settings = {
-    replaceHideCompletedCheckbox: false,
+    replaceHideCompletedCheckbox: true,
     addMissableFilter: true
 };
 
