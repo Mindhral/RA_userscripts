@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         RA_HideMasteredSets
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Allows to hide mastered sets only on user profiles.
 // @author       Mindhral
 // @match        https://retroachievements.org/user/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
 (function() {
@@ -17,10 +18,8 @@
     const completedRows = document.querySelectorAll('#usercompletedgamescomponent tr.completion-progress-completed-row');
     if (completedRows.length == 0) return;
 
-    let initialValue = localStorage.HideUserSetsType;
-    if (initialValue == null) {
-        initialValue = hideCompletedCheckbox.checked ? 'completed' : 'none';
-    }
+    const defaultValue = hideCompletedCheckbox.checked ? 'completed' : 'none';
+    let initialValue = GM_getValue('HideUserSetsType', defaultValue);
 
     const changeVisibility = value => {
         completedRows.forEach(row => {
@@ -30,7 +29,7 @@
                 row.classList.remove('hidden');
             }
         })
-        localStorage.HideUserSetsType = value;
+        GM_setValue('HideUserSetsType', value);
     };
 
     const createRadioLabel = value => {
