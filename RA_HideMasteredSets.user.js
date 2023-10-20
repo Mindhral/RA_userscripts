@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_HideMasteredSets
 // @namespace    RA
-// @version      0.2
+// @version      0.3
 // @description  Allows to hide mastered sets only on user profiles.
 // @author       Mindhral
 // @match        https://retroachievements.org/user/*
@@ -12,15 +12,14 @@
 // ==/UserScript==
 
 (function() {
-    const hideCompletedCheckbox = document.getElementById('hide-user-completed-sets-checkbox');
-    if (hideCompletedCheckbox == null) return;
-
-    const completedRows = document.querySelectorAll('#usercompletedgamescomponent tr.completion-progress-completed-row');
+    const completedGamesComponent = document.querySelector('#usercompletedgamescomponent')
+    if (completedGamesComponent == null) return;
+    const completedRows = completedGamesComponent.querySelectorAll('tr.completion-progress-completed-row');
     if (completedRows.length == 0) return;
+    const hideCompletedCheckbox = document.getElementById('hide-user-completed-sets-checkbox');
 
-    const defaultValue = hideCompletedCheckbox.checked ? 'completed' : 'none';
+    const defaultValue = hideCompletedCheckbox?.checked ? 'completed' : 'none';
     let initialValue = GM_getValue('HideUserSetsType', defaultValue);
-
     const changeVisibility = value => {
         completedRows.forEach(row => {
             if (value === 'completed' || (value === 'mastered' && row.getElementsByClassName('mastered').length > 0)) {
@@ -48,6 +47,8 @@
 
     const span = document.createElement('span');
     span.append('Hide:\n', createRadioLabel('none'), createRadioLabel('mastered'), createRadioLabel('completed'));
-    const parentLabel = hideCompletedCheckbox.parentElement;
-    parentLabel.replaceWith(span);
+    if (hideCompletedCheckbox != null) {
+        hideCompletedCheckbox.parentElement.remove();
+    }
+    completedGamesComponent.insertAdjacentElement('beforebegin', span)
 })();
