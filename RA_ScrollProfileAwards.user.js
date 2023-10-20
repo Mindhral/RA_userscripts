@@ -15,9 +15,9 @@ const Settings = {
 };
 
 (function() {
-    const awardsDiv = document.querySelector('div#gameawards div.component')
-    awardsDiv.style['overflow-y'] = 'auto'
-    awardsDiv.style['max-height'] = Settings.maxHeight
-    awardsDiv.style['padding-left'] = '0.75rem'
-    awardsDiv.style['padding-right'] = '0.75rem'
+    const awardsDiv = document.querySelector('div#gameawards div.component');
+    awardsDiv.style['overflow-y'] = 'auto';
+    awardsDiv.style['max-height'] = Settings.maxHeight;
+    awardsDiv.style['padding-left'] = '0.75rem';
+    awardsDiv.style['padding-right'] = '0.75rem';
 })();
