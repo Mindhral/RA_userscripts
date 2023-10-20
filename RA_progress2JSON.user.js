@@ -1,14 +1,23 @@
 // ==UserScript==
 // @name         RA_progress2JSON
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Adds a button to progress section on profile page to copy the data in JSON format
 // @author       Mindhral
 // @match        https://retroachievements.org/user/*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
-// @grant        none
+// @grant        unsafeWindow
 // ==/UserScript==
+
+const createIcon = (icon, title) => {
+    const iconDiv = document.createElement('div')
+    iconDiv.className = 'icon'
+    iconDiv.style.cssText = 'font-size: 0.65em; cursor: pointer'
+    iconDiv.title = title
+    iconDiv.innerHTML = icon
+    return iconDiv
+}
 
 (function() {
     // only active for authentified user's own page
@@ -27,12 +36,9 @@
     const titleSpan = document.createElement('span')
     titleSpan.className = 'grow'
     titleSpan.innerHTML = completedGamesTitle.innerHTML
-    const iconDiv = document.createElement('div')
-    iconDiv.className = 'icon'
-    iconDiv.style.cssText = 'font-size: 0.65em; cursor: pointer'
-    iconDiv.title = 'copy progress as JSON'
-    iconDiv.innerHTML = '📋'
-    completedGamesTitle.replaceChildren(titleSpan, iconDiv)
+    const copyIconDiv = createIcon('📋', 'copy progress as JSON')
+    const linkIconDiv = createIcon('🔗', 'open JSON in new tab')
+    completedGamesTitle.replaceChildren(titleSpan, copyIconDiv, linkIconDiv)
 
     // building object row by row (i.e game by game)
     const addRowInfo = progress => row => {
@@ -52,9 +58,13 @@
         rows.forEach(addRowInfo(progress))
         return JSON.stringify(progress)
     }
-    iconDiv.addEventListener('click', () => {
+    copyIconDiv.addEventListener('click', () => {
         navigator.clipboard.writeText(getProgressJson())
-        iconDiv.style.cursor = 'grabbing'
-        setTimeout(() => { iconDiv.style.cursor = 'pointer' }, 500)
+        copyIconDiv.style.cursor = 'grabbing'
+        setTimeout(() => { copyIconDiv.style.cursor = 'pointer' }, 500)
+    })
+    linkIconDiv.addEventListener('click', () => {
+        const newWindow = unsafeWindow.open('', 'progress')
+        newWindow.location = 'data:application/json,' + getProgressJson()
     })
 })();
