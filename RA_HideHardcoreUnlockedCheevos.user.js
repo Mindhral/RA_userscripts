@@ -27,7 +27,6 @@
                 row.classList.remove('hidden')
             }
         })
-        localStorage.HideCheevosType = value
     }
 
     const createRadioLabel = value => {
