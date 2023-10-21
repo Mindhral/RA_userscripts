@@ -32,6 +32,8 @@ Adds some filters for achievements on a game page.
 
 ![filter missable](/assets/EnhancedCheevosFilters_missable.png)
 
+Either of these changes can be deactivated with a corresponding boolean at the begining of the script.
+
 ## RA_EnhancedCheevosSort
 
 Modifies the sorting of achievements on a game page.
@@ -89,7 +91,7 @@ Adds a link on game page to view the unofficial achievements for the game, if an
 
 ## RA_progress2JSON
 
-Adds clickable icons on top of the *Completion Progress* section of profile page, which respectively copy to clipboard or open in a new tab the completion data in JSON format.
+Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles the completion data in JSON format and respectively copy it to clipboard or open it in a new tab.
 
 ![progress2JSON icons](/assets/progress2JSON_icons.png)
 
@@ -99,3 +101,5 @@ Adds clickable icons on top of the *Completion Progress* section of profile page
 The items keys are game ids.
 
 This can be useful in combination with some script or program which can use this data to display it or integrate it in other metadata, especially while the public API is unavailable.
+
+Opening a new tab with the data doesn't seem to work in Microsoft Edge at least.
