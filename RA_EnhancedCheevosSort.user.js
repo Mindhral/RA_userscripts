@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedCheevosSort
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Adds some possibilities to the sorting of achievements on game page, and do it locally without requesting the server
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -81,7 +81,7 @@ const createOption = (value, labelTxt) => {
     return option;
 };
 
-const Settings = GM_getValue('cheevosSortSettings', {
+let settings = GM_getValue('cheevosSortSettings', {
     mainSort: 'normal',
     descSort: false,
     sortGroup: 'groupUnlocks',
@@ -122,28 +122,28 @@ const Settings = GM_getValue('cheevosSortSettings', {
     for (const [sortName, sort] of Object.entries(MainSorts)) {
         mainSelect.append(createOption(sortName, sort.label));
     }
-    mainSelect.namedItem(Settings.mainSort).selected = true;
+    mainSelect.namedItem(settings.mainSort).selected = true;
     mainCompare = MainSorts.normal.compare;
 
     const descLabel = document.createElement('label');
     const descCheckbox = document.createElement('input');
     descCheckbox.id = 'descSort';
     descCheckbox.type = 'checkbox';
-    descCheckbox.checked = Settings.descSort;
+    descCheckbox.checked = settings.descSort;
     descLabel.append(descCheckbox, ' descending');
     sortSpan.replaceChildren(sortLabel, mainSelect, '\n', descLabel);
 
     const updateCompare = () => {
-        mainCompare = MainSorts[Settings.mainSort].compare;
-        if (Settings.descSort) mainCompare = Compares.reverse(mainCompare);
+        mainCompare = MainSorts[settings.mainSort].compare;
+        if (settings.descSort) mainCompare = Compares.reverse(mainCompare);
         sortRows();
     };
     mainSelect.addEventListener('change', () => {
-        Settings.mainSort = mainSelect.selectedOptions[0].value;
+        settings.mainSort = mainSelect.selectedOptions[0].value;
         updateCompare();
     });
     descCheckbox.addEventListener('change', () => {
-        Settings.descSort = descCheckbox.checked;
+        settings.descSort = descCheckbox.checked;
         updateCompare();
     });
 
@@ -155,44 +155,44 @@ const Settings = GM_getValue('cheevosSortSettings', {
         for (const [sortName, sort] of Object.entries(SortGroupings)) {
             groupSelect.append(createOption(sortName, sort.label));
         }
-        groupSelect.namedItem(Settings.sortGroup).selected = true;
+        groupSelect.namedItem(settings.sortGroup).selected = true;
 
         const groupLastLabel = document.createElement('label');
         const groupLastCheckbox = document.createElement('input');
         groupLastCheckbox.id = 'groupLast';
         groupLastCheckbox.type = 'checkbox';
-        groupLastCheckbox.checked = Settings.groupLast;
+        groupLastCheckbox.checked = settings.groupLast;
         groupLastLabel.append(groupLastCheckbox, ' last');
         groupSpan.append('Separate unlocks: ', groupSelect, '\n', groupLastLabel);
         sortDiv.append(groupSpan);
 
         const updateUnlockCompare = () => {
-            const getRowValue = SortGroupings[Settings.sortGroup].getRowValue;
+            const getRowValue = SortGroupings[settings.sortGroup].getRowValue;
             groupCompare = (r1, r2) => getRowValue(r1) - getRowValue(r2);
-            if (!Settings.groupLast) groupCompare = Compares.reverse(groupCompare);
+            if (!settings.groupLast) groupCompare = Compares.reverse(groupCompare);
             sortRows();
         };
         groupSelect.addEventListener('change', () => {
-            Settings.sortGroup = groupSelect.selectedOptions[0].value;
+            settings.sortGroup = groupSelect.selectedOptions[0].value;
             updateUnlockCompare();
         });
         groupLastCheckbox.addEventListener('change', () => {
-            Settings.groupLast = groupLastCheckbox.checked;
+            settings.groupLast = groupLastCheckbox.checked;
             updateUnlockCompare();
         });
 
         // implementing constraints between controls
         mainSelect.addEventListener('change', () => {
             const noneItem = groupSelect.namedItem('groupNone');
-            noneItem.disabled = (Settings.mainSort === 'normal');
+            noneItem.disabled = (settings.mainSort === 'normal');
             noneItem.title = noneItem.disabled ? 'unavailable with normal sort' : '';
             if (noneItem.disabled && noneItem.selected) {
                 groupSelect.selectedIndex = 0;
-                Settings.sortGroup = groupSelect.selectedOptions[0].value;
+                settings.sortGroup = groupSelect.selectedOptions[0].value;
             }
         });
         groupSelect.addEventListener('change', () => {
-            groupLastCheckbox.disabled = (Settings.sortGroup === 'groupNone');
+            groupLastCheckbox.disabled = (settings.sortGroup === 'groupNone');
         });
         // take initial values into account
         groupSelect.dispatchEvent(new Event('change'));
@@ -200,15 +200,23 @@ const Settings = GM_getValue('cheevosSortSettings', {
     mainSelect.dispatchEvent(new Event('change'));
 
     // adds the saving button
-    const saveDiv = document.createElement('div');
-    saveDiv.className = 'icon';
-    saveDiv.style.cssText = 'cursor: pointer;font-size: 1.35em; padding-left:2em';
-    saveDiv.title = 'save sort parameters as default';
-    saveDiv.innerHTML = '💾';
-    saveDiv.addEventListener('click', () => {
-        saveDiv.style.cursor = 'grabbing';
-        GM_setValue('cheevosSortSettings', Settings);
-        setTimeout(() => { saveDiv.style.cursor = 'pointer' }, 500);
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'hidden';
+    iconSpan.style.cssText = 'font-size: 1.25em; padding-left:2em';
+    const saveButton = document.createElement('button');
+    saveButton.title = 'save sort parameters as default';
+    saveButton.innerHTML = '💾';
+    saveButton.addEventListener('click', () => {
+        GM_setValue('cheevosSortSettings', settings);
+        iconSpan.classList.add('hidden')
     });
-    sortSpan.append('\n', saveDiv);
+    iconSpan.append(saveButton);
+    sortSpan.append('\n', iconSpan);
+
+    settings = new Proxy(settings, {
+        set(obj, prop,val) {
+            iconSpan.classList.remove('hidden')
+            Reflect.set(...arguments);
+        }
+    });
 })();
