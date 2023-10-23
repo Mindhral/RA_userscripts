@@ -83,6 +83,14 @@ The number of badges and the height which trigger the scroll bar apparition can 
 > [!NOTE]
 > Results are not consistent between devices and browsers as it can reduce the number of columns to 4 instead of 5.
 
+## RA_HideProfileAchievementsBadges
+
+On profile page, in *Last [n] games played* section, if a game has more than 48 badges (3 lines in wide layout), this scripts only shows the first 32 badges (2 lines) and adds a button to show the others.
+
+![some badges hidden and button displayed](/assets/HideProfileAchievementsBadges_button.png) ![all badges displayed](/assets/HideProfileAchievementsBadges_clicked.png)
+
+Both numbers of badges can be adjusted at the beginning of the script.
+
 ## RA_LinkUnofficalAchievements
 
 Adds a link on game page to view the unofficial achievements for the game, if any. This reloads the page. The link is displayed whether there are unofficial achievements or not.
