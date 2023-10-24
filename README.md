@@ -81,8 +81,6 @@ Events and site awards are not affected.
 The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page. Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
 ![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
 
-> [!NOTE]
-> Results are not consistent between devices and browsers as it can reduce the number of columns to 4 instead of 5.
 
 ## RA_HideProfileAchievementsBadges
 

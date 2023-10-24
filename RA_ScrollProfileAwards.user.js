@@ -73,8 +73,14 @@ function profilePage() {
     if (awardsDiv.children.length < Settings.minGameCount) return;
     awardsDiv.style['overflow-y'] = 'auto';
     awardsDiv.style['max-height'] = Settings.maxHeight + 'em';
-    awardsDiv.style['padding-left'] = '0.75rem';
-    awardsDiv.style['padding-right'] = '0.75rem';
+    if (window.matchMedia('(min-width: 1280px)').matches) {
+        awardsDiv.style['padding-left'] = '0.75rem';
+        awardsDiv.style['padding-right'] = '0.75rem';
+    } else if (window.matchMedia('(min-width: 768px)').matches) {
+        awardsDiv.style['padding-left'] = '0';
+        awardsDiv.style['padding-right'] = '0';
+        awardsDiv.style.gap = '0.2rem';
+    }
 }
 
 if (window.location.pathname.startsWith('/controlpanel.php')) {
