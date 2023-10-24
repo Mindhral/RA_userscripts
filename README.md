@@ -78,9 +78,9 @@ This makes it easier to scroll to the next sections, and combined with lazy load
 
 Events and site awards are not affected.
 
-The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page. Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
-![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
+The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page[^1].
 
+![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
 
 ## RA_HideProfileAchievementsBadges
 
@@ -88,7 +88,9 @@ On profile page, in *Last [n] games played* section, if a game has more than 48 
 
 ![some badges hidden and button displayed](/assets/HideProfileAchievementsBadges_button.png) ![all badges displayed](/assets/HideProfileAchievementsBadges_clicked.png)
 
-Both numbers of badges can be adjusted at the beginning of the script.
+Both numbers of badges can be adjusted in a dedicated section on *Settings* page[^1].
+
+![hide achievements badges settings](/assets/HideProfileAchievementsBadges_settings.png)
 
 ## RA_LinkUnofficalAchievements
 
@@ -110,3 +112,5 @@ The items keys are game ids.
 This can be useful in combination with some script or program which can use this data to display it or integrate it in other metadata, especially while the public API is unavailable.
 
 Opening a new tab with the data doesn't seem to work in Microsoft Edge at least.
+
+[^1]: Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
