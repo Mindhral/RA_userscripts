@@ -1,22 +1,67 @@
 // ==UserScript==
 // @name         RA_EnhancedCheevosFilters
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  Allows to hide achievements unlocked in hardcore only, or with missable tag
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
+// @match        https://retroachievements.org/controlpanel.php*
 // @run-at       document-end
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
 // ==/UserScript==
 
+const PropertyPrefix = 'EnhancedCheevosFilters.';
 const Settings = {
-    replaceHideCompletedCheckbox: true,
-    addMissableFilter: true
+    replaceHideCompletedCheckbox: GM_getValue(PropertyPrefix + 'replaceHideCompletedCheckbox', true),
+    addMissableFilter: GM_getValue(PropertyPrefix + 'addMissableFilter', true)
 };
 
-(function() {
+function newElement(tagName, parent, className = null, innerHTML = null) {
+    const result = document.createElement(tagName);
+    parent.append(result);
+    if (className != null) result.className = className;
+    if (innerHTML != null) result.innerHTML = innerHTML;
+    return result;
+}
+
+function settingsPage() {
+    const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const settingsDiv = xpathRes.iterateNext();
+    if (settingsDiv == null) return;
+
+    const newDiv = document.createElement('div');
+    newDiv.className = 'component';
+    settingsDiv.insertAdjacentElement('afterend', newDiv);
+    const title = newElement('h4', newDiv, null, 'Enhanced Cheevos Filters');
+    const table = newElement('table', newDiv, 'table-highlight');
+    const tbody = newElement('tbody', table);
+
+    const replaceCheckboxLine = newElement('tr', tbody);
+    newElement('td', replaceCheckboxLine, null, 'Replace <em>Hide unlocked achievements</em> checkbox');
+    const replaceCheckboxCell = newElement('td', replaceCheckboxLine);
+    const replaceCheckboxInput = newElement('input', replaceCheckboxCell);
+    replaceCheckboxInput.type = 'checkbox';
+    replaceCheckboxInput.checked = Settings.replaceHideCompletedCheckbox;
+
+    const missableFilterLine = newElement('tr', tbody);
+    newElement('td', missableFilterLine, null, 'Add filter on Missable tag');
+    const missableFilterCell = newElement('td', missableFilterLine);
+    const missableFilterInput = newElement('input', missableFilterCell);
+    missableFilterInput.type = 'checkbox';
+    missableFilterInput.checked = Settings.addMissableFilter;
+
+    replaceCheckboxInput.addEventListener('input', () => {
+        GM_setValue(PropertyPrefix + 'replaceHideCompletedCheckbox', replaceCheckboxInput.checked);
+    });
+    missableFilterInput.addEventListener('change', () => {
+        GM_setValue(PropertyPrefix + 'addMissableFilter', missableFilterInput.checked);
+    });
+}
+
+function gamePage() {
     const achievementsList = document.querySelector('#achievement ul');
     if (achievementsList == null) return;
     const allRows = achievementsList.querySelectorAll('li');
@@ -96,4 +141,10 @@ const Settings = {
 
         filterDiv.append(missableSpan);
     })();
-})();
+}
+
+if (window.location.pathname.startsWith('/controlpanel.php')) {
+    settingsPage();
+} else {
+    gamePage();
+}

@@ -32,7 +32,9 @@ Adds some filters for achievements on a game page.
 
 ![filter missable](/assets/EnhancedCheevosFilters_missable.png)
 
-Either of these changes can be deactivated with a corresponding boolean at the begining of the script.
+Either of these changes can be deactivated with a corresponding checkbox in a dedicated section on *Settings* page[^1].
+
+![enhanced filters settings](/assets/EnhancedCheevosFilters_settings.png)
 
 ## RA_EnhancedCheevosSort
 
