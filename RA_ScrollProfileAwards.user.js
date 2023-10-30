@@ -57,6 +57,7 @@ function settingsPage() {
     maxHeightInput.style.width = '7em';
     const unitSpan = newElement('span', maxHeightCell, null, ' em');
     unitSpan.title = 'em: font-size of the element';
+    unitSpan.style.cursor = 'help';
 
     maxHeightInput.addEventListener('input', () => {
         if (!maxHeightInput.reportValidity()) return;
