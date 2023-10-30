@@ -60,11 +60,11 @@ function settingsPage() {
 
     maxBadgesInput.addEventListener('input', () => {
         if (!maxBadgesInput.reportValidity()) return;
-        GM_setValue(PropertyPrefix + 'maxBadgesCount', maxBadgesInput.value);
+        GM_setValue(PropertyPrefix + 'maxBadgesCount', parseInt(maxBadgesInput.value));
     });
     shownBadgesInput.addEventListener('input', () => {
         if (!shownBadgesInput.reportValidity()) return;
-        GM_setValue(PropertyPrefix + 'showBadgesCount', shownBadgesInput.value);
+        GM_setValue(PropertyPrefix + 'showBadgesCount', parseInt(shownBadgesInput.value));
     });
 }
 

@@ -61,11 +61,11 @@ function settingsPage() {
 
     maxHeightInput.addEventListener('input', () => {
         if (!maxHeightInput.reportValidity()) return;
-        GM_setValue(PropertyPrefix + 'maxHeight', maxHeightInput.value);
+        GM_setValue(PropertyPrefix + 'maxHeight', parseInt(maxHeightInput.value));
     });
     minGamesInput.addEventListener('input', () => {
         if (!minGamesInput.reportValidity()) return;
-        GM_setValue(PropertyPrefix + 'minGameCount', minGamesInput.value);
+        GM_setValue(PropertyPrefix + 'minGameCount', parseInt(minGamesInput.value));
     });
 }
 
