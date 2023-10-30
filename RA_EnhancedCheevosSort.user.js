@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         RA_EnhancedCheevosSort
 // @namespace    RA
-// @version      0.2
+// @version      0.3
 // @description  Adds some possibilities to the sorting of achievements on game page, and do it locally without requesting the server
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
-// @run-at       document-end
+// @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -88,7 +88,7 @@ let settings = GM_getValue('cheevosSortSettings', {
     groupLast: false
 });
 
-(function() {
+document.addEventListener("DOMContentLoaded", () => {
     const achievementsList = document.querySelector('#achievement ul');
     if (achievementsList == null) return;
     const allRows = achievementsList.querySelectorAll('li');
@@ -219,4 +219,4 @@ let settings = GM_getValue('cheevosSortSettings', {
             Reflect.set(...arguments);
         }
     });
-})();
+});

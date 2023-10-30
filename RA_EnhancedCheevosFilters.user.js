@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         RA_EnhancedCheevosFilters
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Allows to hide achievements unlocked in hardcore only, or with missable tag
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/controlpanel.php*
-// @run-at       document-end
+// @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -144,7 +144,7 @@ function gamePage() {
 }
 
 if (window.location.pathname.startsWith('/controlpanel.php')) {
-    settingsPage();
+    document.addEventListener("DOMContentLoaded", settingsPage);
 } else {
-    gamePage();
+    document.addEventListener("DOMContentLoaded", gamePage);
 }

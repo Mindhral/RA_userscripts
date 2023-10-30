@@ -1,18 +1,18 @@
 // ==UserScript==
 // @name         RA_HideMasteredSets
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  Allows to hide mastered sets only on user profiles.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
-// @run-at       document-end
+// @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
 
-(function() {
+document.addEventListener("DOMContentLoaded", () => {
     const completedGamesComponent = document.querySelector('#usercompletedgamescomponent')
     if (completedGamesComponent == null) return;
     const completedRows = completedGamesComponent.querySelectorAll('tr.completion-progress-completed-row');
@@ -52,4 +52,4 @@
         hideCompletedCheckbox.parentElement.remove();
     }
     completedGamesComponent.insertAdjacentElement('beforebegin', span)
-})();
+});

@@ -7,7 +7,7 @@
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @match        https://retroachievements.org/controlpanel.php*
-// @run-at       document-end
+// @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -114,7 +114,7 @@ function profilePage() {
 }
 
 if (window.location.pathname.startsWith('/controlpanel.php')) {
-    settingsPage();
+    document.addEventListener("DOMContentLoaded", settingsPage);
 } else {
-    profilePage();
+    document.addEventListener("DOMContentLoaded", profilePage);
 }

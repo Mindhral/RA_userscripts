@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         RA_Progress2JSON
 // @namespace    RA
-// @version      0.2
+// @version      0.3
 // @description  Adds a button to progress section on profile page to copy the data in JSON format
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
-// @run-at       document-end
+// @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        unsafeWindow
 // ==/UserScript==
@@ -20,7 +20,7 @@ const createIcon = (icon, title) => {
     return iconDiv;
 }
 
-(function() {
+document.addEventListener("DOMContentLoaded", () => {
     // only active for authentified user's own page
     const currentUserDiv = document.querySelector('div.dropdown-menu-right div.dropdown-header');
     if (currentUserDiv == null) return;
@@ -68,4 +68,4 @@ const createIcon = (icon, title) => {
         const newWindow = unsafeWindow.open('', 'progress');
         newWindow.location = 'data:application/json,' + getProgressJson();
     });
-})();
+});
