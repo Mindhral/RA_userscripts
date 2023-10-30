@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_HideProfileAchievementsBadges
 // @namespace    RA
-// @version      0.2
+// @version      0.3
 // @description  Hides achievements badges on profile page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -16,7 +16,8 @@
 const PropertyPrefix = 'HideProfileAchievementsBadges.';
 const Settings = {
     maxBadgesCount: GM_getValue(PropertyPrefix + 'maxBadgesCount', 48),
-    showBadgesCount: GM_getValue(PropertyPrefix + 'showBadgesCount', 32)
+    showBadgesCount: GM_getValue(PropertyPrefix + 'showBadgesCount', 32),
+    opacityGradientCount: GM_getValue(PropertyPrefix + 'opacityGradientCount', 16)
 };
 
 function newElement(tagName, parent, className = null, innerHTML = null) {
@@ -51,12 +52,22 @@ function settingsPage() {
 
     const shownBadgesLine = newElement('tr', tbody);
     newElement('td', shownBadgesLine, null, 'Number of badges always displayed');
-    const shownBadgesCell = newElement('td',shownBadgesLine);
+    const shownBadgesCell = newElement('td', shownBadgesLine);
     const shownBadgesInput = newElement('input', shownBadgesCell);
     shownBadgesInput.type = 'number';
     shownBadgesInput.value = Settings.showBadgesCount;
-    shownBadgesInput.min = 0;
+    shownBadgesInput.min = Settings.opacityGradientCount;
     shownBadgesInput.style.width = '7em';
+
+    const opacityGradientLine = newElement('tr', tbody);
+    newElement('td', opacityGradientLine, null, 'Number of badges in the transparency gradient');
+    const opacityGradientCell = newElement('td', opacityGradientLine);
+    const opacityGradientInput = newElement('input', opacityGradientCell);
+    opacityGradientInput.type = 'number';
+    opacityGradientInput.value = Settings.opacityGradientCount;
+    opacityGradientInput.min = 0;
+    opacityGradientInput.max = Settings.showBadgesCount;
+    opacityGradientInput.style.width = '7em';
 
     maxBadgesInput.addEventListener('input', () => {
         if (!maxBadgesInput.reportValidity()) return;
@@ -64,7 +75,13 @@ function settingsPage() {
     });
     shownBadgesInput.addEventListener('input', () => {
         if (!shownBadgesInput.reportValidity()) return;
+        opacityGradientInput.max = shownBadgesInput.value;
         GM_setValue(PropertyPrefix + 'showBadgesCount', parseInt(shownBadgesInput.value));
+    });
+    opacityGradientInput.addEventListener('input', () => {
+        if (!opacityGradientInput.reportValidity()) return;
+        shownBadgesInput.min = opacityGradientInput.value;
+        GM_setValue(PropertyPrefix + 'opacityGradientCount', parseInt(opacityGradientInput.value));
     });
 }
 
@@ -72,8 +89,11 @@ function profilePage() {
     const badgeContainers = document.querySelectorAll('div.recentlyplayed > div:nth-of-type(2n)');
     badgeContainers.forEach(div => {
         if (div.children.length <= Settings.maxBadgesCount) return;
-        for (let i=Settings.showBadgesCount; i < div.children.length; i++) {
+        for (let i = Settings.showBadgesCount; i < div.children.length; i++) {
             div.children[i].classList.add('hidden')
+        }
+        for (let i = 1; i <= Settings.opacityGradientCount; i++) {
+            div.children[Settings.showBadgesCount - i].style.opacity = i / (Settings.opacityGradientCount + 1);
         }
         const showButton = document.createElement('button');
         showButton.className='btn'
@@ -83,8 +103,11 @@ function profilePage() {
         div.append(showButton)
         showButton.addEventListener('click', () => {
             showButton.remove()
-            for (let i=Settings.showBadgesCount; i < div.children.length; i++) {
+            for (let i = Settings.showBadgesCount; i < div.children.length; i++) {
                 div.children[i].classList.remove('hidden')
+            }
+            for (let i = 1; i <= Settings.opacityGradientCount; i++) {
+                div.children[Settings.showBadgesCount - i].style.opacity = null;
             }
         });
     });

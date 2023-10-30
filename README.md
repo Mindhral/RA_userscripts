@@ -87,10 +87,11 @@ The number of badges and the height which trigger the scroll bar apparition can 
 ## RA_HideProfileAchievementsBadges
 
 On profile page, in *Last [n] games played* section, if a game has more than 48 badges (3 lines in wide layout), this scripts only shows the first 32 badges (2 lines) and adds a button to show the others.
+A transparency gradient is set on the last 16 badges (last line).
 
 ![some badges hidden and button displayed](/assets/HideProfileAchievementsBadges_button.png) ![all badges displayed](/assets/HideProfileAchievementsBadges_clicked.png)
 
-Both numbers of badges can be adjusted in a dedicated section on *Settings* page[^1].
+All 3 numbers of badges can be adjusted in a dedicated section on *Settings* page[^1].
 
 ![hide achievements badges settings](/assets/HideProfileAchievementsBadges_settings.png)
 
