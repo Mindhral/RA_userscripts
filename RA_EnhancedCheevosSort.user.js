@@ -42,6 +42,15 @@ const MainSorts = {
         label: 'Title',
         extractInfo: r1 => { r1.title = r1.element.querySelector('div > a.inline').innerText },
         compare: (r1, r2) => r1.title.localeCompare(r2.title)
+    },
+    'unlock-date': {
+        label: 'Unlock date',
+        extractInfo: r => {
+            r.unlockDate = r.index; // to sort locked achievements with "normal" order
+            const match = r.element.querySelector('li.unlocked-row p.leading-4 + p')?.innerText?.match(/Unlocked\s+(.+)([ap]m)/i);
+            if (match != null) r.unlockDate = Date.parse(match[1] + ' ' + match[2]);
+        },
+        compare: (r1, r2) => r1.unlockDate - r2.unlockDate
     }
 };
 

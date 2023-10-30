@@ -42,7 +42,7 @@ Modifies the sorting of achievements on a game page.
 
 1. The sorting is done on client side, without any additional request to the server. It is faster, and removes some load on the server.
 
-2. Adds sort by "Won by (hardcore)" and by RetroPoints
+2. Adds sort by "Won by (hardcore)", RetroPoints and "Unlock date". For the last one, normal sort is used for locked achievements.
 
 ![main sorts](/assets/EnhancedCheevosSort_main_sorts.png)
 
