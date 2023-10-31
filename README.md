@@ -71,6 +71,18 @@ Modifies the sorting of achievements on a game page.
 
 ![grouping save](/assets/EnhancedCheevosSort_save.png)
 
+## RA_GameListTagFilter
+
+Adds a filter on games titles tags on game list pages: console hubs, *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.
+
+![n64 demo filter](/assets/GameListTagFilter_n64_demo.png)
+
+The filter is applied on the games already displayed, so the behavior is different from what could be expected from a filter executed on server when there is pagination:
+
+![claim homebrew page 1](/assets/GameListTagFilter_claim_homebrew.png)
+
+This script should be compatible with *RA_colorMarkGames*.
+
 ## RA_ScrollProfileAwards
 
 If the number of badges in the *Game Awards* section of profile page exceeds a certain number, this script adds a scroll bar to that section.
