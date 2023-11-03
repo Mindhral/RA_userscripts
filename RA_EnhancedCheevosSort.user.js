@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedCheevosSort
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  Adds some possibilities to the sorting of achievements on game page, and do it locally without requesting the server
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCompare();
     });
 
-    if (rowInfos.some(r => r.unlocked)) {
+    if (rowInfos.some(r => r.unlocked) && !rowInfos.every(r => r.hcUnlocked)) {
         // Adds sort option to handle unlocks
         const groupSpan = document.createElement('span');
         const groupSelect = document.createElement('select');
