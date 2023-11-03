@@ -83,6 +83,31 @@ The filter is applied on the games already displayed, so the behavior is differe
 
 This script should be compatible with *RA_colorMarkGames*.
 
+## RA_ReorderAwardsHelper
+
+Allows to do some automatic sorting on *Reorder Site Awards* page.
+
+1. Sorts all awards by title or obtention date, or reset to initial order (from when the page was loaded). Select the order then click either *Asc* or *Desc* for ascending or descending order.
+
+![sort by list](/assets/ReorderAwardsHelper_sortby.png)
+
+2. Put all games with a master award or a certain tag (Subset, Hack, ...) either at the beginning or at the end. Select *Mastered* or the wanted tag (*&lt;untagged&gt;* for all games without any tag), then click *First* or *Last*. Select *tags...* to be allowed to select multiple tags in a new list (use Shift or Ctrl keys while selecting). Games wich are moved are kept in the same order.
+
+![move awards group](/assets/ReorderAwardsHelper_groups.png) ![move awards group](/assets/ReorderAwardsHelper_tags_multi.png)
+
+To use a multi-criteria sorting, apply the different options in "reverse order". For example, to obtain the following result, where each section is ordered by title:
+
+![sort awards example](/assets/ReorderAwardsHelper_example.png)
+
+1. Select sort by *Title*, then click *Asc*
+2. Select *tags...*, then *Homebrew*, *Prototype* and *Unlicensed*, and click *Last*
+3. Select *Hacks* and click *Last*
+4. Select *Mastered* and click *First*
+
+The changes are not saved; the corresponding button must still be clicked for that.
+
+Only affects the *Game Awards* section.
+
 ## RA_ScrollProfileAwards
 
 If the number of badges in the *Game Awards* section of profile page exceeds a certain number, this script adds a scroll bar to that section.
