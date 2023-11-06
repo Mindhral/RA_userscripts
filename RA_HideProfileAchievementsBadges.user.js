@@ -48,7 +48,6 @@ function settingsPage() {
     maxBadgesInput.value = Settings.maxBadgesCount;
     maxBadgesInput.min = 0;
     maxBadgesInput.style.width = '7em';
-    maxBadgesInput.append(' em');
 
     const shownBadgesLine = newElement('tr', tbody);
     newElement('td', shownBadgesLine, null, 'Number of badges always displayed');

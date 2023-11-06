@@ -71,12 +71,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const sortRows = compare => {
-        rowInfos.sort(compare);
         const tbody = awardsTable.getElementsByTagName('tbody')[0];
-        rowInfos.forEach(r => tbody.append(r.element));
+        rowInfos.sort(compare).forEach(r => tbody.append(r.element));
     }
-
-    //console.log(rowInfos);
 
     const sortDiv = document.createElement('div');
     sortDiv.className = awardsTable.previousElementSibling.className;
