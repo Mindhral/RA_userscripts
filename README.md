@@ -83,6 +83,22 @@ The filter is applied on the games already displayed, so the behavior is differe
 
 This script should be compatible with *RA_colorMarkGames*.
 
+## RA_EnhancedHubSort
+
+Modifies the sorting of entries on a Hub page and adds some filtering.
+
+![hub sort](/assets/EnhancedHubSort.png)
+
+1. The sorting is done on client side.
+
+2. Adds sort by *Points* and by *Title*. *Original* restores the order from when the page was loaded. If used in combination with *RA_colorMarkGames*, the order produced by that script is used.
+
+3. Possibility to always put hubs at the end, regardless of the sorting option.
+
+3. Filtering by console (including the special value *Hubs*), tag (*&lt;none&gt;* for entries without tags) or status (with/without achievements).
+
+4. Adds the missing columns on hubs rows, which fixes the alternating colors on the right side.
+
 ## RA_ReorderAwardsHelper
 
 Allows to do some automatic sorting on *Reorder Site Awards* page.
