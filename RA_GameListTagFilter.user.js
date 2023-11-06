@@ -22,9 +22,7 @@ function getTags(row) {
 }
 
 function getAllTags(rows) {
-    const tags = [];
-    rows.flatMap(getTags).forEach(tag => { if (!tags.includes(tag)) tags.push(tag); });
-    return tags;
+    return [...new Set(rows.flatMap(getTags))];
 }
 
 function buildSelect(tags, selectedTag) {
