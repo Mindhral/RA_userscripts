@@ -156,7 +156,7 @@ Adds a link on game page to view the unofficial achievements for the game, if an
 
 ## RA_progress2JSON
 
-Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles the completion data in JSON format and respectively copy it to clipboard or open it in a new tab.
+Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles the completion data in JSON format and respectively open it in a new tab and copy it to clipboard.
 
 ![progress2JSON icons](/assets/progress2JSON_icons.png)
 

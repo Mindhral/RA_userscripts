@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         RA_Progress2JSON
 // @namespace    RA
-// @version      0.3
-// @description  Adds a button to progress section on profile page to copy the data in JSON format
+// @version      0.4
+// @description  Adds button to progress section on profile page to copy progress data in JSON format or open it in a new tab
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
@@ -34,12 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // HTML DOM manipulations
     completedGamesTitle.classList.add('flex');
-    const titleSpan = document.createElement('span');
-    titleSpan.className = 'grow';
-    titleSpan.innerHTML = completedGamesTitle.innerHTML;
+    const emptySpan = document.createElement('span');
+    emptySpan.className = 'grow';
+    const link = document.createElement('a');
+    link.title = 'open progress JSON in new tab';
+    link.style.cssText = 'font-size: 0.65em;cursor: pointer';
+    link.innerHTML = 'json';
     const copyIconDiv = createIcon('📋', 'copy progress as JSON');
-    const linkIconDiv = createIcon('🔗', 'open JSON in new tab');
-    completedGamesTitle.replaceChildren(titleSpan, copyIconDiv, linkIconDiv);
+    completedGamesTitle.append(emptySpan, link, copyIconDiv);
 
     // building object row by row (i.e game by game)
     const addRowInfo = progress => row => {
@@ -64,8 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         copyIconDiv.style.cursor = 'grabbing';
         setTimeout(() => { copyIconDiv.style.cursor = 'pointer' }, 500);
     });
-    linkIconDiv.addEventListener('click', () => {
-        const newWindow = unsafeWindow.open('', 'progress');
-        newWindow.location = 'data:application/json,' + getProgressJson();
+    link.addEventListener('click', () => {
+        unsafeWindow.open('data:application/json;base64,' + btoa(getProgressJson()), 'progress');
     });
 });
