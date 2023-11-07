@@ -169,4 +169,20 @@ This can be useful in combination with some script or program which can use this
 
 Opening a new tab with the data doesn't seem to work in Microsoft Edge at least.
 
+## RA_Played2CSV
+
+Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles data on played games in CSV format and respectively open it in a new tab and copy it to clipboard.
+
+![Played2CSV icons](/assets/Played2CSV_icons.png)
+
+````
+id,title,tags,console,hcUnlocked,scUnlocked,total,status,unlock date
+2,Aladdin,,Mega Drive,22,22,22,Mastered,22/02/2022 22:28:00
+11458,Super Mario 64 [Subset - Bonus],Subset,Nintendo 64,47,48,48,Completed,08/11/2022 17:19:00
+22509,Super Mario Senseless Delirium,Hack,Nintendo 64,6,14,100,
+````
+Entries are sorted by game id so that the order is consistent between two exports.
+The field separator and the new line separator can be changed at the beginning of the script.
+The date should be formatted according to the browser's locale.
+
 [^1]: Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
