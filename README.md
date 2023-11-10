@@ -83,6 +83,24 @@ The filter is applied on the games already displayed, so the behavior is differe
 
 This script should be compatible with *RA_colorMarkGames*.
 
+## RA_GameListRandom
+
+On game list pages (console hubs, *Want to play*, *All games*), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated.
+
+Single page shuffle (console hub with achievements, *Want to play* with 50 games or less):
+
+![console shuffle](/assets/GameListRandom_console_shuffle.png)
+
+When there is pagination (most console hub without achievements, *All games*, *Want to play* with more than 50 games), the *Random game* button chooses an entry, goes to its page if necessary, and isolates it:
+
+![console random](/assets/GameListRandom_console_random.png)
+
+Once a game is selected, one can either redraw using the same button or display all the games on the current page again:
+
+![console selected](/assets/GameListRandom_console_selected.png)
+
+This script and [RA_GameListTagFilter](#ra_gamelisttagfilter) can coexist, but using both of them at the same time will result in the second one being used "winning" and the first one getting ignored.
+
 ## RA_EnhancedHubSort
 
 Modifies the sorting of entries on a Hub page and adds some filtering.
