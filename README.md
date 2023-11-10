@@ -93,17 +93,19 @@ Modifies the sorting of entries on a Hub page and adds some filtering.
 
 2. Adds sort by *Points* and by *Title*. *Original* restores the order from when the page was loaded. If used in combination with *RA_colorMarkGames*, the order produced by that script is used.
 
-3. Possibility to always put hubs at the end, regardless of the sorting option.
+3. Adds *Random* sort (shuffle). Using the *desc.* checkbox is a way to re-shuffle in one click.
 
-3. Filtering by console (including the special value *Hubs*), tag (*&lt;none&gt;* for entries without tags) or status (with/without achievements).
+4. Possibility to always put hubs at the end, regardless of the sorting option.
 
-4. Adds the missing columns on hubs rows, which fixes the alternating colors on the right side.
+5. Filtering by console (including the special value *Hubs*), tag (*&lt;none&gt;* for entries without tags) or status (with/without achievements).
+
+6. Adds the missing columns on hubs rows, which fixes the alternating colors on the right side.
 
 ## RA_ReorderAwardsHelper
 
 Allows to do some automatic sorting on *Reorder Site Awards* page.
 
-1. Sorts all awards by title or obtention date, or reset to initial order (from when the page was loaded). Select the order then click either *Asc* or *Desc* for ascending or descending order.
+1. Sorts all awards by title or unlock date, or reset to initial order (from when the page was loaded). Select the order then click either *Asc* or *Desc* for ascending or descending order. *Random* sort allows to shuffle the list.
 
 ![sort by list](/assets/ReorderAwardsHelper_sortby.png)
 

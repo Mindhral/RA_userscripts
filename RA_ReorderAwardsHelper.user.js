@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_ReorderAwardsHelper
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Allows to sort game awards automatically on Reorder Site Awards page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -26,8 +26,23 @@ const MainSorts = {
         label: 'Initial order',
         extractInfo: r => { },
         compare: (r1, r2) => r1.index - r2.index
+    },
+    'random': {
+        label: 'Random',
+        extractInfo: r => { },
+        compare: (r1, r2) => 0
     }
 };
+
+function shuffle(array) {
+    let index = array.length;
+    while (index > 1) {
+        let newIdx = Math.floor(Math.random() * index);
+        index--;
+        [array[index], array[newIdx]] = [array[newIdx], array[index]];
+    }
+    return array;
+}
 
 const Compares = {
     reverse: c => (a, b) => c(b, a),
@@ -71,6 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const sortRows = compare => {
+        // forced to do a special case as random sort using compare only (Math.random()-0.5) is not evenly distributed
+        if (compare === MainSorts.random.compare) shuffle(rowInfos);
         const tbody = awardsTable.getElementsByTagName('tbody')[0];
         rowInfos.sort(compare).forEach(r => tbody.append(r.element));
     }
@@ -90,6 +107,9 @@ document.addEventListener("DOMContentLoaded", () => {
     mainSortDiv.append(mainSortLabel, ' ', mainSortSelect);
     const ascSortButton = createButton('Asc', mainSortDiv);
     const descSortButton = createButton('Desc', mainSortDiv);
+    mainSortSelect.addEventListener('change', () => {
+        descSortButton.disabled = mainSortSelect.selectedOptions[0].value === 'random';
+    });
 
     const getCompare = () => MainSorts[mainSortSelect.selectedOptions[0].value].compare;
     ascSortButton.addEventListener('click', () => sortRows(getCompare()));

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -27,6 +27,10 @@ const Sorts = {
     'retropoints': {
         label: 'RetroPoints',
         compare: (r1, r2) => r1.retropoints - r2.retropoints
+    },
+    'random': {
+        label: 'Random',
+        compare: (r1, r2) => 0
     }
 };
 
@@ -86,6 +90,16 @@ function createOption(value, labelTxt, select) {
     option.innerHTML = labelTxt;
     select.append(option);
     return option;
+}
+
+function shuffle(array) {
+    let index = array.length;
+    while (index > 1) {
+        let newIdx = Math.floor(Math.random() * index);
+        index--;
+        [array[index], array[newIdx]] = [array[newIdx], array[index]];
+    }
+    return array;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -154,7 +168,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (rowsData[0].index == null) {
             rowsData.forEach((row, i) => {row.index = i});
         }
-        let compare = Sorts[sortSelect.selectedOptions[0].value].compare;
+        const sort = Sorts[sortSelect.selectedOptions[0].value];
+        // forced to do a special case as random sort using compare only (Math.random()-0.5) is not evenly distributed
+        if (sort == Sorts.random) shuffle(rowsData);
+        let compare = sort.compare;
         if (descCheckbox.checked) compare = Compares.reverse(compare);
         if (hubsLastCheckbox.checked) compare = Compares.compose(hubsCompare, compare);
 
