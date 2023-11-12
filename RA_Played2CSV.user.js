@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_Played2CSV
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Adds button to progress section on profile page to copy data on played games in CSV format or open it in a new tab
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -58,8 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const total = parseInt(hcProgressMatch[2]);
         const scProgressMatch = row.getElementsByClassName('progressbar-label')[0].innerText.match(/(\d+) of \d+/);
         const scUnlocked = parseInt(scProgressMatch[1]);
-        const status = row.querySelector('div.completion-icon').getAttribute('title')?.replace(/\(.+\)/, '') ?? '';
-        return { id, title, tags, console, hcUnlocked, scUnlocked, total, status };
+        const status = row.querySelector('div.completion-icon').getAttribute('title')?.replace(/ *\(.+\)/, '') ?? '';
+        return { id, title, tags, console, hcUnlocked, scUnlocked, total, status, 'unlock date': '' };
     };
 
     // building complete Object
@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const rowsData = [...document.querySelectorAll('#usercompletedgamescomponent tr')]
             .map(getRowInfo)
             .sort((r1, r2) => r1.id - r2.id);
-        const awardsDivs = document.querySelectorAll('div#gameawards .component > div');
+        const awardsDivs = document.querySelectorAll('aside > div .component > div');
         awardsDivs.forEach(div => {
             const id = parseInt(div.dataset.gameid);
             const row = rowsData.find(r => r.id === id);
