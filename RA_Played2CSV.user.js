@@ -94,6 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { copyIconDiv.style.cursor = 'pointer' }, 500);
     });
     link.addEventListener('click', () => {
-        unsafeWindow.open('data:text/csv;base64,' + btoa(toCSV(getRowsInfo())), 'progress');
+        unsafeWindow.open('data:text/csv,' + encodeURI(toCSV(getRowsInfo())), 'played');
     });
 });
