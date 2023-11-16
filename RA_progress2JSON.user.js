@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         RA_Progress2JSON
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Adds button to progress section on profile page to copy progress data in JSON format or open it in a new tab
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
+// @exclude      https://retroachievements.org/user/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        unsafeWindow

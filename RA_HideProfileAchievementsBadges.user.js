@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         RA_HideProfileAchievementsBadges
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Hides achievements badges on profile page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @match        https://retroachievements.org/controlpanel.php*
+// @exclude      https://retroachievements.org/user/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue

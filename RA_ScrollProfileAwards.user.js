@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         RA_ScrollProfileAwards
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Set a max height for the game award section on profile pages, and a scroll bar if necessary
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @match        https://retroachievements.org/controlpanel.php*
+// @exclude      https://retroachievements.org/user/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue

@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         RA_HideMasteredSets
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Allows to hide mastered sets only on user profiles.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
+// @exclude      https://retroachievements.org/user/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
