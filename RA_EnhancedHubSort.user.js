@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.2
+// @version      0.2.1
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -111,16 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const rows = [...gamesTable.getElementsByTagName('tr')];
     if (rows.length == 0) return;
-
-    // Fix missing column on Hubs rows
-    const addMissingColumns = () => {
-        const getColCount = row => row.getElementsByTagName('td').length;
-        const addColumn = row => row.append(document.createElement('td'));
-
-        const maxColCount = Math.max(...rows.map(getColCount));
-        rows.filter(row => getColCount(row) < maxColCount).forEach(addColumn);
-    };
-    addMissingColumns(rows);
 
     // Get data to be used in sorting and filtering
     const getRowData = row => {
