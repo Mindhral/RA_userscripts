@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_HideProfileAchievementsBadges
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  Hides achievements badges on profile page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -15,9 +15,9 @@
 
 const PropertyPrefix = 'HideProfileAchievementsBadges.';
 const Settings = {
-    maxBadgesCount: GM_getValue(PropertyPrefix + 'maxBadgesCount', 48),
-    showBadgesCount: GM_getValue(PropertyPrefix + 'showBadgesCount', 32),
-    opacityGradientCount: GM_getValue(PropertyPrefix + 'opacityGradientCount', 16)
+    maxBadgesCount: GM_getValue(PropertyPrefix + 'maxBadgesCount', 45),
+    showBadgesCount: GM_getValue(PropertyPrefix + 'showBadgesCount', 30),
+    opacityGradientCount: GM_getValue(PropertyPrefix + 'opacityGradientCount', 15)
 };
 
 function newElement(tagName, parent, className = null, innerHTML = null) {
@@ -29,10 +29,11 @@ function newElement(tagName, parent, className = null, innerHTML = null) {
 }
 
 function settingsPage() {
+    console.log(1);
     const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     const settingsDiv = xpathRes.iterateNext();
     if (settingsDiv == null) return;
-
+    console.log(2);
     const newDiv = document.createElement('div');
     newDiv.className = 'component';
     settingsDiv.insertAdjacentElement('afterend', newDiv);
@@ -67,6 +68,7 @@ function settingsPage() {
     opacityGradientInput.min = 0;
     opacityGradientInput.max = Settings.showBadgesCount;
     opacityGradientInput.style.width = '7em';
+    console.log(3);
 
     maxBadgesInput.addEventListener('input', () => {
         if (!maxBadgesInput.reportValidity()) return;
@@ -82,10 +84,11 @@ function settingsPage() {
         shownBadgesInput.min = opacityGradientInput.value;
         GM_setValue(PropertyPrefix + 'opacityGradientCount', parseInt(opacityGradientInput.value));
     });
+    console.log(4);
 }
 
 function profilePage() {
-    const badgeContainers = document.querySelectorAll('div.recentlyplayed > div:nth-of-type(2n)');
+    const badgeContainers = document.querySelectorAll('div.transition-all > hr + div');
     badgeContainers.forEach(div => {
         if (div.children.length <= Settings.maxBadgesCount) return;
         for (let i = Settings.showBadgesCount; i < div.children.length; i++) {
