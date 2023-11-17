@@ -144,6 +144,39 @@ The changes are not saved; the corresponding button must still be clicked for th
 
 Only affects the *Game Awards* section.
 
+## RA_GameResourceSearch
+
+On a game page, adds a link to search for external resources on the current game, and a select box to choose in what web site.
+
+![game resource link](/assets/GameResourceSearch_game_link.png) ![game resource select](/assets/GameResourceSearch_game_select.png)
+
+All available searches can be customized and new ones can be created on the Settings page.
+
+![game resource settings](/assets/GameResourceSearch_settings_moby.png)
+
+> [!WARNING]
+> The URL template executes provided JavaScript code. Only insert code you understand, or provided by someone you trust.
+
+Search configurations can be (in order of the controls on the first row):
+1. Created from scratch
+2. Created using a copy of the currently selected configuration
+3. Deactivated
+4. Moved down or up in the list (saved immediately)
+5. Saved
+6. Reset to default (only for configurations included with the script)
+7. Deleted (only for configurations created by the user)
+
+The parameters for a search configuration are (from second to last row):
+1. The name displayed in the select box
+2. The URL template. This is a JavaScript [template literal](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals), where you can use the variables `${gameName}`, `${consoleName}` (used in the navbar on game page, or in select boxes) and `${consoleLongName}` (used in the *Games* drop down menu on top of the UI).  
+   Use of methods (functions) on theses elements is possible. See default configuration for *Mobygames* as an example, and [string documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) for more possibilities.
+4. Consoles names can be specified to override both *${consoleName}* and *${consoleLongName}* in the URL template.  
+   At first, only the systems listed in the *Games* drop down menu are present (with their "long" name). To have the complete list of known systems, with "normal" names, load the page *Most Requested* at least once (needs to be done again if new systems are added in the database).  
+   Systems with a modified names are highlighted with an asterisk in the list.
+6. Consoles can be filtered, so that the current search is only included for the specified systems or on the contrary ignored for these systems.  
+   The consoles are specified with a comma-separated list of their ids. To get the id of a console, hover over its name in the list above. When the list is correctly formatted, hovering over the text box displays the names of the consoles, allowing to check the list.
+7. Tags (*subset*, *hack*, ...) can be filtered as well, with a comma-separated list of values (case insensitive)
+
 ## RA_ScrollProfileAwards
 
 If the number of badges in the *Game Awards* section of profile page exceeds a certain number, this script adds a scroll bar to that section.
