@@ -150,7 +150,7 @@ On a game page, adds a link to search for external resources on the current game
 
 ![game resource link](/assets/GameResourceSearch_game_link.png) ![game resource select](/assets/GameResourceSearch_game_select.png)
 
-All available searches can be customized and new ones can be created on the Settings page.
+All available searches can be customized and new ones can be created on the Settings page[^1].
 
 ![game resource settings](/assets/GameResourceSearch_settings_moby.png)
 
