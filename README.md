@@ -10,11 +10,66 @@ Each script is made for the version of the site which is online at the time of t
 > [!NOTE]
 > The developers of Retroachievements web site don't have any responsibility to theses scripts nor obligation to maintain compatibility with them.
 
-## RA_HideMasteredSets
+## RA_CustomizeProfile
 
-It's possible to filter completed sets in the *Completion Progress* section on profile page. This script adds a possibility to only filter mastered sets while keeping completed sets (at least partially in softcore).
+Allows for a few customizations on *Profile* page, all of which can be deactivated on *Settings* page.
+
+![Customize profile settings](/assets/CustomizeProfile_settings.png)
+
+The first 3 features correspond to former scripts *HideMasteredSets*, *ScrollProfileAwards* and *HideProfileAchievementsBadges*. These can be removed before this one is installed.
+
+### Hide Mastered Progression Option
+
+It's possible to filter completed sets in the *Completion Progress* section on profile page. This feature adds a possibility to only filter mastered sets while keeping completed sets (at least partially in softcore).
 
 ![none](/assets/HideMasteredSets_none.png) ![mastered](/assets/HideMasteredSets_mastered.png) ![completed](/assets/HideMasteredSets_completed.png)
+
+### Scrollable Game Awards
+
+If the number of badges in the *Game Awards* section of profile page exceeds a certain number, this feature adds a scroll bar to that section.
+This makes it easier to scroll to the next sections, and combined with lazy loading allows to download less images from server as long as the section is not scrolled down.
+
+![awards without scroll](/assets/ScrollProfileAwards_without.png) ![awards with scroll bar](/assets/ScrollProfileAwards_with.png)
+
+Events and site awards are not affected.
+
+The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page[^1].
+
+![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
+
+### Hide Achievements Badges
+
+> [!NOTE]
+> This feature is deactivated by default since the 5.2 update of RA _Web includes a very similar feature.
+
+On profile page, in *Last [n] games played* section, if a game has more than 45 badges (3 lines in wide layout), this scripts only shows the first 30 badges (2 lines) and adds a button to show the others.
+A transparency gradient is set on the last 15 badges (last line).
+
+![some badges hidden and button displayed](/assets/HideProfileAchievementsBadges_button.png) ![all badges displayed](/assets/HideProfileAchievementsBadges_clicked.png)
+
+All 3 numbers of badges can be adjusted in a dedicated section on *Settings* page[^1].
+
+![hide achievements badges settings](/assets/HideProfileAchievementsBadges_settings.png)
+
+### Mark Unearned Badges
+
+When achievements are added by a revision to a game previously mastered or completed, the mastery (or completion) status is lost on the game page, but the badge remains. These games can now be found on the *Completion Progress* page, using the filter *Games with awards for revised sets*.
+
+This feature allows to also highlight these badges in the *Game Award* section, with a customizable marker.
+
+![Mark unearned awards](/assets/MarkUnearned_awards.png)
+
+The settings allows to:
+
+![Mark unearned settings](/assets/MarkUnearned_settings.png)
+
+1. Restrict the behavior to the authenticated user's profile
+2. Move the marked badges to the beginning of the list (for the current user only or for everyone)
+3. Specify the HTML code of the marker. Three examples are given and can be loaded then tweaked (position, size, color...), or a brand new code can be used if you know what you are doing.
+
+| ![Warning icon](/assets/MarkUnearned_marker_warning.png) | ![Red border](/assets/MarkUnearned_marker_border.png) | ![Red foreground](/assets/MarkUnearned_marker_foreground.png) |
+| ------------ | ---------- | -------------- |
+| Warning icon | Red border | Red foreground |
 
 ## RA_EnhancedCheevosFilters
 
@@ -176,30 +231,6 @@ The parameters for a search configuration are (from second to last row):
 6. Consoles can be filtered, so that the current search is only included for the specified systems or on the contrary ignored for these systems.  
    The consoles are specified with a comma-separated list of their ids. To get the id of a console, hover over its name in the list above. When the list is correctly formatted, hovering over the text box displays the names of the consoles, allowing to check the list.
 7. Tags (*subset*, *hack*, ...) can be filtered as well, with a comma-separated list of values (case insensitive)
-
-## RA_ScrollProfileAwards
-
-If the number of badges in the *Game Awards* section of profile page exceeds a certain number, this script adds a scroll bar to that section.
-This makes it easier to scroll to the next sections, and combined with lazy loading allows to download less images from server as long as the section is not scrolled down.
-
-![awards without scroll](/assets/ScrollProfileAwards_without.png) ![awards with scroll bar](/assets/ScrollProfileAwards_with.png)
-
-Events and site awards are not affected.
-
-The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page[^1].
-
-![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
-
-## RA_HideProfileAchievementsBadges
-
-On profile page, in *Last [n] games played* section, if a game has more than 45 badges (3 lines in wide layout), this scripts only shows the first 30 badges (2 lines) and adds a button to show the others.
-A transparency gradient is set on the last 15 badges (last line).
-
-![some badges hidden and button displayed](/assets/HideProfileAchievementsBadges_button.png) ![all badges displayed](/assets/HideProfileAchievementsBadges_clicked.png)
-
-All 3 numbers of badges can be adjusted in a dedicated section on *Settings* page[^1].
-
-![hide achievements badges settings](/assets/HideProfileAchievementsBadges_settings.png)
 
 ## RA_LinkUnofficalAchievements
 
