@@ -178,7 +178,7 @@ function getConsoles() {
 
 function executeTemplate(template, consoleName, consoleLongName, gameName) {
     const escapedUrl = template.replaceAll(/[`=;\\]/g, '\\$&');
-    //searchLink.href = eval(`"use strict";\`${escapedUrl}\``);
+    // <=> eval(`"use strict";\`${escapedUrl}\``);
     const urlFunction = Function('consoleName', 'consoleLongName', 'gameName', `"use strict";return \`${escapedUrl}\`;`);
     return urlFunction(consoleName, consoleLongName, gameName);
 }
@@ -386,7 +386,6 @@ function settingsPage() {
     urlText.addEventListener('change', inputChecker(urlText, () => {
         try {
             const res = executeTemplate(urlText.value, 'console', 'Console Name', 'game').trim();
-            console.log(res);
             if (res.length == 0 || res === 'undefined' || res === 'null') return 'The generated url is empty';
         } catch(e) {
             return 'Invalid template: ' + e.message;
