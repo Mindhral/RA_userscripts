@@ -51,6 +51,16 @@ function setRowVisibility(element, visible) {
 const settingsHtml = `<div class="component">
   <h4>Profile page customization</h4>
   <table class="table-highlight"><tbody>
+    <tr><th colspan="2"><label><input id="hideMasterProgrActive" type="checkbox"> Hide Mastered Progression Option</label></th></tr>
+    <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
+    <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
+    <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
+    <tr><th colspan="2"><label><input id="hideAchBadgesActive" type="checkbox"> Hide Achievements Badges</label></th></tr>
+    <tr><td>Maximum number of badges before hiding any</td><td><input id="hideAchBadgesMaxBadges" type="number" min="0" style="width: 7em;"></td></tr>
+    <tr><td>Number of badges always displayed</td><td><input id="hideAchBadgesShownBadges" type="number" min="30" style="width: 7em;"></td></tr>
+    <tr><td>Number of badges in the transparency gradient</td><td><input id="hideAchBadgesOpacityGradient" type="number" min="0" max="45" style="width: 7em;"></td></tr>
+  </tbody></table>
+  <table class="table-highlight"><tbody>
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
     <tr><td>Only on own profile</td><td><input id="unEarnedOwnProfile" type="checkbox"></td></tr>
     <tr>
@@ -68,16 +78,6 @@ const settingsHtml = `<div class="component">
         <input id="unearnedOverlayText" type="text" style="width: 100%;">
       </td>
     </tr>
-  </tbody></table>
-  <table class="table-highlight"><tbody>
-    <tr><th colspan="2"><label><input id="hideMasterProgrActive" type="checkbox"> Hide Mastered Progression Option</label></th></tr>
-    <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
-    <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
-    <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
-    <tr><th colspan="2"><label><input id="hideAchBadgesActive" type="checkbox"> Hide Achievements Badges</label></th></tr>
-    <tr><td>Maximum number of badges before hiding any</td><td><input id="hideAchBadgesMaxBadges" type="number" min="0" style="width: 7em;"></td></tr>
-    <tr><td>Number of badges always displayed</td><td><input id="hideAchBadgesShownBadges" type="number" min="30" style="width: 7em;"></td></tr>
-    <tr><td>Number of badges in the transparency gradient</td><td><input id="hideAchBadgesOpacityGradient" type="number" min="0" max="45" style="width: 7em;"></td></tr>
   </tbody></table>
 </div>`;
 
