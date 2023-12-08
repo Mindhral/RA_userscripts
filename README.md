@@ -73,23 +73,13 @@ The settings allows to:
 
 ## RA_EnhancedCheevosFilters
 
-Adds some filters for achievements on a game page.
-
-1. Hide achievements unlocked in hardcore only
+Replaces the filter which hides unlocked achievements on a game page by a filter which allows to choose to hide all unlocked achievements or just the ones unlocked in hardcore.
 
 ![hide none](/assets/EnhancedCheevosFilters_hide_none.png)
 
 ![hide hardcore](/assets/EnhancedCheevosFilters_hide_hardcore.png)
 
 ![hide unlocked](/assets/EnhancedCheevosFilters_hide_unlocked.png)
-
-2. Filter achievements with a missable tag [m]
-
-![filter missable](/assets/EnhancedCheevosFilters_missable.png)
-
-Either of these changes can be deactivated with a corresponding checkbox in a dedicated section on *Settings* page[^1].
-
-![enhanced filters settings](/assets/EnhancedCheevosFilters_settings.png)
 
 ## RA_EnhancedCheevosSort
 
