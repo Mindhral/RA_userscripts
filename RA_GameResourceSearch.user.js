@@ -37,15 +37,15 @@ const DefaultSearches = [
     {
         id: 'mobygames',
         label:'Mobygames',
-        url:'https://www.mobygames.com/game/platform:${consoleLongName.toLowerCase().replace(" ","-")}/title:${gameName}/',
+        url:'https://www.mobygames.com/game/platform:${consoleLongName.toLowerCase().replace(" ","-")}/title:${gameName.replace("/"," ")}/',
         consoleNames: {
             2: 'n64', 4: 'gameboy', 5: 'gameboy-advance', 6: 'gameboy-color',
             8: 'turbo-grafx', 11: 'sega-master-system', 13: 'lynx', 17: 'jaguar',
             21: 'ps2', 23: 'odyssey-2', 30: 'c64', 37: 'cpc', 38: 'apple2',
             40: 'dreamcast', 41: 'psp', 42: 'cd-i', 43: '3do', 47: 'pc88',
             48: 'pc98', 54: 'epoch-cassette-vision', 55: 'epoch-super-cassette-vision',
-            57: 'channel-f', 58: 'fmtowns', 61: 'ngage', 62: '3ds', 63: 'supervision',
-            66: 'thomson-to', 67: 'pc-6001', 76: 'turbografx-cd', 77: 'jaguar'
+            56: 'neo-geo-cd', 57: 'channel-f', 58: 'fmtowns', 61: 'ngage', 62: '3ds',
+            63: 'supervision', 66: 'thomson-to', 67: 'pc-6001', 76: 'turbografx-cd', 77: 'jaguar'
         },
         consoleFilter: {
             type: 'exclude',
