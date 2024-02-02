@@ -12,11 +12,11 @@ Each script is made for the version of the site which is online at the time of t
 
 ## RA_CustomizeProfile
 
-Allows for a few customizations on *Profile* page, all of which can be deactivated on *Settings* page.
+Allows for some customization on *Profile* page, all of which can be deactivated on *Settings* page.
 
 ![Customize profile settings](/assets/CustomizeProfile_settings.png)
 
-The first 3 features correspond to former scripts *HideMasteredSets*, *ScrollProfileAwards* and *HideProfileAchievementsBadges*. These can be removed before this one is installed.
+The first 2 features correspond to former scripts *HideMasteredSets* and *ScrollProfileAwards*. These can be removed before this one is installed.
 
 ### Hide Mastered Progression Option
 
@@ -36,20 +36,6 @@ Events and site awards are not affected.
 The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page[^1].
 
 ![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
-
-### Hide Achievements Badges
-
-> [!NOTE]
-> This feature is deactivated by default since the 5.2 update of RA _Web includes a very similar feature.
-
-On profile page, in *Last [n] games played* section, if a game has more than 45 badges (3 lines in wide layout), this scripts only shows the first 30 badges (2 lines) and adds a button to show the others.
-A transparency gradient is set on the last 15 badges (last line).
-
-![some badges hidden and button displayed](/assets/HideProfileAchievementsBadges_button.png) ![all badges displayed](/assets/HideProfileAchievementsBadges_clicked.png)
-
-All 3 numbers of badges can be adjusted in a dedicated section on *Settings* page[^1].
-
-![hide achievements badges settings](/assets/HideProfileAchievementsBadges_settings.png)
 
 ### Mark Unearned Badges
 
@@ -246,6 +232,9 @@ The date should be formatted according to the browser's locale.
 
 ## Discontinued
 
-- RA_progress2JSON
+- RA_HideMasteredSets: now included with RA_CustomizeProfile
+- RA_ScrollProfileAwards: now included with RA_CustomizeProfile
+- RA_HideProfileAchievementsBadges: the new layout of these badges already has the feature
+- RA_progress2JSON: not useful anymore with the API being back
 
 [^1]: Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.

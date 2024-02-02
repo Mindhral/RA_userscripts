@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.1
+// @version      1.2
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -55,10 +55,6 @@ const settingsHtml = `<div class="component">
     <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
     <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
     <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
-    <tr><th colspan="2"><label><input id="hideAchBadgesActive" type="checkbox"> Hide Achievements Badges</label></th></tr>
-    <tr><td>Maximum number of badges before hiding any</td><td><input id="hideAchBadgesMaxBadges" type="number" min="0" style="width: 7em;"></td></tr>
-    <tr><td>Number of badges always displayed</td><td><input id="hideAchBadgesShownBadges" type="number" min="30" style="width: 7em;"></td></tr>
-    <tr><td>Number of badges in the transparency gradient</td><td><input id="hideAchBadgesOpacityGradient" type="number" min="0" max="45" style="width: 7em;"></td></tr>
   </tbody></table>
   <table class="table-highlight"><tbody>
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
@@ -322,97 +318,8 @@ const ScrollAwards = (() => {
     return { profilePage, settingsPage };
 })();
 
-const HideAchievementsBadges = (() => {
-    const DefaultSettings = {
-        active: false,
-        maxBadgesCount: 45,
-        showBadgesCount: 30,
-        opacityGradientCount: 15
-    };
-
-    const Settings = loadSettings('hideAchievementsBadges', DefaultSettings);
-
-    function saveSettings() {
-        GM_setValue('hideAchievementsBadges', Settings);
-    }
-
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('hideAchBadgesActive');
-        activeCheckbox.checked = Settings.active;
-
-        const maxBadgesInput = document.getElementById('hideAchBadgesMaxBadges');
-        maxBadgesInput.value = Settings.maxBadgesCount;
-
-        const shownBadgesInput = document.getElementById('hideAchBadgesShownBadges');
-        shownBadgesInput.value = Settings.showBadgesCount;
-        shownBadgesInput.min = Settings.opacityGradientCount;
-
-        const opacityGradientInput = document.getElementById('hideAchBadgesOpacityGradient');
-        opacityGradientInput.value = Settings.opacityGradientCount;
-        opacityGradientInput.max = Settings.showBadgesCount;
-
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            setRowVisibility(maxBadgesInput, Settings.active);
-            setRowVisibility(shownBadgesInput, Settings.active);
-            setRowVisibility(opacityGradientInput, Settings.active);
-            saveSettings();
-        });
-        activeCheckbox.dispatchEvent(new Event('change'));
-        maxBadgesInput.addEventListener('input', () => {
-            if (!maxBadgesInput.reportValidity()) return;
-            Settings.maxBadgesCount = parseInt(maxBadgesInput.value);
-            saveSettings();
-        });
-        shownBadgesInput.addEventListener('input', () => {
-            if (!shownBadgesInput.reportValidity()) return;
-            opacityGradientInput.max = shownBadgesInput.value;
-            Settings.showBadgesCount = parseInt(shownBadgesInput.value);
-            saveSettings();
-        });
-        opacityGradientInput.addEventListener('input', () => {
-            if (!opacityGradientInput.reportValidity()) return;
-            shownBadgesInput.min = opacityGradientInput.value;
-            Settings.opacityGradientCount = parseInt(opacityGradientInput.value);
-            saveSettings();
-        });
-    }
-
-    function profilePage() {
-        if (!Settings.active) return;
-        const badgeContainers = document.querySelectorAll('div.transition-all > hr + div');
-        badgeContainers.forEach(div => {
-            if (div.children.length <= Settings.maxBadgesCount) return;
-            for (let i = Settings.showBadgesCount; i < div.children.length; i++) {
-                div.children[i].classList.add('hidden')
-            }
-            for (let i = 1; i <= Settings.opacityGradientCount; i++) {
-                div.children[Settings.showBadgesCount - i].style.opacity = i / (Settings.opacityGradientCount + 1);
-            }
-            const showButton = document.createElement('button');
-            showButton.className='btn'
-            showButton.style['margin-top']='0.5em'
-            showButton.style['margin-left']='0.8em'
-            showButton.innerHTML='Show all'
-            div.append(showButton)
-            showButton.addEventListener('click', () => {
-                showButton.remove()
-                for (let i = Settings.showBadgesCount; i < div.children.length; i++) {
-                    div.children[i].classList.remove('hidden')
-                }
-                for (let i = 1; i <= Settings.opacityGradientCount; i++) {
-                    div.children[Settings.showBadgesCount - i].style.opacity = null;
-                }
-            });
-        });
-    }
-
-    return { profilePage, settingsPage };
-})();
-
 function profilePage() {
     ScrollAwards.profilePage();
-    HideAchievementsBadges.profilePage();
     HideMasteredProgress.profilePage();
     MarkUnearnedAwards.profilePage();
 }
@@ -426,7 +333,6 @@ function settingsPage() {
     mainDiv.outerHTML = settingsHtml;
 
     ScrollAwards.settingsPage();
-    HideAchievementsBadges.settingsPage();
     HideMasteredProgress.settingsPage();
     MarkUnearnedAwards.settingsPage();
 }
