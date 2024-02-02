@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedCheevosSort
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Adds some possibilities to the sorting of achievements on game page, and do it locally without requesting the server
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -98,7 +98,7 @@ let settings = GM_getValue('cheevosSortSettings', {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-    const achievementsList = document.querySelector('#achievement ul');
+    const achievementsList = document.getElementById('set-achievements-list');
     if (achievementsList == null) return;
     const allRows = achievementsList.querySelectorAll('li');
     if (allRows.length == 0) return;
