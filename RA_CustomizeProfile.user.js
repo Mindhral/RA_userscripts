@@ -19,7 +19,7 @@ function isOwnProfile() {
     const currentUserDiv = document.querySelector('div.dropdown-menu-right div.dropdown-header');
     if (!currentUserDiv) return false; // not authenticated
     const currentUser = currentUserDiv.textContent;
-    const pageUserDiv = document.querySelector('div.usersummary h3');
+    const pageUserDiv = document.querySelector('article h1');
     const pageUser = pageUserDiv.textContent;
     return currentUser === pageUser;
 }
@@ -94,7 +94,7 @@ const HideMasteredProgress = (() => {
         let initialValue = GM_getValue('hideProgressType', defaultValue);
         const changeVisibility = value => {
             completedRows.forEach(row => {
-                if (value === 'completed' || (value === 'mastered' && row.getElementsByClassName('mastered').length > 0)) {
+                if (value === 'completed' || (value === 'mastered' && row.querySelector('div[title="Mastered"]'))) {
                     row.classList.add('hidden');
                 } else {
                     row.classList.remove('hidden');
@@ -186,7 +186,7 @@ const MarkUnearnedAwards = (() => {
         const completedRows = [...document.querySelectorAll('#usercompletedgamescomponent tr.completion-progress-completed-row')];
         completedRows.forEach(row => {
             const id = row.getElementsByTagName('a')[0].href.split('/').at(-1);
-            if (row.getElementsByClassName('mastered').length > 0) masterIds.add(id);
+            if (row.querySelector('div[title="Mastered"]')) masterIds.add(id);
             else completionIds.add(id);
         });
 
@@ -305,12 +305,10 @@ const ScrollAwards = (() => {
         if (awardsDiv.children.length < Settings.minGameCount) return;
         awardsDiv.style['overflow-y'] = 'auto';
         awardsDiv.style['max-height'] = Settings.maxHeight + 'em';
+        awardsDiv.style['align-content'] = 'normal';
         if (window.matchMedia('(min-width: 1280px)').matches) {
-            awardsDiv.style['padding-left'] = '0.75rem';
-            awardsDiv.style['padding-right'] = '0.75rem';
-        } else if (window.matchMedia('(min-width: 768px)').matches) {
-            awardsDiv.style['padding-left'] = '0';
-            awardsDiv.style['padding-right'] = '0';
+            // do nothing anymore
+        } else if (window.matchMedia('(min-width: 1024px)').matches) {
             awardsDiv.style.gap = '0.2rem';
         }
     }
