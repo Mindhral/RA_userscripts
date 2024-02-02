@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_Played2CSV
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  Adds button to progress section on profile page to copy data on played games in CSV format or open it in a new tab
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentUserDiv = document.querySelector('div.dropdown-menu-right div.dropdown-header');
     if (currentUserDiv == null) return;
     const currentUser = currentUserDiv.textContent;
-    const pageUserDiv = document.querySelector('div.usersummary h3');
+    const pageUserDiv = document.querySelector('article h1');
     const pageUser = pageUserDiv.textContent;
     if (currentUser !== pageUser) return;
 
@@ -53,14 +53,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const firstPara = row.querySelector('p');
         const title = row.querySelector('a img').getAttribute('alt').replace(/~.+~/, '').trim().replace(' game badge', '');
         const tags = [...row.querySelector('p').querySelectorAll('span.tag span:first-child')].map(span => span.innerText);
-        const console = row.querySelector('td:first-child div > span:not(.tag)').innerText.trim();
-        const hcProgressMatch = row.getElementsByClassName('completion-hardcore')[0].title.match(/Hardcore: (\d+)\/(\d+)/);
-        const hcUnlocked = parseInt(hcProgressMatch[1]);
-        const total = parseInt(hcProgressMatch[2]);
-        const scProgressMatch = row.getElementsByClassName('progressbar-label')[0].innerText.match(/(\d+) of \d+/);
-        const scUnlocked = parseInt(scProgressMatch[1]);
-        const status = row.querySelector('div.completion-icon').getAttribute('title')?.replace(/ *\(.+\)/, '') ?? '';
-        return { id, title, tags, console, hcUnlocked, scUnlocked, total, status, 'unlock date': '' };
+        const consoleName = row.querySelector('td:first-child div > span:not(.tag)').innerText.trim();
+        const progressTitle = row.querySelector('div[role="progressbar"]').title
+        const hcProgressMatch = progressTitle.match(/(\d+)\/(\d+) \(hardcore\)/);
+        const hcUnlocked = hcProgressMatch ? parseInt(hcProgressMatch[1]) : 0;
+        const scProgressMatch = progressTitle.match(/(\d+)\/(\d+) \(softcore\)/);
+        const scUnlocked = scProgressMatch ? parseInt(scProgressMatch[1]) : 0;
+        const total = parseInt(hcProgressMatch ? hcProgressMatch[2] : scProgressMatch[2]);
+        const status = row.querySelector('div[data-award]').dataset.award;
+        return { id, title, tags, console: consoleName, hcUnlocked, scUnlocked, total, status, 'unlock date': '' };
     };
 
     // building complete Object
