@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_LinkUnofficalAchievements
 // @namespace    RA
-// @version      0.2
+// @version      0.3
 // @description  Adds a link to unofficial achievements on a game's page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const achievementTitle = document.querySelector('#achievement > h2');
     if (achievementTitle == null) return;
+    if (achievementTitle.innerText !== 'Achievements') return;
 
     const link = document.createElement('a');
     urlParams.set('f', '5');
