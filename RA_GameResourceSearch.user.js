@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_GameResourceSearch
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Adds (customizable) links to game pages to search for resources on the game.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -158,7 +158,7 @@ function setRequestPage() {
     [...document.getElementById('filter-by-console-id').children].forEach(option => {
         const id = parseInt(option.value);
         if (isNaN(id) || id <= 0 || id == 100 || id == 101) return;
-        consoles[id] = option.innerText.trim();
+        consoles[id] = option.innerText.trim().split('/')[0];
     });
     GM_setValue('consoles', consoles);
 }
@@ -495,7 +495,7 @@ function gamePage() {
     // Extract infos
     const navpath = document.querySelector('div.navpath');
     if (!navpath) return; // hubs
-    const navbarConsoleName = navpath.children[1].innerText.trim();
+    const navbarConsoleName = navpath.children[1].innerText.trim().split('/')[0];
     const consoleId = parseInt(navpath.children[1].href.split('=').at(-1));
     if (consoleId == 101) return; // Events
     const gameName = navpath.children[2].innerText.split('|')[0].trim();
