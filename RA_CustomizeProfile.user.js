@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.0
+// @version      1.1
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -305,6 +305,7 @@ const ScrollAwards = (() => {
     function profilePage() {
         if (!Settings.active) return;
         const awardsDiv = document.querySelector('div#gameawards div.component');
+        if (!awardsDiv) return;
         if (awardsDiv.children.length < Settings.minGameCount) return;
         awardsDiv.style['overflow-y'] = 'auto';
         awardsDiv.style['max-height'] = Settings.maxHeight + 'em';
