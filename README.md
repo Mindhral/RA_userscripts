@@ -228,21 +228,6 @@ Adds a link on game page to view the unofficial achievements for the game, if an
 
 ![link to unofficial achievements](/assets/LinkUnofficalAchievements_link.png)
 
-## RA_progress2JSON
-
-Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles the completion data in JSON format and respectively open it in a new tab and copy it to clipboard.
-
-![progress2JSON icons](/assets/progress2JSON_icons.png)
-
-````
-{"2":{"NumAch":22,"Earned":22,"HCEarned":22},"62":{"NumAch":31,"Earned":3,"HCEarned":3},...}
-````
-The items keys are game ids.
-
-This can be useful in combination with some script or program which can use this data to display it or integrate it in other metadata, especially while the public API is unavailable.
-
-Opening a new tab with the data doesn't seem to work in Microsoft Edge at least.
-
 ## RA_Played2CSV
 
 Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles data on played games in CSV format and respectively open it in a new tab and copy it to clipboard.
@@ -258,5 +243,9 @@ id,title,tags,console,hcUnlocked,scUnlocked,total,status,unlock date
 Entries are sorted by game id so that the order is consistent between two exports.
 The field separator and the new line separator can be changed at the beginning of the script.
 The date should be formatted according to the browser's locale.
+
+## Discontinued
+
+- RA_progress2JSON
 
 [^1]: Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
