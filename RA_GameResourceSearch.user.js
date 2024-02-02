@@ -180,7 +180,7 @@ function executeTemplate(template, consoleName, consoleLongName, gameName) {
     const escapedUrl = template.replaceAll(/[`=;\\]/g, '\\$&');
     // <=> eval(`"use strict";\`${escapedUrl}\``);
     const urlFunction = Function('consoleName', 'consoleLongName', 'gameName', `"use strict";return \`${escapedUrl}\`;`);
-    return urlFunction(consoleName, consoleLongName, gameName);
+    return urlFunction(consoleName, consoleLongName, encodeURIComponent(gameName));
 }
 
 function setVisible(element, visible) {
