@@ -301,6 +301,28 @@ function customize() {
         createOption(name, status.label, statusSelect2, status.title);
     }
     origSortDiv.remove();
+    // games counter
+    const countVisible = () => (gameTables.flatMap(t => t.rowsData).filter(r => r.visible).length).toLocaleString('en-US');
+    const gameCounterSpan = (() => {
+        const nextElmt = sortDiv.nextElementSibling;
+        if (nextElmt.localName == 'p' && nextElmt.innerText.match(/Viewing \d(.*\d)? games/)) {
+            return nextElmt.getElementsByTagName('span')[0];
+        } else {
+            const newPara = document.createElement('p');
+            newPara.className = 'mb-4 text-xs';
+            const span = document.createElement('span');
+            span.className = 'font-bold';
+            span.innerText = countVisible();
+            newPara.append('Viewing ', span, ' games');
+            sortDiv.after(newPara);
+            return span;
+        }
+    })();
+    const gameTotalText = gameCounterSpan.nextSibling;
+    const totalCount = (() => {
+        const match = gameTotalText.data.match(/of\s+([\d,]+)\s+games/);
+        return match ? match[1] : gameCounterSpan.innerText;
+    })();
 
     const updateList = gameTable => {
         // slower than using 'hidden' class, but allows to keep alternating row colors
@@ -318,6 +340,10 @@ function customize() {
         table.classList[classFunc]('hidden');
         // h2 title before table's parent div
         table.parentElement.previousElementSibling.classList[classFunc]('hidden');
+        //updates counter
+        const visibleCount = countVisible();
+        gameCounterSpan.innerText = visibleCount;
+        gameTotalText.data = (visibleCount == totalCount) ? ' games' : ' of ' + totalCount + ' games';
     };
 
     // sorting logic
