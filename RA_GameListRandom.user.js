@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         RA_GameListRandom
 // @namespace    RA
-// @version      0.1
-// @description  On Game list pages (console Hubs, Want to play, All games), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated
+// @version      0.2
+// @description  On Game list pages (Want to play, All games), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated
 // @author       Mindhral
 // @match        https://retroachievements.org/gameList.php*
 // @run-at       document-start
@@ -95,7 +95,8 @@ function addShuffleButton() {
 
 document.addEventListener("DOMContentLoaded", () => {
     // special case of hubs list
-    if(new URLSearchParams(window.location.search).get('c') === '100') return;
+    const consoleId = new URLSearchParams(window.location.search).get('c');
+    if(consoleId == '100' || consoleId == '101') return;
     // presence of pagination
     if (document.querySelector('article > div.text-right')) {
         addRandomGameButton();
