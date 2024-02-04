@@ -104,9 +104,9 @@ Modifies the sorting of achievements on a game page.
 
 ## RA_GameListTagFilter
 
-Adds a filter on games titles tags on game list pages: console hubs, *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.
+Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.
 
-![n64 demo filter](/assets/GameListTagFilter_n64_demo.png)
+![n64 demo filter](/assets/GameListTagFilter_wanttoplay_homebrew.png)
 
 The filter is applied on the games already displayed, so the behavior is different from what could be expected from a filter executed on server when there is pagination:
 
