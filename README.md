@@ -134,21 +134,29 @@ This script and [RA_GameListTagFilter](#ra_gamelisttagfilter) can coexist, but u
 
 ## RA_EnhancedHubSort
 
-Modifies the sorting of entries on a Hub page and adds some filtering.
+Modifies the sorting of entries on a Hub page (including consoles games lists) and adds some filtering.
 
 ![hub sort](/assets/EnhancedHubSort.png)
 
-1. The sorting is done on client side.
+1. The sorting and filtering are done on client side, except:
+   - grouping by console
+   - requesting all achievements if they are not loaded initially
 
-2. Adds sort by *Points* and by *Title*. *Original* restores the order from when the page was loaded. If used in combination with *RA_colorMarkGames*, the order produced by that script is used.
+2. Adds the possibility to reverse all sorts
 
-3. Adds *Random* sort (shuffle). Using the *desc.* checkbox is a way to re-shuffle in one click.
+3. Differentiates sorts by *Most hardcore progress* and by *Most progress* (softcore + hardcore). *Original* restores the order from when the page was loaded. If used in combination with *RA_colorMarkGames*, the order produced by that script is used.
 
-4. Possibility to always put hubs at the end, regardless of the sorting option.
+4. Adds *Random* sort (shuffle). Using the *Reverse* checkbox is a way to re-shuffle in one click.
 
-5. Filtering by console (including the special value *Hubs*), tag (*&lt;none&gt;* for entries without tags) or status (with/without achievements).
+5. Filtering by console and tag (*&lt;none&gt;* for entries without tags)
 
-6. Adds the missing columns on hubs rows, which fixes the alternating colors on the right side.
+6. The filtering for games with or without achievement and the filtering by progress status are regrouped in a single filter composed of two drop-down lists: one for what we want to keep and one for what we want to exclude.
+   
+   ![hub sort with status](/assets/EnhancedHubSort_status_with.png) ![hub sort without status](/assets/EnhancedHubSort_status_without.png)
+   
+   All options have a mouse-over help text to make them clearer.
+
+7. The game count is updated when sorting (and added is absent)
 
 ## RA_ReorderAwardsHelper
 
