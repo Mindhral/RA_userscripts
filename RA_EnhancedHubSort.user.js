@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/system/*/games*
+// @match        https://retroachievements.org/user/*/developer/sets*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        none
@@ -150,7 +151,7 @@ const Status2 = {
 
 const sortBlockHTML = `<div class="embedded p-4 my-4 w-full"><div class="grid sm:flex sm:divide-x-2 divide-embed-highlight">
   <div class="grid gap-y-1 sm:pr-[40px]">
-    <label class="font-bold text-xs">Sort</label>
+    <label class="font-bold text-xs">Sort by</label>
     <span class="text-2xs">
       <select id="sortSelect"></select>
       <label><input id="descSort" type="checkbox"> Reverse</label>
@@ -233,7 +234,7 @@ function customize() {
         const cons = firstCell.querySelector('div > span:not(.tag)')?.innerText.trim()?? '';
 
         const getCellAsNb = (idx, parseFunc) => {
-            const val = parseFunc(cells.item(idx).innerText.replace(',', ''));
+            const val = parseFunc(cells.item(idx).innerText.replace(/\d+ of /, '').replaceAll(',', ''));
             return isNaN(val) ? -1 : val;
         };
 
@@ -251,7 +252,7 @@ function customize() {
 
     const gameTables = [...document.querySelectorAll('article table.table-highlight')].map(table => {
         // eliminate both title rows and hub rows (single column)
-        const rows = [...table.getElementsByTagName('tr')].filter(r => r.getElementsByTagName('td').length > 1);
+        const rows = [...table.getElementsByTagName('tr')].filter(r => r.getElementsByTagName('td').length > 1 && r.querySelector('a'));
         const rowsData = [...rows].map(getRowData);
         const tbody = table.getElementsByTagName('tbody')[0];
         return {rowsData, tbody};
@@ -268,27 +269,32 @@ function customize() {
     for (const [sortName, sort] of Object.entries(Sorts)) {
         createOption(sortName, sort.label, sortSelect);
     }
-    const groupConsolesCheckbox = getElementByXpath(origSortDiv, './/label[normalize-space()="Group by console"]/input');
-    const groupConsolesLabel = document.getElementById('groupConsolesLabel');
-    if (groupConsolesCheckbox) {
-        groupConsolesLabel.insertAdjacentElement('afterbegin', groupConsolesCheckbox);
-    } else {
-        groupConsolesLabel.remove();
-    }
     const consoleSelect = document.getElementById('consoleSelect');
-    if (gameTables.length == 1) {
-        const rowsData = gameTables[0].rowsData;
-        const consoles = new Set(rowsData.map(r => r.console).filter(c => c.length > 0));
-        if (consoles.size == 0) {
-            // system page
-            consoleSelect.parentElement.className = 'hidden';
-        } else {
-            // hub page
-            [...consoles].sort().forEach(c => createOption(c, c, consoleSelect));
-        }
+    if (pageName == 'user') {
+        const filtersDiv = getElementByXpath(origSortDiv, './/div[label[normalize-space()="Filters"]]');
+        consoleSelect.parentElement.replaceWith(filtersDiv);
     } else {
-        consoleSelect.disabled = true;
-        consoleSelect.style.opacity = 0.5;
+        const groupConsolesCheckbox = getElementByXpath(origSortDiv, './/label[normalize-space()="Group by console"]/input');
+        const groupConsolesLabel = document.getElementById('groupConsolesLabel');
+        if (groupConsolesCheckbox) {
+            groupConsolesLabel.insertAdjacentElement('afterbegin', groupConsolesCheckbox);
+        } else {
+            groupConsolesLabel.remove();
+        }
+        if (gameTables.length == 1) {
+            const rowsData = gameTables[0].rowsData;
+            const consoles = new Set(rowsData.map(r => r.console).filter(c => c.length > 0));
+            if (consoles.size == 0) {
+                // system page
+                consoleSelect.parentElement.remove();
+            } else {
+                // hub page
+                [...consoles].sort().forEach(c => createOption(c, c, consoleSelect));
+            }
+        } else {
+            consoleSelect.disabled = true;
+            consoleSelect.style.opacity = 0.5;
+        }
     }
     const tagSelect = document.getElementById('tagSelect');
     [...new Set(gameTables.flatMap(t => t.rowsData.flatMap(r => r.tags)))].sort().forEach(tag => createOption(tag, tag, tagSelect));
@@ -299,6 +305,18 @@ function customize() {
     const statusSelect2 = document.getElementById('statusSelect2');
     for (const [name, status] of Object.entries(Status2)) {
         createOption(name, status.label, statusSelect2, status.title);
+    }
+
+    const soleDevLabel = getElementByXpath(origSortDiv, './/label[normalize-space()="Sole developer"]');
+    if (soleDevLabel) {
+        const soleDevDiv = document.createElement('div');
+        const sortDivChild = sortDiv.firstElementChild;
+        soleDevDiv.className = sortDivChild.lastElementChild.className;
+        soleDevDiv.classList.add('text-2xs');
+        soleDevLabel.append(' 🔄');
+        soleDevLabel.title = 'Reloads the page';
+        soleDevDiv.append(soleDevLabel);
+        sortDivChild.append(soleDevDiv);
     }
     origSortDiv.remove();
     // games counter
@@ -327,10 +345,10 @@ function customize() {
     const updateList = gameTable => {
         // slower than using 'hidden' class, but allows to keep alternating row colors
         let hasVisible = false;
-        gameTable.rowsData.forEach(row => {
+        gameTable.rowsData.reverse().forEach(row => {
             if (row.visible) {
                 hasVisible = true;
-                gameTable.tbody.append(row.element);
+                gameTable.tbody.prepend(row.element);
             } else {
                 row.element.remove();
             }
@@ -407,31 +425,35 @@ function customize() {
         [...statusSelect1.options].forEach((opt, idx) => { opt.disabled = (idx > statusSelect2.selectedIndex); });
     });
 
-    const hasCheevosParam = (() => {
-        const hasCheevosRadio = origSortDiv.querySelector('input[name="radio-populated"][checked]');
-        if (hasCheevosRadio) {
-            return hasCheevosRadio.value;
+    if (pageName == 'user') {
+        // developper sets
+        statusSelect1.options[1].classList.add('hidden');
+        statusSelect2.options[0].classList.add('hidden');
+    } else {
+        const hasCheevosParam = (() => {
+            const hasCheevosRadio = origSortDiv.querySelector('input[name="radio-populated"][checked]');
+            if (hasCheevosRadio) return hasCheevosRadio.value;
+            return origSortDiv.querySelector('input[type="checkbox"]')?.checked ? 'yes' : 'all';
+        })();
+        let reloadingStatusSelect;
+        if (hasCheevosParam == 'yes') {
+            statusSelect1.selectedIndex = 1;
+            reloadingStatusSelect = statusSelect1;
+        } else if (hasCheevosParam == 'no') {
+            statusSelect2.selectedIndex = 0;
+            reloadingStatusSelect = statusSelect2;
         }
-        return origSortDiv.querySelector('input[type="checkbox"]')?.checked ? 'yes' : 'all';
-    })();
-    let reloadingStatusSelect;
-    if (hasCheevosParam == 'yes') {
-        statusSelect1.selectedIndex = 1;
-        reloadingStatusSelect = statusSelect1;
-    } else if (hasCheevosParam == 'no') {
-        statusSelect2.selectedIndex = 0;
-        reloadingStatusSelect = statusSelect2;
-    }
-    if (reloadingStatusSelect) {
-        reloadingStatusSelect.dispatchEvent(new Event('change'));
-        const allOption = reloadingStatusSelect.querySelector('option[value="all"]');
-        allOption.innerText += ' 🔄'
-        allOption.title += ' (reloads the page)';
-        reloadingStatusSelect.addEventListener('change', () => {
-            if (reloadingStatusSelect.selectedOptions[0].value == 'all') {
-                setHasCheevosParam('all');
-            }
-        });
+        if (reloadingStatusSelect) {
+            reloadingStatusSelect.dispatchEvent(new Event('change'));
+            const allOption = reloadingStatusSelect.querySelector('option[value="all"]');
+            allOption.innerText += ' 🔄'
+            allOption.title += ' (reloads the page)';
+            reloadingStatusSelect.addEventListener('change', () => {
+                if (reloadingStatusSelect.selectedOptions[0].value == 'all') {
+                    setHasCheevosParam('all');
+                }
+            });
+        }
     }
 }
 
