@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_Played2CSV
 // @namespace    RA
-// @version      0.4
+// @version      0.4.1
 // @description  Adds button to progress section on profile page to copy data on played games in CSV format or open it in a new tab
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -54,11 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const title = row.querySelector('a img').getAttribute('alt').replace(/~.+~/, '').trim().replace(' game badge', '');
         const tags = [...row.querySelector('p').querySelectorAll('span.tag span:first-child')].map(span => span.innerText);
         const consoleName = row.querySelector('td:first-child div > span:not(.tag)').innerText.trim();
-        const progressTitle = row.querySelector('div[role="progressbar"]').title
+        const progressTitle = row.querySelector('div[role="progressbar"]').title;
         const hcProgressMatch = progressTitle.match(/(\d+)\/(\d+) \(hardcore\)/);
         const hcUnlocked = hcProgressMatch ? parseInt(hcProgressMatch[1]) : 0;
         const scProgressMatch = progressTitle.match(/(\d+)\/(\d+) \(softcore\)/);
-        const scUnlocked = scProgressMatch ? parseInt(scProgressMatch[1]) : 0;
+        const scUnlocked = scProgressMatch ? parseInt(scProgressMatch[1]) : hcUnlocked;
         const total = parseInt(hcProgressMatch ? hcProgressMatch[2] : scProgressMatch[2]);
         const status = row.querySelector('div[data-award]').dataset.award;
         return { id, title, tags, console: consoleName, hcUnlocked, scUnlocked, total, status, 'unlock date': '' };
