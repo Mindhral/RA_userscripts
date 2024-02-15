@@ -57,17 +57,15 @@ The settings allows to:
 | ------------ | ---------- | -------------- |
 | Warning icon | Red border | Red foreground |
 
-## RA_EnhancedCheevosFilters
+## RA_CustomCheevosList
 
-Replaces the filter which hides unlocked achievements on a game page by a filter which allows to choose to hide all unlocked achievements or just the ones unlocked in hardcore.
+Allows for some customization on the achievements list from *Game* page, all of which can be deactivated on *Settings* page.
 
-![hide none](/assets/EnhancedCheevosFilters_hide_none.png)
+![Customize profile settings](/assets/CustomCheevosList_settings.png)
 
-![hide hardcore](/assets/EnhancedCheevosFilters_hide_hardcore.png)
+The first 3 features correspond to former scripts *EnhancedCheevosSort*, *EnhancedCheevosFilters* and *LinkUnofficalAchievements*. These can be removed before this one is installed.
 
-![hide unlocked](/assets/EnhancedCheevosFilters_hide_unlocked.png)
-
-## RA_EnhancedCheevosSort
+### Enhanced Sort Options
 
 Modifies the sorting of achievements on a game page.
 
@@ -101,6 +99,22 @@ Modifies the sorting of achievements on a game page.
 4. Save current sorting parameters as default. This is saved in script storage, locally (synchronization of this storage doesn't seem to work in Tampermonkey at the moment).
 
 ![grouping save](/assets/EnhancedCheevosSort_save.png)
+
+### Enhanced Filters
+
+Replaces the filter which hides unlocked achievements on a game page by a filter which allows to choose to hide all unlocked achievements or just the ones unlocked in hardcore.
+
+![hide none](/assets/EnhancedCheevosFilters_hide_none.png)
+
+![hide hardcore](/assets/EnhancedCheevosFilters_hide_hardcore.png)
+
+![hide unlocked](/assets/EnhancedCheevosFilters_hide_unlocked.png)
+
+### Link Unofficial Achievements
+
+Adds a link on game page to view the unofficial achievements for the game, if any. This reloads the page. The link is displayed whether there are unofficial achievements or not.
+
+![link to unofficial achievements](/assets/LinkUnofficalAchievements_link.png)
 
 ## RA_GameListTagFilter
 
@@ -224,12 +238,6 @@ The parameters for a search configuration are (from second to last row):
    The consoles are specified with a comma-separated list of their ids. To get the id of a console, hover over its name in the list above. When the list is correctly formatted, hovering over the text box displays the names of the consoles, allowing to check the list.
 7. Tags (*subset*, *hack*, ...) can be filtered as well, with a comma-separated list of values (case insensitive)
 
-## RA_LinkUnofficalAchievements
-
-Adds a link on game page to view the unofficial achievements for the game, if any. This reloads the page. The link is displayed whether there are unofficial achievements or not.
-
-![link to unofficial achievements](/assets/LinkUnofficalAchievements_link.png)
-
 ## RA_Played2CSV
 
 Adds clickable icons on top of the *Completion Progress* section of profile page, which compiles data on played games in CSV format and respectively open it in a new tab and copy it to clipboard.
@@ -252,5 +260,8 @@ The date should be formatted according to the browser's locale.
 - RA_ScrollProfileAwards: now included with RA_CustomizeProfile
 - RA_HideProfileAchievementsBadges: the new layout of these badges already has the feature
 - RA_progress2JSON: not useful anymore with the API being back
+- RA_EnhancedCheevosFilters: now included with RA_CustomCheevosList
+- RA_EnhancedCheevosSort: now included with RA_CustomCheevosList
+- RA_LinkUnofficalAchievements: now included with RA_CustomCheevosList
 
 [^1]: Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
