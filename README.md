@@ -158,6 +158,14 @@ Modifies the sorting of entries on a Hub page (including consoles games lists) a
 
 7. The game count is updated when sorting (and added is absent)
 
+8. Possibility to save the sort and filter options for the current page or for the category (hubs, consoles or developer sets).
+   
+   ![hub sort with status](/assets/EnhancedHubSort_save.png)
+   
+   All filters for a category (default and page specific) can be deleted with a button on the *Settings* page.
+   
+   ![hub sort with status](/assets/EnhancedHubSort_settings_reset.png)
+
 ## RA_ReorderAwardsHelper
 
 Allows to do some automatic sorting on *Reorder Site Awards* page.

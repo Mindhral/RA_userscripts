@@ -8,9 +8,12 @@
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/system/*/games*
 // @match        https://retroachievements.org/user/*/developer/sets*
+// @match        https://retroachievements.org/controlpanel.php*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
-// @grant        none
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @grant        GM_deleteValue
 // ==/UserScript==
 
 const pageName = window.location.pathname.split('/')[1];
@@ -149,7 +152,8 @@ const Status2 = {
     }
 }
 
-const sortBlockHTML = `<div class="embedded p-4 my-4 w-full"><div class="grid sm:flex sm:divide-x-2 divide-embed-highlight">
+const sortBlockHTML = `<div class="my-4">
+<div class="embedded p-4 w-full"><div class="grid sm:flex sm:divide-x-2 divide-embed-highlight">
   <div class="grid gap-y-1 sm:pr-[40px]">
     <label class="font-bold text-xs">Sort by</label>
     <span class="text-2xs">
@@ -170,12 +174,14 @@ const sortBlockHTML = `<div class="embedded p-4 my-4 w-full"><div class="grid sm
   </div>
   <div class="grid gap-y-1 sm:px-4">
     <label class="font-bold text-xs">Status</label>
-      <div class="flex">
+    <div class="flex">
       <select id="statusSelect1"></select>
 	  <select id="statusSelect2"></select>
-</div>
+    </div>
   </div>
-</div></div>`;
+</div></div>
+<p><b>Save filters for:</b> <a id="savePageFilters" style="cursor:pointer;">this page</a> | <a id="saveDefaultFilters" style="cursor:pointer;">default</a> | <a id="resetHubFilters" title="delete saved filters for this page and reset to default ones" style="cursor:pointer;">reset to default</a></p>
+</div>`;
 
 const Compares = {
     reverse: c => (a, b) => c(b, a),
@@ -192,6 +198,7 @@ function getElementByXpath(root, xpath) {
 function createOption(value, labelTxt, select, title = null) {
     const option = document.createElement('option');
     option.value = value;
+    option.setAttribute('name', value);
     if (labelTxt) {
         option.innerHTML = labelTxt;
     } else {
@@ -217,6 +224,42 @@ function setHasCheevosParam(value) {
     if (pageName == 'game') value = (value == 'yes') ? 'true' : 'false';
     params.set('filter[populated]', value);
     window.location.search = params;
+}
+
+const defaultFilters = {
+    "sort": "original",
+    "reverse": false,
+    "tag": "all",
+    "status1": "all",
+    "status2": "all"
+};
+function loadFilters() {
+    if (localStorage.hubFilters) {
+        const filters = JSON.parse(localStorage.hubFilters);
+        localStorage.removeItem('hubFilters');
+        return filters;
+    }
+    const filtersArrayName = (pageName == 'system') ? 'consoleFilters' : (pageName == 'user') ? 'devFilters' : 'hubFilters';
+    const filtersArray = GM_getValue(filtersArrayName, {});
+    const filterId = window.location.pathname.split('/')[2];
+    return filtersArray[filterId] ?? filtersArray[''];
+}
+function saveFilters(filters, isDefault) {
+    const filtersArrayName = (pageName == 'system') ? 'consoleFilters' : (pageName == 'user') ? 'devFilters' : 'hubFilters';
+    const filtersArray = GM_getValue(filtersArrayName, {});
+    const filterId = isDefault ? '' : window.location.pathname.split('/')[2];
+    filtersArray[filterId] = filters;
+    GM_setValue(filtersArrayName, filtersArray);
+}
+function resetPageFilters() {
+    const filtersArrayName = (pageName == 'system') ? 'consoleFilters' : (pageName == 'user') ? 'devFilters' : 'hubFilters';
+    const filtersArray = GM_getValue(filtersArrayName, {});
+    const filterId = window.location.pathname.split('/')[2];
+    if (filtersArray[filterId]) {
+        delete filtersArray[filterId];
+        GM_setValue(filtersArrayName, filtersArray);
+    }
+    return filtersArray[''] ?? defaultFilters;
 }
 
 function customize() {
@@ -345,14 +388,16 @@ function customize() {
     const updateList = gameTable => {
         // slower than using 'hidden' class, but allows to keep alternating row colors
         let hasVisible = false;
-        gameTable.rowsData.reverse().forEach(row => {
+        // go backwards and add first so that the footer row remains last if it exists
+        for (let i = gameTable.rowsData.length - 1; i >= 0; i--) {
+            const row = gameTable.rowsData[i];
             if (row.visible) {
                 hasVisible = true;
                 gameTable.tbody.prepend(row.element);
             } else {
                 row.element.remove();
             }
-        });
+        };
         const classFunc = hasVisible ? 'remove' : 'add';
         const table = gameTable.tbody.parentElement;
         table.classList[classFunc]('hidden');
@@ -391,7 +436,7 @@ function customize() {
     const optionChecks = []; // array of {option, func(row)}
     const checkVisibilities = () => {
         gameTables.forEach(gameTable => {
-            gameTable.rowsData.forEach(row => { row.visible = visibilityFunctions.every(f => f(row)) });
+            gameTable.rowsData.forEach(row => { row.visible = visibilityFunctions.every(f => f(row));});
             updateList(gameTable);
         });
         const visibleRows = gameTables.flatMap(t => t.rowsData.filter(r => r.visible));
@@ -414,7 +459,7 @@ function customize() {
     statusSelect1.addEventListener('change', () => {
         selectedStatus1 = Status1[statusSelect1.selectedOptions[0].value];
         checkVisibilities();
-        [...statusSelect2.options].forEach((opt, idx) => { opt.disabled = (idx < statusSelect1.selectedIndex); });
+        [...statusSelect2.options].forEach((opt, idx) => { opt.disabled = (opt.dataset.disabled || idx < statusSelect1.selectedIndex); });
     });
     let selectedStatus2 = Status2.all;
     [...statusSelect2.options].find(o => o.value == 'all').selected = true;
@@ -422,13 +467,28 @@ function customize() {
     statusSelect2.addEventListener('change', () => {
         selectedStatus2 = Status2[statusSelect2.selectedOptions[0].value];
         checkVisibilities();
-        [...statusSelect1.options].forEach((opt, idx) => { opt.disabled = (idx > statusSelect2.selectedIndex); });
+        [...statusSelect1.options].forEach((opt, idx) => { opt.disabled = (opt.dataset.disabled || idx > statusSelect2.selectedIndex); });
     });
 
+    const createFiltersObj = () => {
+        const res = {
+            sort: sortSelect.selectedOptions[0].value,
+            reverse: descCheckbox.checked,
+            tag: tagSelect.selectedOptions[0].value,
+            status1: statusSelect1.selectedOptions[0].value,
+            status2: statusSelect2.selectedOptions[0].value
+        };
+        if (consoleSelect.closest('body')) res.console = consoleSelect.selectedOptions[0].value;
+        return res;
+    };
+
+    // restrictions
     if (pageName == 'user') {
         // developper sets
         statusSelect1.options[1].classList.add('hidden');
+        statusSelect1.options[1].dataset.disabled = true;
         statusSelect2.options[0].classList.add('hidden');
+        statusSelect2.options[0].dataset.disabled = true;
     } else {
         const hasCheevosParam = (() => {
             const hasCheevosRadio = origSortDiv.querySelector('input[name="radio-populated"][checked]');
@@ -437,27 +497,127 @@ function customize() {
         })();
         let reloadingStatusSelect;
         if (hasCheevosParam == 'yes') {
-            statusSelect1.selectedIndex = 1;
             reloadingStatusSelect = statusSelect1;
+            if (statusSelect1.selectedOptions[0].value == 'all') statusSelect1.selectedIndex++;
         } else if (hasCheevosParam == 'no') {
-            statusSelect2.selectedIndex = 0;
             reloadingStatusSelect = statusSelect2;
+            statusSelect1.namedItem('all').selected = true;
+            statusSelect2.namedItem('without-ach').selected = true;
+            [...statusSelect1.options].forEach(opt => {
+                if (opt.value != 'all') {
+                    opt.disabled = true;
+                    opt.dataset.disabled = true;
+                }
+            });
+            [...statusSelect2.options].forEach(opt => {
+                if (opt.value != 'all' && opt.value != 'without-ach') {
+                    opt.disabled = true;
+                    opt.dataset.disabled = true;
+                }
+            });
         }
         if (reloadingStatusSelect) {
-            reloadingStatusSelect.dispatchEvent(new Event('change'));
-            const allOption = reloadingStatusSelect.querySelector('option[value="all"]');
-            allOption.innerText += ' 🔄'
+            const allOption = reloadingStatusSelect.namedItem('all');
+            allOption.innerText += ' 🔄';
             allOption.title += ' (reloads the page)';
+            reloadingStatusSelect.dispatchEvent(new Event('change'));
             reloadingStatusSelect.addEventListener('change', () => {
                 if (reloadingStatusSelect.selectedOptions[0].value == 'all') {
+                    localStorage.hubFilters = JSON.stringify(createFiltersObj());
                     setHasCheevosParam('all');
                 }
             });
         }
     }
+
+    // loads filters
+    const select = (selectElmt, value) => {
+        const isAvailable = opt => !opt.dataset.disabled && !opt.innerText.endsWith('🔄');
+        const item = selectElmt.namedItem(value);
+        if (item && isAvailable(item)) {
+            item.selected = true;
+        } else if (value != 'all') {
+            select(selectElmt, 'all');
+        } else {
+            [...selectElmt.options].find(isAvailable).selected = true;
+        }
+        selectElmt.dispatchEvent(new Event('change'));
+    }
+    const updateFilters = filters => {
+        select(sortSelect, filters.sort);
+        descCheckbox.checked = filters.reverse;
+        if (filters.console && !consoleSelect.disabled) {
+            selectedConsole = filters.console;
+            select(consoleSelect, filters.console);
+        }
+        selectedTag = filters.tag;
+        select(tagSelect, filters.tag);
+        selectedStatus1 = Status1[filters.status1];
+        select(statusSelect1, filters.status1);
+        selectedStatus2 = Status2[filters.status2];
+        select(statusSelect2, filters.status2);
+        updateSort();
+    };
+    const savedFilters = loadFilters();
+    if (savedFilters) updateFilters(savedFilters);
+
+    // handling save
+    const savePageLink = document.getElementById('savePageFilters');
+    savePageLink.addEventListener('click', () => saveFilters(createFiltersObj(), false));
+    const saveDefaultLink = document.getElementById('saveDefaultFilters');
+    saveDefaultLink.innerText = ((pageName == 'system') ? 'consoles' : (pageName == 'user') ? 'developers' : 'hubs') + ' ' + saveDefaultLink.innerText;
+    saveDefaultLink.addEventListener('click', () => saveFilters(createFiltersObj(), true));
+    const resetFiltersLink = document.getElementById('resetHubFilters');
+    resetFiltersLink.addEventListener('click', () => updateFilters(resetPageFilters()));
+    [savePageLink, saveDefaultLink, resetFiltersLink].forEach(link => link.addEventListener('click', event => {
+        const link = event.target;
+        link.style.cursor = 'grabbing';
+        setTimeout(() => { link.style.cursor = 'pointer'; }, 500);
+    }));
+}
+
+const settingsHtml = `<div class="component">
+  <h4>Enhanced Hub Sort</h4>
+  <table class="table-highlight"><tbody>
+    <tr>
+      <td>Reset saved filters</td>
+      <td>
+        <button id="resetHubFilters" class="btn">Hubs</button> <button id="resetConsoleFilters" class="btn">Consoles</button> <button id="resetDevFilters" class="btn">Developers</button>
+      </td>
+    </tr>
+  </tbody></table>
+</div>`;
+
+function settingsPage() {
+    // HTML creation
+    const settingsDiv = getElementByXpath(document, '//div[h3[text()="Settings"]]');
+    if (!settingsDiv) return;
+    const mainDiv = document.createElement('div');
+    settingsDiv.insertAdjacentElement('afterend', mainDiv);
+    mainDiv.outerHTML = settingsHtml;
+
+    //Reset butons for saved filters
+    const addResetBehavior = (buttonId, filterId) => {
+        const button = document.getElementById(buttonId);
+        if (GM_getValue(filterId, null)) {
+            button.addEventListener('click', () => {
+                GM_deleteValue(filterId);
+                button.disabled = true;
+            });
+        } else {
+            button.disabled = true;
+        }
+    };
+    addResetBehavior('resetHubFilters', 'hubFilters');
+    addResetBehavior('resetConsoleFilters', 'consoleFilters');
+    addResetBehavior('resetDevFilters', 'devFilters');
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    if (pageName == 'controlpanel.php') {
+        settingsPage();
+        return;
+    }
     if (pageName == 'game') {
         const consoleName = document.querySelector('h1 div span')?.innerText?.trim();
         if (consoleName && consoleName !== 'Hubs') return;
