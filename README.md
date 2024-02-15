@@ -116,6 +116,16 @@ Adds a link on game page to view the unofficial achievements for the game, if an
 
 ![link to unofficial achievements](/assets/LinkUnofficalAchievements_link.png)
 
+### Collapse Achievements List
+
+Adds a collapse button above the achievements list, allowing to get faster to the following sections.
+
+![achievements list not collapsed](/assets/CollapseCheevosList_no.png)
+
+![achievements list collapsed](/assets/CollapseCheevosList_yes.png)
+
+A setting allows to choose whether to collapse the list on page load or not (never, always, remember the last state).
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.

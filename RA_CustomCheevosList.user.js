@@ -23,6 +23,12 @@ function loadSettings(key, defValues) {
     return settings;
 }
 
+// Sets the visibility of the table row containing the given element
+function setRowVisibility(element, visible) {
+    const action = visible ? 'remove' : 'add';
+    element.closest('tr')?.classList[action]?.('hidden');
+}
+
 function getElementByXpath(root, xpath) {
   return document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 }
@@ -30,9 +36,18 @@ function getElementByXpath(root, xpath) {
 const settingsHtml = `<div class="component">
   <h4>Achievements list customization</h4>
   <table class="table-highlight"><tbody>
-    <tr><th colspan="2"><label><input id="enhancedSortActive" type="checkbox"> Enhanced Sort Options</label></th></tr>
-    <tr><th colspan="2"><label><input id="enhancedFiltersActive" type="checkbox"> Enhanced Filters</label></th></tr>
+    <tr><th colspan="2"><label><input id="enhancedCheevosSortActive" type="checkbox"> Enhanced Sort Options</label></th></tr>
+    <tr><th colspan="2"><label><input id="enhancedCheevosFiltersActive" type="checkbox"> Enhanced Filters</label></th></tr>
     <tr><th colspan="2"><label><input id="linkUnofficalActive" type="checkbox"> Link Unofficial Achievements</label></th></tr>
+    <tr><th colspan="2"><label><input id="collapseCheevosListActive" type="checkbox"> Collapse Achievements List</label></th></tr>
+    <tr>
+      <td>Collapse on page load</td>
+      <td>
+        <label><input type="radio" name="collapseOnLoad" value="never"> never</label>
+        <label><input type="radio" name="collapseOnLoad" value="remember"> remember</label>
+        <label><input type="radio" name="collapseOnLoad" value="always"> always</label>
+      </td>
+    </tr>
   </tbody></table>
 </div>`;
 
@@ -130,7 +145,7 @@ const EnhancedCheevosSort = (() => {
     });
 
     function settingsPage() {
-        const activeCheckbox = document.getElementById('enhancedSortActive');
+        const activeCheckbox = document.getElementById('enhancedCheevosSortActive');
         activeCheckbox.checked = Settings.active;
         activeCheckbox.addEventListener('change', () => {
             Settings.active = activeCheckbox.checked;
@@ -284,7 +299,7 @@ const EnhancedCheevosFilters = (() => {
     const Settings = loadSettings('enhancedFilters', DefaultSettings);
 
     function settingsPage() {
-        const activeCheckbox = document.getElementById('enhancedFiltersActive');
+        const activeCheckbox = document.getElementById('enhancedCheevosFiltersActive');
         activeCheckbox.checked = Settings.active;
         activeCheckbox.addEventListener('change', () => {
             Settings.active = activeCheckbox.checked;
@@ -382,10 +397,85 @@ const LinkUnofficalAchievements = (() => {
     return { gamePage, settingsPage };
 })();
 
+const CollapseAchievementsList = (() => {
+    const DefaultSettings = {
+        active: true,
+        collapseOnLoad: 'never'
+    };
+
+    const Settings = loadSettings('collapseCheevosList', DefaultSettings);
+
+    function saveSettings() {
+        GM_setValue('collapseCheevosList', Settings);
+    }
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('collapseCheevosListActive');
+        activeCheckbox.checked = Settings.active;
+
+        const collapseOnLoadRadios = [...document.querySelectorAll('input[name="collapseOnLoad"]')];
+        collapseOnLoadRadios.filter(r => r.value == Settings.collapseOnLoad)[0].checked = true;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(collapseOnLoadRadios[0], Settings.active);
+            saveSettings()
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+
+        collapseOnLoadRadios.forEach(r => r.addEventListener('change', () => {
+            Settings.collapseOnLoad = r.value;
+            saveSettings();
+        }));
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+        const achievementsList = document.getElementById('set-achievements-list');
+        if (achievementsList == null) return;
+        const filterDiv = achievementsList.previousElementSibling;
+        const countersDiv = filterDiv.previousElementSibling.previousElementSibling;
+
+        const newDiv = document.createElement('div');
+        countersDiv.replaceWith(newDiv);
+        newDiv.outerHTML = `<div class="flex w-full justify-between items-center" x-data="{
+        isExpanded: true,
+        handleToggle() {
+            this.isExpanded = !this.isExpanded;
+        }
+    }">
+  <button id="collapseAchievementsBtn" title="Hide achievements list" @click="handleToggle" class="btn transition-transform lg:active:scale-95 duration-75">
+    <div class="transition-transform rotate-180" :class="{ 'rotate-180': isExpanded }">
+      <svg class="icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc. --><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path></svg>
+    </div>
+  </button>
+</div>`;
+        const button = document.getElementById('collapseAchievementsBtn');
+        button.before(countersDiv);
+
+        const lastState = GM_getValue('collapseLastState', true);
+        let visible = true;
+        button.addEventListener('click', () => {
+            visible = !visible;
+            const method = visible ? 'remove' : 'add';
+            filterDiv.classList[method]('hidden');
+            achievementsList.classList[method]('hidden');
+            button.title = visible ? 'Hide achievements list' : 'Show achievements list';
+            GM_setValue('collapseLastState', !visible);
+        });
+        if (Settings.collapseOnLoad == 'always' || (Settings.collapseOnLoad == 'remember' && lastState)) {
+            button.dispatchEvent(new Event('click'));
+        }
+    }
+
+    return { gamePage, settingsPage };
+})();
+
 function gamePage() {
     EnhancedCheevosSort.gamePage();
     EnhancedCheevosFilters.gamePage();
     LinkUnofficalAchievements.gamePage();
+    CollapseAchievementsList.gamePage();
 }
 
 function settingsPage() {
@@ -399,6 +489,7 @@ function settingsPage() {
     EnhancedCheevosSort.settingsPage();
     EnhancedCheevosFilters.settingsPage();
     LinkUnofficalAchievements.settingsPage();
+    CollapseAchievementsList.settingsPage();
 }
 
 const urlPathname = window.location.pathname;
