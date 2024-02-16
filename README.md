@@ -126,6 +126,16 @@ Adds a collapse button above the achievements list, allowing to get faster to th
 
 A setting allows to choose whether to collapse the list on page load or not (never, always, remember the last state).
 
+### Custom Locked Badge
+
+Allows to replace black and white version of locked achievement badges by the colored version, or by a generic spoiler-free one. It works on the achievements list on a game page, the *Beaten Game Credit* pop-up on the same page, and on the achievement page.
+
+Optionally, the badge can be replaced by the colored version or the black and white version on mouseover.
+
+Both behaviors can be selected on settings page. Some combinations are disabled, as they would not make sense or would be redundant.
+
+![Custom locked badge settings](/assets/CustomLocked_settings.png)
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.

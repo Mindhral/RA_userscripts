@@ -6,6 +6,7 @@
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
+// @match        https://retroachievements.org/achievement/*
 // @match        https://retroachievements.org/controlpanel.php*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -46,6 +47,23 @@ const settingsHtml = `<div class="component">
         <label><input type="radio" name="collapseOnLoad" value="never"> never</label>
         <label><input type="radio" name="collapseOnLoad" value="remember"> remember</label>
         <label><input type="radio" name="collapseOnLoad" value="always"> always</label>
+      </td>
+    </tr>
+    <tr><th colspan="2"><label><input id="customLockedActive" type="checkbox"> Custom locked badges</label></th></tr>
+    <tr>
+      <td>Default</td>
+      <td>
+        <label title="Usual black & white badge"><input type="radio" name="defaultLocked" value="noop"> no change</label>
+        <label title="Default, spoiler-free badge"><input type="radio" name="defaultLocked" value="generic"> generic</label>
+        <label title="Unlocked badge"><input type="radio" name="defaultLocked" value="colored"> colored</label>
+      </td>
+    </tr>
+    <tr>
+      <td>Mouseover</td>
+      <td>
+        <label title="No action on mouseover"><input type="radio" name="mouseoverLocked" value="noop"> same</label>
+        <label title="Usual locked badge"><input type="radio" name="mouseoverLocked" value="bw"> black & white</label>
+        <label title="Unlocked badge"><input type="radio" name="mouseoverLocked" value="colored"> colored</label>
       </td>
     </tr>
   </tbody></table>
@@ -471,27 +489,128 @@ const CollapseAchievementsList = (() => {
     return { gamePage, settingsPage };
 })();
 
-function gamePage() {
-    EnhancedCheevosSort.gamePage();
-    EnhancedCheevosFilters.gamePage();
-    LinkUnofficalAchievements.gamePage();
-    CollapseAchievementsList.gamePage();
-}
+const CustomLockedBadges = (() => {
+    const DefaultSettings = {
+        active: false,
+        default: 'noop',
+        mouseover: 'colored'
+    };
 
-function settingsPage() {
-    const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    const settingsDiv = xpathRes.iterateNext();
-    if (!settingsDiv) return;
-    const mainDiv = document.createElement('div');
-    settingsDiv.insertAdjacentElement('afterend', mainDiv);
-    mainDiv.outerHTML = settingsHtml;
+    const Settings = loadSettings('customLocked', DefaultSettings);
 
-    EnhancedCheevosSort.settingsPage();
-    EnhancedCheevosFilters.settingsPage();
-    LinkUnofficalAchievements.settingsPage();
-    CollapseAchievementsList.settingsPage();
-}
+    function saveSettings() {
+        GM_setValue('customLocked', Settings);
+    }
 
-const urlPathname = window.location.pathname;
-const mainMethod = urlPathname.startsWith('/controlpanel.php') ? settingsPage : gamePage;
-document.addEventListener("DOMContentLoaded", mainMethod);
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('customLockedActive');
+        activeCheckbox.checked = Settings.active;
+
+        const defaultLockedRadios = [...document.querySelectorAll('input[name="defaultLocked"]')];
+        defaultLockedRadios.filter(r => r.value == Settings.default)[0].checked = true;
+
+        const mouseoverLockedRadios = [...document.querySelectorAll('input[name="mouseoverLocked"]')];
+        mouseoverLockedRadios.filter(r => r.value == Settings.mouseover)[0].checked = true;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(defaultLockedRadios[0], Settings.active);
+            setRowVisibility(mouseoverLockedRadios[0], Settings.active);
+            saveSettings()
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+
+        defaultLockedRadios.forEach(r => r.addEventListener('change', () => {
+            Settings.default = r.value;
+            const disabled = (r.value == 'noop') ? [ 'noop', 'bw' ] : (r.value == 'colored') ? [ 'colored' ] : [];
+            let mustChange = false;
+            mouseoverLockedRadios.forEach(r2 => {
+                r2.disabled = disabled.includes(r2.value);
+                if (r2.disabled && r2.checked) mustChange = true;
+            });
+            if (mustChange) {
+                const firstAvailable = mouseoverLockedRadios.find(r2 => !r2.disabled);
+                firstAvailable.checked = true;
+                firstAvailable.dispatchEvent(new Event('change'));
+            } else {
+                saveSettings();
+            }
+        }));
+        mouseoverLockedRadios.forEach(r => r.addEventListener('change', () => {
+            Settings.mouseover = r.value;
+            saveSettings();
+        }));
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+        const GenericUnlockURL = 'https://static.retroachievements.org/assets/images/achievement/badge-locked.png';
+        const ProcessImage = badge => {
+            let source = badge.src;
+            const colored = source.replace('_lock.png', '.png');
+            if (source == colored) {
+                return;
+            }
+            const locked = source;
+
+            if (Settings.default == 'colored') {
+                source = colored;
+            } else if (Settings.default == 'generic') {
+                source = GenericUnlockURL;
+            }
+            badge.src = source;
+
+            let mouseover = source;
+            if (Settings.mouseover == 'bw') {
+                mouseover = locked;
+            } else if (Settings.mouseover == 'colored') {
+                mouseover = colored;
+            }
+            if (mouseover != source) {
+                badge.addEventListener('mouseenter', () => { badge.src = mouseover; });
+                badge.addEventListener('mouseleave', () => { badge.src = source; });
+            }
+        };
+        [...document.getElementsByClassName('badgeimg')].forEach(ProcessImage);
+
+        // handling "Beaten Game Credit" modals (one per button)
+        const newNodesCallback = records => records.forEach(record => {
+            [...record.target.getElementsByClassName('badgeimg')].forEach(ProcessImage);
+        });
+        const newNodesObserver = new MutationObserver(newNodesCallback);
+        const newNodesConfig = { childList: true };
+        document.querySelectorAll('body div[x-html="dynamicHtmlContent"]').forEach(div => newNodesObserver.observe(div, newNodesConfig));
+    }
+
+    return { gamePage, settingsPage };
+})();
+
+const Pages = {
+    game: () => {
+        EnhancedCheevosSort.gamePage();
+        EnhancedCheevosFilters.gamePage();
+        LinkUnofficalAchievements.gamePage();
+        CollapseAchievementsList.gamePage();
+        CustomLockedBadges.gamePage();
+    },
+    achievement: () => {
+        CustomLockedBadges.gamePage();
+    },
+    controlpanel: () => {
+        const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+        const settingsDiv = xpathRes.iterateNext();
+        if (!settingsDiv) return;
+        const mainDiv = document.createElement('div');
+        settingsDiv.insertAdjacentElement('afterend', mainDiv);
+        mainDiv.outerHTML = settingsHtml;
+
+        EnhancedCheevosSort.settingsPage();
+        EnhancedCheevosFilters.settingsPage();
+        LinkUnofficalAchievements.settingsPage();
+        CollapseAchievementsList.settingsPage();
+        CustomLockedBadges.settingsPage();
+    }
+};
+
+const pageName = window.location.pathname.split('/', 2)[1].split('.php', 1)[0];
+document.addEventListener("DOMContentLoaded", Pages[pageName]);
