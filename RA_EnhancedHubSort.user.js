@@ -17,6 +17,7 @@
 // ==/UserScript==
 
 const pageName = window.location.pathname.split('/')[1];
+const consoleGroups = GM_getValue('consoleGroups', []);
 
 const Sorts = {
     'original': {
@@ -197,8 +198,10 @@ function getElementByXpath(root, xpath) {
 
 function createOption(value, labelTxt, select, title = null) {
     const option = document.createElement('option');
-    option.value = value;
-    option.setAttribute('name', value);
+    if (value) {
+        option.value = value;
+        option.setAttribute('name', value);
+    }
     if (labelTxt) {
         option.innerHTML = labelTxt;
     } else {
@@ -209,6 +212,17 @@ function createOption(value, labelTxt, select, title = null) {
     return option;
 }
 
+function setVisible(element, visible) {
+    const method = visible ? 'remove' : 'add';
+    element.classList[method]('hidden');
+}
+
+function ackIconClick(event) {
+    const icon = event.target;
+    icon.style.cursor = 'wait';
+    setTimeout(() => { icon.style.cursor = 'pointer'; }, 300);
+}
+
 function shuffle(array) {
     let index = array.length;
     while (index > 1) {
@@ -217,6 +231,16 @@ function shuffle(array) {
         [array[index], array[newIdx]] = [array[newIdx], array[index]];
     }
     return array;
+}
+
+function getConsolesById() {
+    const consoles = {};
+    const dropdown = document.querySelector('div.dropdown > button[title="Games"] ~ div.dropdown-menu');
+    dropdown.querySelectorAll('a.dropdown-item[href*="/system/"]').forEach(item => {
+        const id = parseInt(item.href.split('/').at(-2));
+        consoles[id] = item.innerText.trim();
+    });
+    return consoles;
 }
 
 function setHasCheevosParam(value) {
@@ -302,6 +326,8 @@ function customize() {
     }).filter(t => t.rowsData.length > 0);
     if (gameTables.length == 0) return;
 
+    const consolesById = getConsolesById();
+
     // Adds HTML
     const newDiv = document.createElement('div');
     // removal of origSortDiv must be delayed to allow for XPath search
@@ -332,6 +358,11 @@ function customize() {
                 consoleSelect.parentElement.remove();
             } else {
                 // hub page
+                consoleGroups.forEach(g => {
+                    const option = createOption('gr-' + g.id, g.label, consoleSelect);
+                    option.title = g.consoles.map(i => consolesById[i]).join('\n');
+                });
+                createOption(null, '--', consoleSelect).disabled = true;
                 [...consoles].sort().forEach(c => createOption(c, c, consoleSelect));
             }
         } else {
@@ -398,11 +429,10 @@ function customize() {
                 row.element.remove();
             }
         };
-        const classFunc = hasVisible ? 'remove' : 'add';
         const table = gameTable.tbody.parentElement;
-        table.classList[classFunc]('hidden');
+        setVisible(table, hasVisible);
         // h2 title before table's parent div
-        table.parentElement.previousElementSibling.classList[classFunc]('hidden');
+        setVisible(table.parentElement.previousElementSibling, hasVisible);
         //updates counter
         const visibleCount = countVisible();
         gameCounterSpan.innerText = visibleCount;
@@ -443,9 +473,18 @@ function customize() {
         optionChecks.forEach(obj => { obj.option.disabled = !visibleRows.some(obj.func); });
     };
     let selectedConsole = 'all';
-    visibilityFunctions.push(row => selectedConsole === 'all' || row.console === selectedConsole);
+    let selectedConsoles;
+    visibilityFunctions.push(row => selectedConsole == 'all' || selectedConsoles.has(row.console));
     consoleSelect.addEventListener('change', () => {
         selectedConsole = consoleSelect.selectedOptions[0].value;
+        if (selectedConsole == 'all') {
+            selectedConsoles = new Set();
+        } else if (selectedConsole.startsWith('gr-')) {
+            const groupId = parseInt(selectedConsole.substr(3));
+            selectedConsoles = new Set(consoleGroups.find(g => g.id == groupId)?.consoles.map(i => consolesById[i]));
+        } else {
+            selectedConsoles = new Set([selectedConsole]);
+        }
         checkVisibilities();
     });
     let selectedTag = 'all';
@@ -485,9 +524,9 @@ function customize() {
     // restrictions
     if (pageName == 'user') {
         // developper sets
-        statusSelect1.options[1].classList.add('hidden');
+        setVisible(statusSelect1.options[1], false);
         statusSelect1.options[1].dataset.disabled = true;
-        statusSelect2.options[0].classList.add('hidden');
+        setVisible(statusSelect2.options[0], false);
         statusSelect2.options[0].dataset.disabled = true;
     } else {
         const hasCheevosParam = (() => {
@@ -569,11 +608,7 @@ function customize() {
     saveDefaultLink.addEventListener('click', () => saveFilters(createFiltersObj(), true));
     const resetFiltersLink = document.getElementById('resetHubFilters');
     resetFiltersLink.addEventListener('click', () => updateFilters(resetPageFilters()));
-    [savePageLink, saveDefaultLink, resetFiltersLink].forEach(link => link.addEventListener('click', event => {
-        const link = event.target;
-        link.style.cursor = 'grabbing';
-        setTimeout(() => { link.style.cursor = 'pointer'; }, 500);
-    }));
+    [savePageLink, saveDefaultLink, resetFiltersLink].forEach(link => link.addEventListener('click', ackIconClick));
 }
 
 const settingsHtml = `<div class="component">
@@ -583,6 +618,25 @@ const settingsHtml = `<div class="component">
       <td>Reset saved filters</td>
       <td>
         <button id="resetHubFilters" class="btn">Hubs</button> <button id="resetConsoleFilters" class="btn">Consoles</button> <button id="resetDevFilters" class="btn">Developers</button>
+      </td>
+    </tr>
+    <tr>
+      <td>Console groups</td>
+      <td>
+        <div>
+          <select id="hubConsoleGroups" style="min-width: 10em;"></select>
+          <span id="hubConsoleGroupNew" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new console group">
+            <img style="width: 1.1em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAZCAYAAAA8CX6UAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAB7SURBVEhL7ZTRCoAgDEW1r4j6/0+rPsPuNqmR4Zy99OCBixPkOBUMIDkyI69EJAGZVYiRljIrskt5M+WxibzhhhSduUSKA1mkFNwidQ3U2SXr6ohk6pgsc132c516AK6aRTWaRTVok95XKxgimyGyGSKb/4n4P5LyCyGcQrkwJuTlwmgAAAAASUVORK5CYII" />
+          </span>
+          <div id="hubConsoleGroupSave" class="icon clickable" style="margin-left: 2em;" title="save current group">💾</div>
+          <div id="hubConsoleGroupDelete" class="icon clickable hidden" title="delete current group" style="font-size: 2em">🗑</div>
+        </div>
+        <div>
+          <input id="hubConsoleGroupLabel" type="text" size="25" maxlength="25" placeholder="label">
+          <select id="hubConsoleGroupConsoleSelect"></select>
+          <div id="hubConsoleGroupAdd" class="icon clickable" title="add console to group">➕</div>
+          <div id="hubConsoleGroupRemove" class="icon clickable" title="remove console from group">➖</div>
+        </div>
       </td>
     </tr>
   </tbody></table>
@@ -596,7 +650,8 @@ function settingsPage() {
     settingsDiv.insertAdjacentElement('afterend', mainDiv);
     mainDiv.outerHTML = settingsHtml;
 
-    //Reset butons for saved filters
+    /* Reset butons for saved filters */
+
     const addResetBehavior = (buttonId, filterId) => {
         const button = document.getElementById(buttonId);
         if (GM_getValue(filterId, null)) {
@@ -611,6 +666,112 @@ function settingsPage() {
     addResetBehavior('resetHubFilters', 'hubFilters');
     addResetBehavior('resetConsoleFilters', 'consoleFilters');
     addResetBehavior('resetDevFilters', 'devFilters');
+
+    /* Console groups */
+
+    // Retrieve elements by their ids
+    const groupSelect = document.getElementById('hubConsoleGroups');
+    const newGroupIcon = document.getElementById('hubConsoleGroupNew');
+    const saveGroupIcon = document.getElementById('hubConsoleGroupSave');
+    const deleteGroupIcon = document.getElementById('hubConsoleGroupDelete');
+    const groupLabel = document.getElementById('hubConsoleGroupLabel');
+    const consoleSelect = document.getElementById('hubConsoleGroupConsoleSelect');
+    const addConsoleIcon = document.getElementById('hubConsoleGroupAdd');
+    const removeConsoleIcon = document.getElementById('hubConsoleGroupRemove');
+
+    // Updating content
+    consoleGroups.forEach(group => createOption(null, group.label, groupSelect));
+    const consolesById = getConsolesById();
+    const sortedConsoles = Object.entries(consolesById).sort((c1, c2) => c1[1].localeCompare(c2[1]));
+    for (const [id, name] of sortedConsoles) {
+        createOption(id, name, consoleSelect);
+    }
+
+    const onGroupChange = () => {
+        const group = consoleGroups[groupSelect.selectedIndex] ?? {};
+        groupLabel.value = group.label ?? '';
+        groupLabel.dispatchEvent(new Event('change'));
+        [...consoleSelect.options].forEach(option => {
+            const label = consolesById[option.value];
+            option.innerText = (group.consoles?.includes(parseInt(option.value))) ? label + '*' : label;
+        });
+        setVisible(deleteGroupIcon, groupSelect.selectedIndex != -1);
+        consoleSelect.dispatchEvent(new Event('change'));
+    };
+    groupSelect.addEventListener('change', onGroupChange);
+    consoleSelect.addEventListener('change', () => {
+        const isIncluded = consoleSelect.selectedOptions[0].innerText.endsWith('*');
+        setVisible(addConsoleIcon, !isIncluded);
+        setVisible(removeConsoleIcon, isIncluded);
+    });
+    // Finish init
+    onGroupChange();
+
+    // Input checks
+    const errors = new Set();
+    const checkers = [];
+    const inputChecker = (input, check) => {
+        const checker = () => {
+            const errorMsg = check();
+            input.title = errorMsg ?? '';
+            input.style['border-color'] = errorMsg ? 'red' : null;
+            if (errorMsg) errors.add(input); else errors.delete(input);
+            saveGroupIcon.style.cursor = (errors.size > 0) ? 'not-allowed' : 'pointer';
+        };
+        checkers.push(checker);
+        return checker;
+    };
+    groupLabel.addEventListener('change', inputChecker(groupLabel, () => {
+        const newLabel = groupLabel.value.trim();
+        if (newLabel.length == 0) return 'Label cannot be empty';
+        if (consoleGroups.some((c, i) => i != groupSelect.selectedIndex && c.label == newLabel)) return 'Another group has the same label';
+    }));
+    consoleSelect.addEventListener('change', inputChecker(consoleSelect, () => {
+        if ([...consoleSelect.options].filter(o => o.innerText.endsWith('*')).length == 0) return 'At least one console must be selected';
+    }));
+
+    // Actions behavior
+    newGroupIcon.addEventListener('click', () => {
+        groupSelect.selectedIndex =-1;
+        onGroupChange();
+    });
+    const saveGroups = () => GM_setValue('consoleGroups', consoleGroups);
+    saveGroupIcon.addEventListener('click', () => {
+        checkers.forEach(c => c());
+        if (errors.size > 0) return;
+        const isNew = groupSelect.selectedIndex == -1;
+        const group = isNew ? {} : consoleGroups[groupSelect.selectedIndex];
+        group.label = groupLabel.value.trim();
+        group.consoles = [...consoleSelect.options].filter(o => o.innerText.endsWith('*')).map(o => parseInt(o.value));
+        if (isNew) {
+            group.id = GM_getValue('nextConsoleGroupId', 1);
+            GM_setValue('nextConsoleGroupId', group.id + 1);
+            consoleGroups.push(group);
+            createOption(group.id, group.label, groupSelect);
+            groupSelect.selectedIndex = groupSelect.options.length - 1;
+            groupSelect.dispatchEvent(new Event('change'));
+        } else {
+            groupSelect.selectedOptions[0].innerHTML = group.label;
+        }
+        saveGroups();
+    });
+    saveGroupIcon.addEventListener('click', ackIconClick);
+    deleteGroupIcon.addEventListener('click', () => {
+        consoleGroups.splice(groupSelect.selectedIndex, 1);
+        groupSelect.selectedOptions[0].remove();
+        saveGroups();
+        groupSelect.dispatchEvent(new Event('change'));
+    });
+    addConsoleIcon.addEventListener('click', () => {
+        const option = consoleSelect.selectedOptions[0];
+        option.innerText = consolesById[option.value] + '*';
+        consoleSelect.dispatchEvent(new Event('change'));
+    });
+    removeConsoleIcon.addEventListener('click', () => {
+        const option = consoleSelect.selectedOptions[0];
+        option.innerText = consolesById[option.value];
+        consoleSelect.dispatchEvent(new Event('change'));
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
