@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_GameResourceSearch
 // @namespace    RA
-// @version      0.2
+// @version      0.2.1
 // @description  Adds (customizable) links to game pages to search for resources on the game.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -37,12 +37,12 @@ const DefaultSearches = [
     {
         id: 'mobygames',
         label:'Mobygames',
-        url:'https://www.mobygames.com/game/platform:${consoleLongName.toLowerCase().replace(" ","-")}/title:${gameName.replace("/"," ")}/',
+        url:'https://www.mobygames.com/game/platform:${consoleName.toLowerCase().replace(" ","-")}/title:${gameName.replace("/"," ")}/',
         consoleNames: {
             2: 'n64', 4: 'gameboy', 5: 'gameboy-advance', 6: 'gameboy-color',
-            8: 'turbo-grafx', 11: 'sega-master-system', 13: 'lynx', 17: 'jaguar',
+            8: 'turbo-grafx', 10: 'sega-32x', 11: 'sega-master-system', 13: 'lynx', 17: 'jaguar',
             21: 'ps2', 23: 'odyssey-2', 30: 'c64', 37: 'cpc', 38: 'apple2',
-            39: 'sega-saturn', 40: 'dreamcast', 41: 'psp', 42: 'cd-i', 43: '3do', 47: 'pc88',
+            39: 'sega-saturn', 41: 'psp', 42: 'cd-i', 43: '3do', 47: 'pc88',
             48: 'pc98', 54: 'epoch-cassette-vision', 55: 'epoch-super-cassette-vision',
             56: 'neo-geo-cd', 57: 'channel-f', 58: 'fmtowns', 61: 'ngage', 62: '3ds',
             63: 'supervision', 66: 'thomson-to', 67: 'pc-6001', 76: 'turbografx-cd', 77: 'jaguar'
@@ -168,19 +168,20 @@ function getConsoles() {
     // if the setRequestlist page wasn't loaded, we get the consoles from the drop down menu
     if (allConsoles.length == 0) {
         const dropdown = document.querySelector('div.dropdown > button[title="Games"] ~ div.dropdown-menu');
-        dropdown.querySelectorAll('a.dropdown-item[href*="gameList.php?c="]').forEach(item => {
-            const id = parseInt(item.href.split('=').at(-1));
+        dropdown.querySelectorAll('a.dropdown-item[href*="/system/"]').forEach(item => {
+            const id = parseInt(item.href.split('/').at(-2));
             allConsoles[id] = item.innerText.trim().split('/')[0];
         });
     }
     return allConsoles;
 }
 
-function executeTemplate(template, consoleName, consoleLongName, gameName) {
+function executeTemplate(template, consoleName, gameName) {
     const escapedUrl = template.replaceAll(/[`=;\\]/g, '\\$&');
+    // consoleLongName is kept for retro-compatibility
     // <=> eval(`"use strict";\`${escapedUrl}\``);
     const urlFunction = Function('consoleName', 'consoleLongName', 'gameName', `"use strict";return \`${escapedUrl}\`;`);
-    return urlFunction(consoleName, consoleLongName, encodeURIComponent(gameName));
+    return urlFunction(consoleName, consoleName, encodeURIComponent(gameName));
 }
 
 function setVisible(element, visible) {
@@ -198,14 +199,14 @@ const settingsDivHtml = `<div class="component">
 			<tr>
 				<td><div class="flex">
 					<select id="grSearchSelect"></select>
-                    <span id="grSearchAdd" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="New empty search">
+                    <span id="grSearchAdd" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new empty search">
                     	<img style="width: 1.1em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAZCAYAAAA8CX6UAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAB7SURBVEhL7ZTRCoAgDEW1r4j6/0+rPsPuNqmR4Zy99OCBixPkOBUMIDkyI69EJAGZVYiRljIrskt5M+WxibzhhhSduUSKA1mkFNwidQ3U2SXr6ohk6pgsc132c516AK6aRTWaRTVok95XKxgimyGyGSKb/4n4P5LyCyGcQrkwJuTlwmgAAAAASUVORK5CYII" />
                     </span>
-                    <span id="grSearchClone" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="New search based on the current one">
+                    <span id="grSearchClone" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new search based on the current one">
                     	<img style="width: 1.6em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAADNSURBVEhL3ZIBCsMgDEV1d2jZ/S832A7R5ds40tTqtxYGffAx0MSfpAaShdRTtCPq2WIRNCwT4++qWfRZw5WHnpegjbxFm4lYE3bibPQSTQgATPI+W6LxE6HD6r7NrnNxEeT571o7Uyb4ns2Ocm0zHtokx6CW70FNlwmodQz8XcjvfsL2EsReJSiTNLJRL811HQEzpg55u0lsx1YjDE1Swt+VmpTztAlTh7zu13WG/5ikHRY0wn3+yegTTvUIalxh0uQ+T5jaaQViXSF8AV7KhUyGTd36AAAAAElFTkSuQmCC" />
                     </span>
 				</div></td>
-				<td><label><input id="grSearchActive" type="checkbox">active</label></td>
+				<td><label><input id="grSearchActive" type="checkbox"> active</label></td>
 				<td>
 					<div id="grSearchDown" class="icon clickable" title="move search down in the list">🔽</div><div id="grSearchUp" class="icon clickable" title="move search up in the list">🔼</div>
 					<div id="grSearchSave" class="icon clickable" title="save current Search">💾</div>
@@ -221,7 +222,7 @@ const settingsDivHtml = `<div class="component">
 				<td>Url pattern</td>
 				<td colspan="2">
 					<input id="grSearchURL" type="text" style="width: 95%;" placeholder="url">
-					<div class="icon" title="placeholders: \${gameName}, \${consoleName}, \${consoleLongName} (from top menu)" style="cursor: help;">💡</div>
+					<div class="icon" title="placeholders: \${gameName}, \${consoleName}" style="cursor: help;">💡</div>
 				</td>
 			</tr>
 			<tr>
@@ -496,15 +497,12 @@ function gamePage() {
     const navpath = document.querySelector('div.navpath');
     if (!navpath) return; // hubs
     const navbarConsoleName = navpath.children[1].innerText.trim().split('/')[0];
-    const consoleId = parseInt(navpath.children[1].href.split('=').at(-1));
+    const consoleId = parseInt(navpath.children[1].href.split('/').at(-2));
     if (consoleId == 101) return; // Events
     const gameName = navpath.children[2].innerText.split('|')[0].trim();
     if (!gameName || ! navbarConsoleName || !consoleId) return;
     const tags = [...document.querySelectorAll('h1 span.tag span:first-child')].map(span => span.innerText.trim());
     if (tags.length == 0) tags.push('none');
-
-    const consoleNames = getConsoles();
-    const menuConsoleName = consoleNames[consoleId];
 
     // Add HTML elements
     const listItem = newElement('li', document.querySelector('aside > div.component> ul'), 'flex mb-2');
@@ -534,8 +532,7 @@ function gamePage() {
     const updateLink = () => {
         const search = Settings.searches[searchSelect.selectedOptions[0].value];
         const consoleName = search.consoleNames?.[consoleId] ?? navbarConsoleName;
-        const consoleLongName = search.consoleNames?.[consoleId] ?? menuConsoleName ?? navbarConsoleName;
-        searchLink.href = executeTemplate(search.url, consoleName, consoleLongName, gameName);
+        searchLink.href = executeTemplate(search.url, consoleName, gameName);
     }
     updateLink();
     searchSelect.addEventListener('change', updateLink);
