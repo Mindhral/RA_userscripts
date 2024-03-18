@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -157,25 +157,30 @@ const sortBlockHTML = `<div class="my-4">
 <div class="embedded p-4 w-full"><div class="grid sm:flex sm:divide-x-2 divide-embed-highlight">
   <div class="grid gap-y-1 sm:pr-[40px]">
     <label class="font-bold text-xs">Sort by</label>
-    <span class="text-2xs">
+    <div>
       <select id="sortSelect"></select>
-      <label><input id="descSort" type="checkbox"> Reverse</label>
-    </span>
+      <label class="text-2xs"><input id="descSort" type="checkbox"> Reverse</label>
+    </div>
   </div>
   <div class="grid gap-y-1 sm:px-4">
     <div class="flex">
       <label class="font-bold text-xs">Console</label>
       <label id="groupConsolesLabel" title="Group tables by console (reloads the page)" class="text-2xs" style="margin-left: 2em;"> Group 🔄</label>
     </div>
-    <select id="consoleSelect"><option value="all">All</option></select>
+    <div>
+      <select id="consoleSelect"><option value="all">All</option></select>
+    </div>
   </div>
   <div class="grid gap-y-1 sm:px-4">
     <label class="font-bold text-xs">Tag</label>
-    <select id="tagSelect"><option value="all">All</option></select>
+    <div>
+      <select id="tagSelect"><option value="all">All</option></select>
+      <select id="tagsMSelect" multiple class="hidden" style="vertical-align: top;" title="Ctrl+click or Shift+click for multiple selection"></select>
+    </div>
   </div>
   <div class="grid gap-y-1 sm:px-4">
     <label class="font-bold text-xs">Status</label>
-    <div class="flex">
+    <div>
       <select id="statusSelect1"></select>
 	  <select id="statusSelect2"></select>
     </div>
@@ -253,7 +258,7 @@ function setHasCheevosParam(value) {
 const defaultFilters = {
     "sort": "original",
     "reverse": false,
-    "tag": "all",
+    "tags": [],
     "status1": "all",
     "status2": "all"
 };
@@ -371,7 +376,12 @@ function customize() {
         }
     }
     const tagSelect = document.getElementById('tagSelect');
-    [...new Set(gameTables.flatMap(t => t.rowsData.flatMap(r => r.tags)))].sort().forEach(tag => createOption(tag, tag, tagSelect));
+    const tagsMSelect = document.getElementById('tagsMSelect');
+    [...new Set(gameTables.flatMap(t => t.rowsData.flatMap(r => r.tags)))].sort().forEach(tag => {
+        createOption(tag, tag, tagSelect);
+        createOption(tag, tag, tagsMSelect);
+    });
+    createOption('multiple', 'Multiple...', tagSelect, 'Multiple selection');
     const statusSelect1 = document.getElementById('statusSelect1');
     for (const [name, status] of Object.entries(Status1)) {
         createOption(name, status.label, statusSelect1, status.title);
@@ -487,10 +497,26 @@ function customize() {
         }
         checkVisibilities();
     });
-    let selectedTag = 'all';
-    visibilityFunctions.push(row => selectedTag === 'all' || row.tags.includes(selectedTag));
+    let selectedTags = [];
+    visibilityFunctions.push(row => selectedTags.length == 0 || selectedTags.some(tag => row.tags.includes(tag)));
     tagSelect.addEventListener('change', () => {
-        selectedTag = tagSelect.selectedOptions[0].value;
+        const selectedValue = tagSelect.selectedOptions[0].value;
+        if (selectedValue == 'multiple') {
+            tagsMSelect.classList.remove('hidden');
+        } else {
+            tagsMSelect.classList.add('hidden');
+            if (selectedValue == 'all') {
+                selectedTags = [];
+                [...tagsMSelect.options].forEach(o => { o.selected = true; });
+            } else {
+                selectedTags = [selectedValue];
+                tagsMSelect.selectedIndex = tagSelect.selectedIndex - 1;
+            }
+            checkVisibilities();
+        }
+    });
+    tagsMSelect.addEventListener('change', () => {
+        selectedTags = [...tagsMSelect.selectedOptions].map(t => t.value);
         checkVisibilities();
     });
     let selectedStatus1 = Status1.all;
@@ -513,11 +539,11 @@ function customize() {
         const res = {
             sort: sortSelect.selectedOptions[0].value,
             reverse: descCheckbox.checked,
-            tag: tagSelect.selectedOptions[0].value,
+            tags: selectedTags,
             status1: statusSelect1.selectedOptions[0].value,
             status2: statusSelect2.selectedOptions[0].value
         };
-        if (consoleSelect.closest('body')) res.console = consoleSelect.selectedOptions[0].value;
+        if (consoleSelect.closest('body')) res.console = selectedConsole;
         return res;
     };
 
@@ -589,11 +615,17 @@ function customize() {
             selectedConsole = filters.console;
             select(consoleSelect, filters.console);
         }
-        selectedTag = filters.tag;
-        select(tagSelect, filters.tag);
-        selectedStatus1 = Status1[filters.status1];
+        filters.tags ??= [filters.tag]; // compatibility with previous version
+        if (filters.tags.length == 0) {
+            select(tagSelect, 'all');
+        } else if (filters.tags.length == 1) {
+            select(tagSelect, filters.tags[0]);
+        } else {
+            select(tagSelect, 'multiple');
+            [...tagsMSelect.options].forEach(opt => { opt.selected = filters.tags.includes(opt.value); } );
+            tagsMSelect.dispatchEvent(new Event('change'));
+        }
         select(statusSelect1, filters.status1);
-        selectedStatus2 = Status2[filters.status2];
         select(statusSelect2, filters.status2);
         updateSort();
     };
