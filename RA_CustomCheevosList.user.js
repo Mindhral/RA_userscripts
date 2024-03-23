@@ -34,6 +34,14 @@ function getElementByXpath(root, xpath) {
   return document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 }
 
+// Handling "Beaten Game Credit" modals when they are loaded (one per button)
+function handleBeatenModal(nodeCallback) {
+    const newNodesCallback = records => records.forEach(record => nodeCallback(record.target));
+    const newNodesObserver = new MutationObserver(newNodesCallback);
+    const newNodesConfig = { childList: true };
+    document.querySelectorAll('body div[x-html="dynamicHtmlContent"]').forEach(div => newNodesObserver.observe(div, newNodesConfig));
+}
+
 const settingsHtml = `<div class="component">
   <h4>Achievements list customization</h4>
   <table class="table-highlight"><tbody>
@@ -66,6 +74,7 @@ const settingsHtml = `<div class="component">
         <label title="Unlocked badge"><input type="radio" name="mouseoverLocked" value="colored"> colored</label>
       </td>
     </tr>
+    <tr><th colspan="2"><label><input id="filterBeatenCreditListActive" type="checkbox"> Beaten Game Credit Filter</label></th></tr>
   </tbody></table>
 </div>`;
 
@@ -584,13 +593,116 @@ const CustomLockedBadges = (() => {
         };
         [...document.getElementsByClassName('badgeimg')].forEach(ProcessImage);
 
-        // handling "Beaten Game Credit" modals (one per button)
-        const newNodesCallback = records => records.forEach(record => {
-            [...record.target.getElementsByClassName('badgeimg')].forEach(ProcessImage);
+        handleBeatenModal(node => [...node.getElementsByClassName('badgeimg')].forEach(ProcessImage));
+    }
+
+    return { gamePage, settingsPage };
+})();
+
+const FilterBeatenCreditList = (() => {
+    const DefaultSettings = {
+        active: true
+    };
+
+    const Settings = loadSettings('filterBeatenCreditList', DefaultSettings);
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('filterBeatenCreditListActive');
+        activeCheckbox.checked = Settings.active;
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            GM_setValue('filterBeatenCreditList', Settings);
         });
-        const newNodesObserver = new MutationObserver(newNodesCallback);
-        const newNodesConfig = { childList: true };
-        document.querySelectorAll('body div[x-html="dynamicHtmlContent"]').forEach(div => newNodesObserver.observe(div, newNodesConfig));
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+        // used to sync filters on all modals
+        const changeCallbacks = [];
+        let onlyRemaining = false;
+        let forHardcore = false;
+        const setParams = (mainCheck, hcCheck) => {
+            onlyRemaining = mainCheck;
+            forHardcore = hcCheck;
+            changeCallbacks.forEach(callback => callback());
+        }
+
+        handleBeatenModal(node => {
+            const mainDiv = node.firstElementChild;
+            if (!mainDiv || mainDiv.children.length < 3) return;
+            const elements = [...mainDiv.children];
+            const isUnlocked = e => e.querySelector('li.unlocked-row') != null;
+            const isUnlockedHc = e => e.querySelector('img.goldimagebig') != null;
+            if (!elements.some(isUnlocked)) return;
+
+            // identify progression and win elements
+            let progressionTitle;
+            const progressionItems = [];
+            let winTitle;
+            const winItems = [];
+            let index = 1;
+            if (elements[1].innerText.includes("ALL of these")) {
+                progressionTitle = elements[1];
+                while (elements[++index]?.matches('ul')) progressionItems.push(elements[index]);
+            }
+            if (index < elements.length) {
+                winTitle = elements[index];
+                while (++index < elements.length) winItems.push(elements[index]);
+            }
+
+            // add new DOM nodes
+            const [mainCheckbox, hcCheckbox] = (() => {
+                const textDiv = mainDiv.firstElementChild;
+                const newDiv = document.createElement('div');
+                textDiv.append(newDiv);
+                textDiv.classList.remove('mb-6');
+                textDiv.classList.add('mb-4');
+                newDiv.classList.add('flex');
+
+                const label = document.createElement('label');
+                newDiv.append(label);
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                label.append(checkbox, ' Only show remaining');
+                const unlockedHcCount = elements.filter(isUnlockedHc).length;
+                let hcCheckbox;
+                if (unlockedHcCount > 0 && unlockedHcCount != elements.filter(isUnlocked).length) {
+                    const hcLabel = document.createElement('label');
+                    newDiv.append(hcLabel);
+                    hcCheckbox = document.createElement('input');
+                    hcCheckbox.type = 'checkbox';
+                    hcLabel.append(hcCheckbox, ' for hardcore');
+                    hcLabel.style['margin-left'] = '1em';
+                }
+                return [checkbox, hcCheckbox];
+            })();
+
+            // filter behavior
+            const filter = () => {
+                mainCheckbox.checked = onlyRemaining;
+                if (hcCheckbox) hcCheckbox.checked = forHardcore;
+                elements.forEach(e => e.classList.remove('hidden'));
+                if (!onlyRemaining) {
+                    return;
+                }
+                const unlockedTest = forHardcore ? isUnlockedHc : isUnlocked;
+                const hide = e => e.classList.add('hidden');
+                if (progressionTitle) {
+                    const unlockedProgr = progressionItems.filter(unlockedTest);
+                    if (unlockedProgr.length == progressionItems.length) hide(progressionTitle);
+                    unlockedProgr.forEach(hide);
+                }
+                if (winItems.some(unlockedTest)) {
+                    hide(winTitle);
+                    winItems.forEach(hide);
+                }
+            };
+            changeCallbacks.push(filter);
+            filter();
+
+            mainCheckbox.addEventListener('change', () => setParams(mainCheckbox.checked, hcCheckbox?.checked));
+            hcCheckbox?.addEventListener('change', () => setParams(hcCheckbox.checked || mainCheckbox.checked, hcCheckbox.checked));
+        });
     }
 
     return { gamePage, settingsPage };
@@ -603,6 +715,7 @@ const Pages = {
         LinkUnofficalAchievements.gamePage();
         CollapseAchievementsList.gamePage();
         CustomLockedBadges.gamePage();
+        FilterBeatenCreditList.gamePage();
     },
     achievement: () => {
         CustomLockedBadges.gamePage();
@@ -619,6 +732,7 @@ const Pages = {
         LinkUnofficalAchievements.settingsPage();
         CollapseAchievementsList.settingsPage();
         CustomLockedBadges.settingsPage();
+        FilterBeatenCreditList.settingsPage();
     }
 };
 

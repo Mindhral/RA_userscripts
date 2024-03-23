@@ -136,6 +136,12 @@ Both behaviors can be selected on settings page. Some combinations are disabled,
 
 ![Custom locked badge settings](/assets/CustomLocked_settings.png)
 
+### Beaten Game Credit Filter
+
+Adds a filter on *Beaten Game Credit* widgets to only show remaining achievements (not unlocked). If some achievements were unlocked in both modes (softcore and hardcore), a checkbox is available to only hide achievements obtained in hardcore.
+
+![beaten game credit filter none](/assets/BeatenGameFilter_none.png) ![beaten game credit filter remaining](/assets/BeatenGameFilter_remaining.png) ![beaten game credit filter remaining hardcore](/assets/BeatenGameFilter_remaining_hc.png)
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.
