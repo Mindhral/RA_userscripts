@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.0
+// @version      1.1
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -102,6 +102,17 @@ const EnhancedCheevosSort = (() => {
             extractInfo: r1 => { r1.title = r1.element.querySelector('div > a.inline').innerText },
             compare: (r1, r2) => r1.title.localeCompare(r2.title)
         },
+        'type': {
+            label: 'Type',
+            extractInfo: (() => {
+                const order = { 'Progression': 0, 'Win Condition': 1, 'Missable': 2 };
+                return r => { r.type = order[r.element.querySelector('button div[aria-label]')?.ariaLabel] ?? 3 };
+            })(),
+            compare: (r1, r2) => {
+                const comp = r1.type - r2.type;
+                return comp == 0 ? r1.index - r2.index : comp;
+            }
+        },
         'unlock-date': {
             label: 'Unlock date',
             extractInfo: r => {
@@ -188,7 +199,7 @@ const EnhancedCheevosSort = (() => {
         rowInfos.forEach(rowInfo => {
             rowInfo.unlocked = rowInfo.element.classList.contains('unlocked-row');
             rowInfo.hcUnlocked = rowInfo.element.getElementsByClassName('goldimagebig').length > 0;
-        })
+        });
 
         let mainCompare, groupCompare = Compares.allEqual;
 
@@ -597,8 +608,7 @@ const Pages = {
         CustomLockedBadges.gamePage();
     },
     controlpanel: () => {
-        const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-        const settingsDiv = xpathRes.iterateNext();
+        const settingsDiv = getElementByXpath(document, '//div[h3[text()="Settings"]]');
         if (!settingsDiv) return;
         const mainDiv = document.createElement('div');
         settingsDiv.insertAdjacentElement('afterend', mainDiv);
