@@ -142,6 +142,16 @@ Adds a filter on *Beaten Game Credit* widgets to only show remaining achievement
 
 ![beaten game credit filter none](/assets/BeatenGameFilter_none.png) ![beaten game credit filter remaining](/assets/BeatenGameFilter_remaining.png) ![beaten game credit filter remaining hardcore](/assets/BeatenGameFilter_remaining_hc.png)
 
+### Links to User's History
+
+Replaces the dates on achievements unlocks by links to the user's history for that date.
+
+![history links](/assets/CustomCheevosList_historyLinks.png)
+
+The style of the link can be edited in the settings.
+
+![history links settings](/assets/CustomCheevosList_historyLinks_settings.png) ![history links style example](/assets/CustomCheevosList_historyLinks_style.png)
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.

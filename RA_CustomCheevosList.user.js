@@ -31,7 +31,15 @@ function setRowVisibility(element, visible) {
 }
 
 function getElementByXpath(root, xpath) {
-  return document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    return document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
+
+function getElementsByXpath(root, xpath) {
+    const results = document.evaluate(xpath, root, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const nodes = [];
+    let node;
+    while (node = results.iterateNext()) nodes.push(node);
+    return nodes;
 }
 
 // Handling "Beaten Game Credit" modals when they are loaded (one per button)
@@ -75,6 +83,11 @@ const settingsHtml = `<div class="component">
       </td>
     </tr>
     <tr><th colspan="2"><label><input id="filterBeatenCreditListActive" type="checkbox"> Beaten Game Credit Filter</label></th></tr>
+    <tr><th colspan="2"><label><input id="historyLinksActive" type="checkbox"> Links to User's History</label></th></tr>
+    <tr>
+      <td>Link CSS style</td>
+      <td><input id="historyLinksStyle" type="text"> <div id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</div></td>
+    </tr>
   </tbody></table>
 </div>`;
 
@@ -457,7 +470,7 @@ const CollapseAchievementsList = (() => {
         activeCheckbox.addEventListener('change', () => {
             Settings.active = activeCheckbox.checked;
             setRowVisibility(collapseOnLoadRadios[0], Settings.active);
-            saveSettings()
+            saveSettings();
         });
         activeCheckbox.dispatchEvent(new Event('change'));
 
@@ -708,6 +721,62 @@ const FilterBeatenCreditList = (() => {
     return { gamePage, settingsPage };
 })();
 
+const HistoryLinks = (() => {
+    const DefaultSettings = {
+        active: false,
+        style:''
+    };
+
+    const Settings = loadSettings('historyLinks', DefaultSettings);
+
+    function saveSettings() {
+        GM_setValue('historyLinks', Settings);
+    }
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('historyLinksActive');
+        activeCheckbox.checked = Settings.active;
+        const historyLinksStyleText = document.getElementById('historyLinksStyle');
+        historyLinksStyleText.value = Settings.style;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(historyLinksStyleText, Settings.active);
+            saveSettings();
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+        historyLinksStyleText.addEventListener('change', () => {
+            Settings.style = historyLinksStyleText.value.trim();
+            saveSettings();
+        });
+        document.getElementById('historyLinksStyleExample').addEventListener('click', () => {
+            historyLinksStyleText.value = 'color: inherit;text-decoration: underline;';
+            historyLinksStyleText.dispatchEvent(new Event('change'));
+        });
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+        const achievementsList = document.getElementById('set-achievements-list');
+        if (achievementsList == null) return;
+        const currentUser = document.querySelector('div.dropdown-menu-right div.dropdown-header')?.textContent;
+        if (!currentUser) return;
+        getElementsByXpath(achievementsList, '//p[contains(text(), "Unlocked")]').forEach(p => {
+            p.innerHTML = p.innerText.replace(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/, (fullMatch, date) => {
+                const timestamp = new Date(date + ' UTC').getTime() / 1000;
+                return `Unlocked <a class="historyLink" href="/historyexamine.php?d=${timestamp}&amp;u=${currentUser}">${date}</a>`;
+            });
+        });
+        if (Settings.style?.length > 0) {
+            const styleBlock = document.createElement('style');
+            styleBlock.innerHTML = `.historyLink { ${Settings.style }`;
+            document.head.appendChild(styleBlock);
+        }
+    }
+
+    return { gamePage, settingsPage };
+})();
+
 const Pages = {
     game: () => {
         EnhancedCheevosSort.gamePage();
@@ -716,6 +785,7 @@ const Pages = {
         CollapseAchievementsList.gamePage();
         CustomLockedBadges.gamePage();
         FilterBeatenCreditList.gamePage();
+        HistoryLinks.gamePage();
     },
     achievement: () => {
         CustomLockedBadges.gamePage();
@@ -733,6 +803,7 @@ const Pages = {
         CollapseAchievementsList.settingsPage();
         CustomLockedBadges.settingsPage();
         FilterBeatenCreditList.settingsPage();
+        HistoryLinks.settingsPage();
     }
 };
 
