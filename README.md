@@ -126,7 +126,7 @@ Adds a collapse button above the achievements list, allowing to get faster to th
 
 A setting allows to choose whether to collapse the list on page load or not (never, always, remember the last state).
 
-### Custom Locked Badge
+### Custom Locked Badges
 
 Allows to replace black and white version of locked achievement badges by the colored version, or by a generic spoiler-free one. It works on the achievements list on a game page, the *Beaten Game Credit* pop-up on the same page, and on the achievement page.
 
@@ -151,6 +151,12 @@ Replaces the dates on achievements unlocks by links to the user's history for th
 The style of the link can be edited in the settings.
 
 ![history links settings](/assets/CustomCheevosList_historyLinks_settings.png) ![history links style example](/assets/CustomCheevosList_historyLinks_style.png)
+
+### Link High Scores To Compare Page
+
+Adds links to Game Compare page on the scores from the high score section.
+
+![high scores links](/assets/CustomCheevosList_highScoresLinks.png)
 
 ## RA_GameListTagFilter
 

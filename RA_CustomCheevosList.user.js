@@ -65,7 +65,7 @@ const settingsHtml = `<div class="component">
         <label><input type="radio" name="collapseOnLoad" value="always"> always</label>
       </td>
     </tr>
-    <tr><th colspan="2"><label><input id="customLockedActive" type="checkbox"> Custom locked badges</label></th></tr>
+    <tr><th colspan="2"><label><input id="customLockedActive" type="checkbox"> Custom Locked Badges</label></th></tr>
     <tr>
       <td>Default</td>
       <td>
@@ -88,6 +88,7 @@ const settingsHtml = `<div class="component">
       <td>Link CSS style</td>
       <td><input id="historyLinksStyle" type="text"> <div id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</div></td>
     </tr>
+    <tr><th colspan="2"><label><input id="highScoreLinksActive" type="checkbox"> Link High Scores To Compare Page</label></th></tr>
   </tbody></table>
 </div>`;
 
@@ -777,6 +778,60 @@ const HistoryLinks = (() => {
     return { gamePage, settingsPage };
 })();
 
+const LinkHighScore2Compare = (() => {
+    const DefaultSettings = {
+        active: false
+    };
+
+    const Settings = loadSettings('highScoreLinks', DefaultSettings);
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('highScoreLinksActive');
+        activeCheckbox.checked = Settings.active;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            GM_setValue('highScoreLinks', Settings);
+        });
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+        const achievementsList = document.getElementById('set-achievements-list');
+        if (achievementsList == null) return;
+        const currentUser = document.querySelector('div.dropdown-menu-right div.dropdown-header')?.textContent;
+        if (!currentUser) return;
+        const gameId = window.location.pathname.split('/').at(-1);
+
+        const createCompareLink = (root) => {
+            const userId = root.querySelector('a').href.split('/').at(-1);
+            if (userId === currentUser) return;
+            const newLink = document.createElement('a');
+            newLink.href = `/gamecompare.php?ID=${gameId}&f=${userId}`;
+            return newLink;
+        };
+        const highscoresDiv = document.getElementById('highscores');
+        highscoresDiv.querySelectorAll('tr:not(.do-not-highlight)').forEach(tr => {
+            const scoreCell = tr.children.item(2);
+            const scoreSpan = scoreCell.firstElementChild;
+            // moving the help text and cursor from the score span to the entire cell
+            scoreCell.classList.add('cursor-help');
+            scoreSpan.classList.remove('cursor-help');
+            scoreCell.title = scoreSpan.title;
+            scoreSpan.removeAttribute('title');
+            // creating the link
+            const userId = tr.querySelector('a').href.split('/').at(-1);
+            if (userId === currentUser) return;
+            const newLink = document.createElement('a');
+            newLink.href = `/gamecompare.php?ID=${gameId}&f=${userId}`;
+            newLink.append(scoreSpan);
+            scoreCell.append(newLink);
+        });
+    }
+
+    return { gamePage, settingsPage };
+})();
+
 const Pages = {
     game: () => {
         EnhancedCheevosSort.gamePage();
@@ -786,6 +841,7 @@ const Pages = {
         CustomLockedBadges.gamePage();
         FilterBeatenCreditList.gamePage();
         HistoryLinks.gamePage();
+        LinkHighScore2Compare.gamePage();
     },
     achievement: () => {
         CustomLockedBadges.gamePage();
@@ -804,6 +860,7 @@ const Pages = {
         CustomLockedBadges.settingsPage();
         FilterBeatenCreditList.settingsPage();
         HistoryLinks.settingsPage();
+        LinkHighScore2Compare.settingsPage();
     }
 };
 
