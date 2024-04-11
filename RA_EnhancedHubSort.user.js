@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.5
+// @version      0.5.1
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -360,7 +360,7 @@ function customize() {
             const consoles = new Set(rowsData.map(r => r.console).filter(c => c.length > 0));
             if (consoles.size == 0) {
                 // system page
-                consoleSelect.parentElement.remove();
+                consoleSelect.parentElement.parentElement.remove();
             } else {
                 // hub page
                 consoleGroups.forEach(g => {
