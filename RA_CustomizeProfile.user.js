@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.2
+// @version      1.2.1
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -183,11 +183,12 @@ const MarkUnearnedAwards = (() => {
 
         const masterIds = new Set();
         const completionIds = new Set();
-        const completedRows = [...document.querySelectorAll('#usercompletedgamescomponent tr.completion-progress-completed-row')];
-        completedRows.forEach(row => {
+        const inProgressIds = new Set();
+        [...document.querySelectorAll('#usercompletedgamescomponent tr')].forEach(row => {
             const id = row.getElementsByTagName('a')[0].href.split('/').at(-1);
             if (row.querySelector('div[title="Mastered"]')) masterIds.add(id);
-            else completionIds.add(id);
+            else if (row.querySelector('div[title="Completed"]')) completionIds.add(id);
+            else inProgressIds.add(id);
         });
 
         let lastMovedBadge;
@@ -197,6 +198,8 @@ const MarkUnearnedAwards = (() => {
             if (isMaster) {
                 if (masterIds.has(id)) return;
             } else if (completionIds.has(id)) return;
+            // special case of demoted sets
+            if (!inProgressIds.has(id)) return;
 
             markFakeBadge(badge);
             if (Settings.fakeBadgesFirst == 0) return;
