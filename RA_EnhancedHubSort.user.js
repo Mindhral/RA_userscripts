@@ -315,9 +315,9 @@ function customize() {
         const retroratio = getCellAsNb(3, parseFloat);
         const leaderboards = getCellAsNb(4, parseInt);
         const players = getCellAsNb(5, parseInt);
-        const progressTitle = row.querySelector('div[role="progressbar"]')?.title
-        const hcProgress = parseInt(progressTitle?.match(/(\d+)\/\d+ \(hardcore\)/)?.[1]) / achievements || 0
-        const scProgress = parseInt(progressTitle?.match(/(\d+)\/\d+ \(softcore\)/)?.[1]) / achievements || hcProgress
+        const progressTitle = row.querySelector('div[role="progressbar"]')?.ariaLabel;
+        const hcProgress = parseInt(progressTitle?.match(/(\d+)\/\d+ \(hardcore\)/)?.[1]) / achievements || 0;
+        const scProgress = parseInt(progressTitle?.match(/(\d+)\/\d+ \(softcore\)/)?.[1]) / achievements || hcProgress;
         const status = row.querySelector('div[data-award]')?.dataset.award;
         return {id, title, console: cons, tags, achievements, points, retroratio, leaderboards, players, hcProgress, scProgress, status, element: row, visible: true};
     };
