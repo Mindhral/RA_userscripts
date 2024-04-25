@@ -33,7 +33,7 @@ This makes it easier to scroll to the next sections, and combined with lazy load
 
 Events and site awards are not affected.
 
-The number of badges and the height which trigger the scroll bar apparition can be changed in a dedicated section on *Settings* page[^1].
+The number of badges and the height which trigger the scroll bar apparition can be changed on *Settings* page[^1]. A third settings allows to use a thin scrollbar, similar to the one used on mobile displays, on desktop browsers. The thin scrollbar is not supported on all browsers and can be harder to use with the mouse which is why it's inactive by default.
 
 ![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
 

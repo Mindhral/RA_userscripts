@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.2.1
+// @version      1.3
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -55,6 +55,7 @@ const settingsHtml = `<div class="component">
     <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
     <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
     <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
+    <tr><td>Thin scrollbar</td><td><input id="scrollAwardsThinBar" type="checkbox"></td></tr>
   </tbody></table>
   <table class="table-highlight"><tbody>
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
@@ -264,7 +265,8 @@ const ScrollAwards = (() => {
     const DefaultSettings = {
         active: true,
         minGameCount:  100,
-        maxHeight: 75 // unit: em
+        maxHeight: 75, // unit: em
+        thinScrollbar: false
     };
 
     const Settings = loadSettings('scrollAwards', DefaultSettings);
@@ -278,14 +280,16 @@ const ScrollAwards = (() => {
         activeCheckbox.checked = Settings.active;
         const minGamesInput = document.getElementById('scrollAwardsMinGames');
         minGamesInput.value = Settings.minGameCount;
-
         const maxHeightInput = document.getElementById('scrollAwardsMaxHeight');
         maxHeightInput.value = Settings.maxHeight;
+        const thinScrollBarCheckbox = document.getElementById('scrollAwardsThinBar');
+        thinScrollBarCheckbox.checked = Settings.thinScrollbar;
 
         activeCheckbox.addEventListener('change', () => {
             Settings.active = activeCheckbox.checked;
             setRowVisibility(minGamesInput, Settings.active);
             setRowVisibility(maxHeightInput, Settings.active);
+            setRowVisibility(thinScrollBarCheckbox, Settings.active);
             saveSettings();
         });
         activeCheckbox.dispatchEvent(new Event('change'));
@@ -299,6 +303,10 @@ const ScrollAwards = (() => {
             Settings.maxHeight = parseInt(maxHeightInput.value);
             saveSettings();
         });
+        thinScrollBarCheckbox.addEventListener('change', () => {
+            Settings.thinScrollbar = thinScrollBarCheckbox.checked;
+            saveSettings();
+        });
     }
 
     function profilePage() {
@@ -309,6 +317,7 @@ const ScrollAwards = (() => {
         awardsDiv.style['overflow-y'] = 'auto';
         awardsDiv.style['max-height'] = Settings.maxHeight + 'em';
         awardsDiv.style['align-content'] = 'normal';
+        if (Settings.thinScrollbar) awardsDiv.style['scrollbar-width'] = 'thin';
         if (window.matchMedia('(min-width: 1280px)').matches) {
             // do nothing anymore
         } else if (window.matchMedia('(min-width: 1024px)').matches) {
