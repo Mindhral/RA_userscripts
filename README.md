@@ -177,6 +177,20 @@ Hardcore data uses the hardcore unlocks, but also the hardcore players count as 
 
 Progress bars are not modified (except for the mouseover text), and the achievements page is not supported by this feature at the moment.
 
+### Custom Leaderboards Scrolling
+
+Modifies the scrolling of the leaderboards list found on a game, achievement or leaderboard pages.
+
+![custom leaderboards scrolling settings](/assets/CustomLBScroll_settings.png)
+
+1. The maximum height of the list can be changed with 2 parameters: one for game pages, and one for achievement and leaderboard pages.
+2. A thin scrollbar can be used instead of the default one. See [Scrollable Game Awards](#scrollable-game-awards) for more information on thin scrollbars.
+3. On a leaderboard page, the current leaderboard is highlighted in the list.
+
+![custom leaderboards scrolling highlight](/assets/CustomLBScroll_highlight.png)
+
+4. On a leaderboard page, a parameter allows to scroll to the current leaderboard on page load.
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.

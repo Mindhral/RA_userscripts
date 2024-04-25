@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.2
+// @version      1.3
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/achievement/*
+// @match        https://retroachievements.org/leaderboardinfo.php*
 // @match        https://retroachievements.org/controlpanel.php*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -107,6 +108,23 @@ const settingsHtml = `<div class="component">
         <label title="Total unlocks displayed, hardcore on the bar's mouseover"><input type="radio" name="unlockCountData" value="total"> total</label>
         <label title="Both displayed in parallel"><input type="radio" name="unlockCountData" value="both"> both</label>
       </td>
+    </tr>
+    <tr><th colspan="2"><label><input id="scrollableLBsActive" type="checkbox"> Custom Leaderboards Scrolling</label></th></tr>
+    <tr>
+      <td>Max height on game page</td>
+      <td><input id="scrollableLBsGameMaxHeight" type="number" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span> <span class="icon" title="0 or negative to ignore" style="cursor: help;">💡</span></td>
+    </tr>
+    <tr>
+      <td>Max height on other pages</td>
+      <td><input id="scrollableLBsDefMaxHeight" type="number" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td>
+    </tr>
+    <tr>
+      <td>Thin scrollbar</td>
+      <td><input id="scrollableLBsThinBar" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td>Auto scroll to current LB</td>
+      <td><input id="scrollableLBsAutoScroll" type="checkbox"></td>
     </tr>
   </tbody></table>
 </div>`;
@@ -983,6 +1001,98 @@ const CustomUnlockCounts = (() => {
     return { gamePage, settingsPage };
 })();
 
+const ScrollableLeaderboards = (() => {
+    const DefaultSettings = {
+        active: false,
+        gamePageMaxHeight: 95,
+        defaultMaxHeight: 70,
+        thinScrollbar: false,
+        autoScroll: true
+    };
+
+    const Settings = loadSettings('scrollableLeaderboards', DefaultSettings);
+
+    function saveSettings() {
+        GM_setValue('scrollableLeaderboards', Settings);
+    }
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('scrollableLBsActive');
+        activeCheckbox.checked = Settings.active;
+        const gamePageMaxHeightText = document.getElementById('scrollableLBsGameMaxHeight');
+        gamePageMaxHeightText.value = Settings.gamePageMaxHeight;
+        const defaultPageMaxHeightText = document.getElementById('scrollableLBsDefMaxHeight');
+        defaultPageMaxHeightText.value = Settings.defaultMaxHeight;
+        const thinScrollBarCheckbox = document.getElementById('scrollableLBsThinBar');
+        thinScrollBarCheckbox.checked = Settings.thinScrollbar;
+        const autoScrollCheckbox = document.getElementById('scrollableLBsAutoScroll');
+        autoScrollCheckbox.checked = Settings.autoScroll;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(gamePageMaxHeightText, Settings.active);
+            setRowVisibility(defaultPageMaxHeightText, Settings.active);
+            setRowVisibility(thinScrollBarCheckbox, Settings.active);
+            setRowVisibility(autoScrollCheckbox, Settings.active);
+            saveSettings();
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+        gamePageMaxHeightText.addEventListener('change', () => {
+            if (!gamePageMaxHeightText.reportValidity()) return;
+            Settings.gamePageMaxHeight = parseInt(gamePageMaxHeightText.value);
+            saveSettings();
+        });
+        defaultPageMaxHeightText.addEventListener('change', () => {
+            if (!defaultPageMaxHeightText.reportValidity()) return;
+            Settings.defaultMaxHeight = parseInt(defaultPageMaxHeightText.value);
+            saveSettings();
+        });
+        thinScrollBarCheckbox.addEventListener('change', () => {
+            Settings.thinScrollbar = thinScrollBarCheckbox.checked;
+            saveSettings();
+        });
+        autoScrollCheckbox.addEventListener('change', () => {
+            Settings.autoScroll = autoScrollCheckbox.checked;
+            saveSettings();
+        });
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+
+        const lbTitle = getElementByXpath(document, '//aside//h2[text()="Leaderboards"]');
+        if (!lbTitle) return;
+
+        const pathname = window.location.pathname;
+        const maxHeight = pathname.startsWith('/game') ? Settings.gamePageMaxHeight : Settings.defaultMaxHeight;
+        if (maxHeight <= 0) return;
+
+        addStyleBlock(`.lb-list { overflow-y: auto; max-height: ${maxHeight}em; scrollbar-width: ${Settings.thinScrollbar ? 'thin' : 'auto'}; scroll-snap-type: y mandatory; }
+        .lb-list > div { scroll-snap-align: start; }`);
+
+        const lbDiv = lbTitle.nextElementSibling;
+        if (!lbDiv) return;
+        lbDiv.classList.remove('max-h-[980px]');
+        lbDiv.classList.add('lb-list');
+
+        if (pathname.startsWith('/leaderboardinfo')) {
+            const selector = 'a[href$="' + window.location.search + '"]';
+            const currentLbIndex = [...lbDiv.children].findIndex(e => e.querySelector(selector));
+            if (currentLbIndex > -1) {
+                const currentLBDiv = lbDiv.children.item(currentLbIndex);
+                currentLBDiv.style['border-color'] = 'var(--text-color)';
+                if (Settings.autoScroll && currentLbIndex > 2) {
+                    const topDiv = lbDiv.children.item(currentLbIndex - 2);
+                    topDiv.scrollIntoView();
+                    scroll(0,0); // workaround to have the main viewport stay on top
+                }
+            }
+        }
+    }
+
+    return { gamePage, settingsPage };
+})();
+
 const Pages = {
     game: () => {
         EnhancedCheevosSort.gamePage();
@@ -994,9 +1104,14 @@ const Pages = {
         HistoryLinks.gamePage();
         LinkHighScore2Compare.gamePage();
         CustomUnlockCounts.gamePage();
+        ScrollableLeaderboards.gamePage();
     },
     achievement: () => {
         CustomLockedBadges.gamePage();
+        ScrollableLeaderboards.gamePage();
+    },
+    leaderboardinfo: () => {
+        ScrollableLeaderboards.gamePage();
     },
     controlpanel: () => {
         const settingsDiv = getElementByXpath(document, '//div[h3[text()="Settings"]]');
@@ -1014,6 +1129,7 @@ const Pages = {
         HistoryLinks.settingsPage();
         LinkHighScore2Compare.settingsPage();
         CustomUnlockCounts.settingsPage();
+        ScrollableLeaderboards.settingsPage();
     }
 };
 
