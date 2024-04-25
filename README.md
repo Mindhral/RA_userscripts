@@ -245,6 +245,8 @@ Allows to do some automatic sorting on *Reorder Site Awards* page.
 
 ![move awards group](/assets/ReorderAwardsHelper_groups.png) ![move awards group](/assets/ReorderAwardsHelper_tags_multi.png)
 
+3. Select or unselect all raws for the *Hide* feature with the checkbox next to the corresponding header
+
 To use a multi-criteria sorting, apply the different options in "reverse order". For example, to obtain the following result, where each section is ordered by title:
 
 ![sort awards example](/assets/ReorderAwardsHelper_example.png)

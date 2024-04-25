@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_ReorderAwardsHelper
 // @namespace    RA
-// @version      0.2
+// @version      0.3
 // @description  Allows to sort game awards automatically on Reorder Site Awards page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -69,7 +69,7 @@ const createButton = (label, parent) => {
     return button;
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+function addSortBar() {
     const awardsTable = document.getElementById('game-reorder-table');
     if (awardsTable == null) return;
     const awardsRows = awardsTable.getElementsByClassName('award-table-row');
@@ -163,4 +163,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const getGroupCompare = () => Compares.comparing(getGroupFilter());
     groupFirstButton.addEventListener('click', () => sortRows(Compares.reverse(getGroupCompare())));
     groupLastButton.addEventListener('click', () => sortRows(getGroupCompare()));
+}
+
+function addHideAllChecks() {
+    document.querySelectorAll('article > table').forEach(table => {
+        const hiddenHeader = [...table.querySelectorAll('thead th')].filter(cell => cell.innerText === 'Hidden')[0];
+        const hideAllCheck = document.createElement('input');
+        hideAllCheck.type = 'checkbox';
+        hiddenHeader.append(' ', hideAllCheck);
+        hideAllCheck.addEventListener('change', () => {
+            table.querySelectorAll('tbody input[type="checkbox"]').forEach((c => {
+                c.checked = hideAllCheck.checked;
+                c.dispatchEvent(new Event('change'));
+            }));
+        });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    addSortBar();
+    addHideAllChecks();
 });
