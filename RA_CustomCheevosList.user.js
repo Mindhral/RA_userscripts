@@ -50,6 +50,12 @@ function handleBeatenModal(nodeCallback) {
     document.querySelectorAll('body div[x-html="dynamicHtmlContent"]').forEach(div => newNodesObserver.observe(div, newNodesConfig));
 }
 
+function addStyleBlock(content) {
+    const styleBlock = document.createElement('style');
+    styleBlock.innerHTML = content;
+    document.head.appendChild(styleBlock);
+}
+
 const settingsHtml = `<div class="component">
   <h4>Achievements list customization</h4>
   <table class="table-highlight"><tbody>
@@ -379,9 +385,7 @@ const EnhancedCheevosFilters = (() => {
                 }
             });
 
-            const styleBlock = document.createElement('style');
-            styleBlock.innerHTML = '.hide-unlock .unlocked-row, .hide-hc-unlocks .hc-unlocked-row { display:none; }';
-            document.head.appendChild(styleBlock);
+            addStyleBlock('.hide-unlock .unlocked-row, .hide-hc-unlocks .hc-unlocked-row { display:none; }');
 
             let currentHidingClass;
             const createUnlockRadioLabel = (value, hidingClass) => {
@@ -769,9 +773,7 @@ const HistoryLinks = (() => {
             });
         });
         if (Settings.style?.length > 0) {
-            const styleBlock = document.createElement('style');
-            styleBlock.innerHTML = `.historyLink { ${Settings.style }`;
-            document.head.appendChild(styleBlock);
+            addStyleBlock(`.historyLink { ${Settings.style }`);
         }
     }
 
