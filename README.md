@@ -172,19 +172,19 @@ This script should be compatible with *RA_colorMarkGames*.
 
 ## RA_GameListRandom
 
-On game list pages (console hubs, *Want to play*, *All games*), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated.
+On game list pages (*Want to play*, *All games*), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated.
 
-Single page shuffle (console hub with achievements, *Want to play* with 50 games or less):
+Single page shuffle (*Want to play* with 50 games or less):
 
-![console shuffle](/assets/GameListRandom_console_shuffle.png)
+![console shuffle](/assets/GameListRandom_toplay_shuffle.png)
 
-When there is pagination (most console hub without achievements, *All games*, *Want to play* with more than 50 games), the *Random game* button chooses an entry, goes to its page if necessary, and isolates it:
+When there is pagination (*All games*, *Want to play* with more than 50 games), the *Random game* button chooses an entry, goes to its page if necessary, and isolates it:
 
-![console random](/assets/GameListRandom_console_random.png)
+![console random](/assets/GameListRandom_toplay_random.png)
 
 Once a game is selected, one can either redraw using the same button or display all the games on the current page again:
 
-![console selected](/assets/GameListRandom_console_selected.png)
+![console selected](/assets/GameListRandom_toplay_selected.png)
 
 This script and [RA_GameListTagFilter](#ra_gamelisttagfilter) can coexist, but using both of them at the same time will result in the second one being used "winning" and the first one getting ignored.
 
