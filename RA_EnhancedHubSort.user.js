@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.5.1
+// @version      0.6
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -183,6 +183,7 @@ const sortBlockHTML = `<div class="my-4">
     <div>
       <select id="statusSelect1"></select>
 	  <select id="statusSelect2"></select>
+      <label title="Games in your Want to Play list"><input id="inBacklogCheckbox" type="checkbox" /> In backlog</label>
     </div>
   </div>
 </div></div>
@@ -260,7 +261,8 @@ const defaultFilters = {
     "reverse": false,
     "tags": [],
     "status1": "all",
-    "status2": "all"
+    "status2": "all",
+    "inBacklog": false
 };
 function loadFilters() {
     if (localStorage.hubFilters) {
@@ -534,6 +536,10 @@ function customize() {
         checkVisibilities();
         [...statusSelect1.options].forEach((opt, idx) => { opt.disabled = (opt.dataset.disabled || idx > statusSelect2.selectedIndex); });
     });
+    const inBacklogCheckbox = document.getElementById('inBacklogCheckbox');
+    // we don't load that information in advance as it can change while the page is on screen
+    visibilityFunctions.push(row => !inBacklogCheckbox.checked || row.element.querySelector('button[id^="play-list"]').title.startsWith('Remove'));
+    inBacklogCheckbox.addEventListener('change', checkVisibilities);
 
     const createFiltersObj = () => {
         const res = {
@@ -541,7 +547,8 @@ function customize() {
             reverse: descCheckbox.checked,
             tags: selectedTags,
             status1: statusSelect1.selectedOptions[0].value,
-            status2: statusSelect2.selectedOptions[0].value
+            status2: statusSelect2.selectedOptions[0].value,
+            inBacklog: inBacklogCheckbox.checked
         };
         if (consoleSelect.closest('body')) res.console = selectedConsole;
         return res;
@@ -625,6 +632,7 @@ function customize() {
             [...tagsMSelect.options].forEach(opt => { opt.selected = filters.tags.includes(opt.value); } );
             tagsMSelect.dispatchEvent(new Event('change'));
         }
+        inBacklogCheckbox.checked = filters.inBacklog;
         select(statusSelect1, filters.status1);
         select(statusSelect2, filters.status2);
         updateSort();

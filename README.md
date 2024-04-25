@@ -203,7 +203,7 @@ Modifies the sorting of entries on a Hub page (including consoles games lists) a
    2. Differentiates sorts by *Most hardcore progress* and by *Most progress* (softcore + hardcore). *Original* restores the order from when the page was loaded. If used in combination with *RA_colorMarkGames*, the order produced by that script is used.
    3. Adds *Random* sort (shuffle). Using the *Reverse* checkbox is a way to re-shuffle in one click.
 
-5. Filtering by console and tag:
+3. Filtering by console and tag:
    1. *&lt;none&gt;* for entries without tags
    
    2. *Multiple* allows to select several tags with Ctrl+click or Shift+click
@@ -216,16 +216,18 @@ Modifies the sorting of entries on a Hub page (including consoles games lists) a
    
    ![hub sort with status](/assets/EnhancedHubSort_console_group.png)
 
-6. The filtering for games with or without achievement and the filtering by progress status are regrouped in a single filter composed of two drop-down lists: one for what we want to keep and one for what we want to exclude.
+4. The filtering for games with or without achievement and the filtering by progress status are regrouped in a single filter composed of two drop-down lists: one for what we want to keep and one for what we want to exclude.
    
    | ![hub sort with status](/assets/EnhancedHubSort_status_with.png) | ![hub sort without status](/assets/EnhancedHubSort_status_without.png) |
    | --- | --- |
    
    All options have a mouse-over help text to make them clearer.
 
-7. The game count is updated when filtering (and added is absent)
+5. Possibility to show only games which are in the *Want to Play* list
 
-8. Possibility to save the sort and filter options for the current page or for the category (hubs, consoles or developer sets).
+6. The game count is updated when filtering (and added is absent)
+
+7. Possibility to save the sort and filter options for the current page or for the category (hubs, consoles or developer sets).
    
    ![hub sort with status](/assets/EnhancedHubSort_save.png)
    
