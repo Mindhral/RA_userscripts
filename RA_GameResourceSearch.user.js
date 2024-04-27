@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_GameResourceSearch
 // @namespace    RA
-// @version      0.2.2
+// @version      0.2.3
 // @description  Adds (customizable) links to game pages to search for resources on the game.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -37,7 +37,7 @@ const DefaultSearches = [
     {
         id: 'mobygames',
         label:'Mobygames',
-        url:'https://www.mobygames.com/game/platform:${consoleName.toLowerCase().replace(" ","-")}/title:${gameName.replace("/"," ")}/',
+        url:'https://www.mobygames.com/game/platform:${consoleName.toLowerCase().replace(" ","-")}/title:${gameName.replace("/","%2F")}/',
         consoleNames: {
             2: 'n64', 4: 'gameboy', 5: 'gameboy-advance', 6: 'gameboy-color',
             8: 'turbo-grafx', 10: 'sega-32x', 11: 'sega-master-system', 13: 'lynx', 17: 'jaguar',
@@ -59,7 +59,7 @@ const DefaultSearches = [
     {
         id: 'gfaq',
         label:'GameFAQs',
-        url:'https://gamefaqs.gamespot.com/search?game=${gameName}',
+        url:'https://gamefaqs.gamespot.com/search?game=${gameName.replaceAll(" ", "+")}',
         consoleFilter: {
             type: 'exclude',
             ids: [...homebrewConsoles, 71] // + Arduboy
@@ -179,11 +179,11 @@ function getConsoles() {
 }
 
 function executeTemplate(template, consoleName, gameName) {
-    const escapedUrl = template.replaceAll(/[`=;\\]/g, '\\$&');
+    const escapedTemplate = template.replaceAll(/[`=;\\]/g, '\\$&').replace(/\$\{(.*?)\}/g,'${encodeURIComponent($1)}');;
     // consoleLongName is kept for retro-compatibility
-    // <=> eval(`"use strict";\`${escapedUrl}\``);
-    const urlFunction = Function('consoleName', 'consoleLongName', 'gameName', `"use strict";return \`${escapedUrl}\`;`);
-    return urlFunction(consoleName, consoleName, encodeURIComponent(gameName));
+    // <=> eval(`"use strict";\`${escapedTemplate}\``);
+    const urlFunction = Function('consoleName', 'consoleLongName', 'gameName', `"use strict";return \`${escapedTemplate}\`;`);
+    return urlFunction(consoleName, consoleName, gameName);
 }
 
 function setVisible(element, visible) {
