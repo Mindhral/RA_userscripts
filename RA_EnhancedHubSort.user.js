@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.6
+// @version      0.6.1
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -325,7 +325,7 @@ function customize() {
     };
 
     const gameTables = [...document.querySelectorAll('article table.table-highlight')].map(table => {
-        // eliminate both title rows and hub rows (single column)
+        // eliminate title rows (th), hub rows (single column) and footer rows (no link)
         const rows = [...table.getElementsByTagName('tr')].filter(r => r.getElementsByTagName('td').length > 1 && r.querySelector('a'));
         const rowsData = [...rows].map(getRowData);
         const tbody = table.getElementsByTagName('tbody')[0];
@@ -348,7 +348,7 @@ function customize() {
     const consoleSelect = document.getElementById('consoleSelect');
     if (pageName == 'user') {
         const filtersDiv = getElementByXpath(origSortDiv, './/div[label[normalize-space()="Filters"]]');
-        consoleSelect.parentElement.replaceWith(filtersDiv);
+        consoleSelect.parentElement.parentElement.replaceWith(filtersDiv);
     } else {
         const groupConsolesCheckbox = getElementByXpath(origSortDiv, './/label[normalize-space()="Group by console"]/input');
         const groupConsolesLabel = document.getElementById('groupConsolesLabel');
