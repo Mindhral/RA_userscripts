@@ -157,7 +157,7 @@ const sortBlockHTML = `<div class="my-4">
 <div class="embedded p-4 w-full"><div class="grid sm:flex sm:divide-x-2 divide-embed-highlight">
   <div class="grid gap-y-1 sm:pr-[40px]">
     <label class="font-bold text-xs">Sort by</label>
-    <div>
+    <div class="flex flex-wrap items-center gap-x-1">
       <select id="sortSelect"></select>
       <label class="text-2xs"><input id="descSort" type="checkbox"> Reverse</label>
     </div>
@@ -168,7 +168,7 @@ const sortBlockHTML = `<div class="my-4">
       <label id="groupConsolesLabel" title="Group tables by console (reloads the page)" class="text-2xs" style="margin-left: 2em;"> Group 🔄</label>
     </div>
     <div>
-      <select id="consoleSelect"><option value="all">All</option></select>
+      <select id="consoleSelect" style="max-width: 15em;"><option value="all">All</option></select>
     </div>
   </div>
   <div class="grid gap-y-1 sm:px-4">
@@ -180,7 +180,7 @@ const sortBlockHTML = `<div class="my-4">
   </div>
   <div class="grid gap-y-1 sm:px-4">
     <label class="font-bold text-xs">Status</label>
-    <div>
+    <div class="flex flex-wrap items-center gap-x-1">
       <select id="statusSelect1"></select>
 	  <select id="statusSelect2"></select>
       <label title="Games in your Want to Play list"><input id="inBacklogCheckbox" type="checkbox" /> In backlog</label>
