@@ -56,6 +56,10 @@ function addStyleBlock(content) {
     document.head.appendChild(styleBlock);
 }
 
+function parseUSInt(str, def = 0) {
+    return parseInt(str?.replaceAll(',', '') ?? 0);
+}
+
 const settingsHtml = `<div class="component">
   <h4>Achievements list customization</h4>
   <table class="table-highlight"><tbody>
@@ -108,12 +112,12 @@ const EnhancedCheevosSort = (() => {
         },
         'won-by': {
             label: 'Won by',
-            extractInfo: r1 => { r1.wonBy = parseInt(r1.element.querySelector('span[title="Total unlocks"]').innerText.replaceAll(',','')) },
+            extractInfo: r1 => { r1.wonBy = parseUSInt(r1.element.querySelector('span[title="Total unlocks"]').innerText) },
             compare: (r1, r2) => r1.wonBy - r2.wonBy
         },
         'won-by-hc': {
             label: 'Won by (hardcore)',
-            extractInfo: r1 => { r1.wonByHc = parseInt(r1.element.querySelector('span[title="Hardcore unlocks"]')?.innerText?.replaceAll(/[\(\),]/g,'')) || 0 },
+            extractInfo: r1 => { r1.wonByHc = parseUSInt(r1.element.querySelector('span[title="Hardcore unlocks"]')?.innerText?.replaceAll(/[\(\)]/g,'')) || 0 },
             compare: (r1, r2) => r1.wonByHc - r2.wonByHc
         },
         'points': {
@@ -123,7 +127,7 @@ const EnhancedCheevosSort = (() => {
         },
         'retropoints': {
             label: 'RetroPoints',
-            extractInfo: r1 => { r1.retroPoints = parseInt(r1.element.querySelector('span.TrueRatio')?.innerText?.replace(/\((\d+)\)/,'$1')) || 0 },
+            extractInfo: r1 => { r1.retroPoints = parseUSInt(r1.element.querySelector('span.TrueRatio')?.innerText?.replace(/\(([\d,]+)\)/,'$1')) || 0 },
             compare: (r1, r2) => r1.retroPoints - r2.retroPoints
         },
         'title': {
