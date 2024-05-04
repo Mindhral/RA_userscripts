@@ -813,7 +813,7 @@ const LinkHighScore2Compare = (() => {
             return newLink;
         };
         const highscoresDiv = document.getElementById('highscores');
-        highscoresDiv.querySelectorAll('tr:not(.do-not-highlight)').forEach(tr => {
+        highscoresDiv?.querySelectorAll('tr:not(.do-not-highlight)').forEach(tr => {
             const scoreCell = tr.children.item(2);
             const scoreSpan = scoreCell.firstElementChild;
             // moving the help text and cursor from the score span to the entire cell
