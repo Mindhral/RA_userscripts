@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.1
+// @version      1.2
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -99,6 +99,15 @@ const settingsHtml = `<div class="component">
       <td><input id="historyLinksStyle" type="text"> <div id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</div></td>
     </tr>
     <tr><th colspan="2"><label><input id="highScoreLinksActive" type="checkbox"> Link High Scores To Compare Page</label></th></tr>
+    <tr><th colspan="2"><label><input id="customUnlockCountsActive" type="checkbox"> Custom Unlock Counts</label></th></tr>
+    <tr>
+      <td>Main unlock data</td>
+      <td>
+        <label title="Hardcore unlocks displayed, total unlocks on the bar's mouseover"><input type="radio" name="unlockCountData" value="hardcore"> hardcore</label>
+        <label title="Total unlocks displayed, hardcore on the bar's mouseover"><input type="radio" name="unlockCountData" value="total"> total</label>
+        <label title="Both displayed in parallel"><input type="radio" name="unlockCountData" value="both"> both</label>
+      </td>
+    </tr>
   </tbody></table>
 </div>`;
 
@@ -838,6 +847,142 @@ const LinkHighScore2Compare = (() => {
     return { gamePage, settingsPage };
 })();
 
+const CustomUnlockCounts = (() => {
+    const DefaultSettings = {
+        active: false,
+        unlockCountData: 'both'
+    };
+
+    const Settings = loadSettings('customUnlockCounts', DefaultSettings);
+
+    function saveSettings() {
+        GM_setValue('customUnlockCounts', Settings);
+    }
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('customUnlockCountsActive');
+        activeCheckbox.checked = Settings.active;
+
+        const unlockCountDataRadios = [...document.querySelectorAll('input[name="unlockCountData"]')];
+        unlockCountDataRadios.filter(r => r.value == Settings.unlockCountData)[0].checked = true;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(unlockCountDataRadios[0], Settings.active);
+            saveSettings();
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+
+        unlockCountDataRadios.forEach(r => r.addEventListener('change', () => {
+            Settings.unlockCountData = r.value;
+            saveSettings();
+        }));
+    }
+
+    function gamePage() {
+        if (!Settings.active) return;
+        const allRows = document.querySelectorAll('#set-achievements-list li');
+        if (allRows.length == 0) return;
+
+        const totalPlayers = allRows[0].querySelector('span[title="Total players"]')?.innerText;
+
+        // called when the distribution chart is filled, which is needed to calculate the hardcore players count
+        const hcTotalCallbacks = [];
+
+        allRows.forEach(row => {
+            // values
+            const unlocks = row.querySelector('span[title="Total unlocks"]').innerText;
+            if (!unlocks || unlocks == '0') return;
+            const hcUnlocksSpan = row.querySelector('span[title="Hardcore unlocks"]');
+            const hcUnlocks = hcUnlocksSpan?.innerText?.replaceAll(/[\(\)]/g,'') ?? '0';
+
+            // identifiy blocks
+            const ratePara = getElementByXpath(row, './/p[contains(text(), "% unlock rate")]');
+            const progressPara = row.querySelector('p[id^="progress-label-"]');
+            const progressBar = row.querySelector('div[role="progressbar"]');
+
+            // elements containing the hardcore players count or hardcore unlock rate
+            // for now, it will be written as "??" or "??%"
+            const hcTotalElements = [];
+            const hcRateElements = [];
+
+            // reusable code
+            const changeToHcRate = block => {
+                block.innerText = block.innerText.replace(/[\d.]+%/, '??%');
+                hcRateElements.push(block);
+            };
+            const parallelCopy = block => {
+                const block2 = block.cloneNode(true);
+                if (block2.id) block2.id = block2.id + '-hc';
+                block2.querySelectorAll('*[id]').forEach(e => { e.id = e.id+ '-hc'; });
+                const newDiv = document.createElement('div');
+                newDiv.className = 'flex justify-around';
+                block.replaceWith(newDiv);
+                newDiv.append(block2, block);
+                return block2
+            };
+            const changeLabelToHc = para => {
+                // hardcore unlocks span is already removed
+                const unlockSpan = para.querySelector('span[title="Total unlocks"]');
+                unlockSpan.innerText = hcUnlocks;
+                unlockSpan.title = 'Hardcore unlocks';
+                const totalSpan = para.querySelector('span[title="Total players"]');
+                totalSpan.innerText = '??';
+                hcTotalElements.push(totalSpan);
+                totalSpan.title = 'Hardcore players';
+                const rateSpan = getElementByXpath(para, './/span[@class="md:hidden"][contains(text(), "%")]'); // small screens
+                changeToHcRate(rateSpan);
+            };
+
+            // handling the 3 different cases
+            let hcProgressPara;
+            hcUnlocksSpan?.remove();
+            switch (Settings.unlockCountData) {
+                case 'hardcore':
+                    progressBar.classList.add('cursor-help');
+                    progressBar.title = `total unlocks: ${unlocks} of ${totalPlayers} (${ratePara.innerText.replace(/ .+/, '')})`;
+                    changeToHcRate(ratePara);
+                    changeLabelToHc(progressPara);
+                    break;
+                case 'both':
+                    ratePara.innerText = ratePara.innerText.replace(' unlock rate', '');
+                    changeToHcRate(parallelCopy(ratePara));
+                    changeLabelToHc(parallelCopy(progressPara));
+                    break;
+                case 'total':
+                default:
+                    // completely handled after hardcore players count is available
+            }
+
+            hcTotalCallbacks.push(hardcorePlayers => {
+                const hcRate = Number(parseUSInt(hcUnlocks) * 100 / hardcorePlayers).toFixed(2) + '%';
+                const hardcorePlayersStr = hardcorePlayers.toLocaleString('en-US');
+                hcTotalElements.forEach(e => { e.innerText = hardcorePlayersStr; });
+                hcRateElements.forEach(e => { e.innerText = e.innerText.replace('??%', hcRate); });
+                if (Settings.unlockCountData == 'total') {
+                    progressBar.classList.add('cursor-help');
+                    progressBar.title = `hardcore: ${hcUnlocks} of ${hardcorePlayersStr} (${hcRate})`;
+                }
+            });
+        });
+
+        const chartDiv = document.getElementById('chart_distribution');
+        const replaceHcValues = () => {
+            const tbody = chartDiv.getElementsByTagName('tbody')?.[0];
+            if (!tbody) return false;
+
+            const hardcorePlayers = [...tbody.children].map(tr => parseUSInt(tr.children[1].innerText)).reduce((a,b) => a + b, 0);
+            hcTotalCallbacks.forEach(f => f(hardcorePlayers));
+            return true;
+        };
+        const newNodesObserver = new MutationObserver(records => { if (replaceHcValues()) newNodesObserver.disconnect(); });
+        newNodesObserver.observe(chartDiv, { childList: true, subtree: true });
+        if (replaceHcValues()) newNodesObserver.disconnect();
+    }
+
+    return { gamePage, settingsPage };
+})();
+
 const Pages = {
     game: () => {
         EnhancedCheevosSort.gamePage();
@@ -848,6 +993,7 @@ const Pages = {
         FilterBeatenCreditList.gamePage();
         HistoryLinks.gamePage();
         LinkHighScore2Compare.gamePage();
+        CustomUnlockCounts.gamePage();
     },
     achievement: () => {
         CustomLockedBadges.gamePage();
@@ -867,6 +1013,7 @@ const Pages = {
         FilterBeatenCreditList.settingsPage();
         HistoryLinks.settingsPage();
         LinkHighScore2Compare.settingsPage();
+        CustomUnlockCounts.settingsPage();
     }
 };
 

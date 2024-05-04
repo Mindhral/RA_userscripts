@@ -158,6 +158,25 @@ Adds links to Game Compare page on the scores from the high score section.
 
 ![high scores links](/assets/CustomCheevosList_highScoresLinks.png)
 
+### Custom Unlock Counts
+
+Allows to change the display of unlock count and rate for achievements on a game page.
+
+![custom unlock counts settings](/assets/CustomUnlockCounts_settings.png)
+
+3 options are available:
+- displaying the hardcore values only (the values combining hardcore and softcore are still available by mouseover on the progress bar)
+- displaying the total (hardcore+softcore) only (hardcore values on mousover on the progress bar)
+- displaying both in parallel
+
+| ![hardcore unlocks](/assets/CustomUnlockCounts_hardcore.png) | ![total unlocks](/assets/CustomUnlockCounts_total.png) | ![both unlock types](/assets/CustomUnlockCounts_both.png) |
+| -------- | -------- | -------- |
+| Hardcore |  Total   |   Both   |
+
+Hardcore data uses the hardcore unlocks, but also the hardcore players count as total (players having at least one hardcore unlock on the set). They are a bit longer than the rest to display, as they wait for the data to be available in the distribution chart.
+
+Progress bars are not modified (except for the mouseover text), and the achievements page is not supported by this feature at the moment.
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.
