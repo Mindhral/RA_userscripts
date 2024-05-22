@@ -191,6 +191,14 @@ Modifies the scrolling of the leaderboards list found on a game, achievement or 
 
 4. On a leaderboard page, a parameter allows to scroll to the current leaderboard on page load.
 
+### Compare Unlocks Filter
+
+Adds a filter to Compare Unlocks page to hide achievements rows depending on their status (locked, unlocked in any mode, unlocked in hardcore) for both players:
+
+![compare unlocks status filter](/assets/CompareUnlocksFilter_status.png)
+
+The last selected value is remembered.
+
 ## RA_GameListTagFilter
 
 Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.

@@ -8,6 +8,7 @@
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/achievement/*
 // @match        https://retroachievements.org/leaderboardinfo.php*
+// @match        https://retroachievements.org/user/*/game/*/compare*
 // @match        https://retroachievements.org/controlpanel.php*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -25,10 +26,14 @@ function loadSettings(key, defValues) {
     return settings;
 }
 
+function setVisible(element, visible) {
+    const method = visible ? 'remove' : 'add';
+    element?.classList[method]('hidden');
+}
+
 // Sets the visibility of the table row containing the given element
 function setRowVisibility(element, visible) {
-    const action = visible ? 'remove' : 'add';
-    element.closest('tr')?.classList[action]?.('hidden');
+    setVisible(element.closest('tr'), visible);
 }
 
 function getElementByXpath(root, xpath) {
@@ -55,6 +60,18 @@ function addStyleBlock(content) {
     const styleBlock = document.createElement('style');
     styleBlock.innerHTML = content;
     document.head.appendChild(styleBlock);
+}
+
+function createOption(value, labelTxt, select, title = null) {
+    const option = document.createElement('option');
+    if (value) {
+        option.value = value;
+        option.setAttribute('name', value);
+    }
+    option.innerHTML = labelTxt;
+    if (title) option.title = title;
+    select.append(option);
+    return option;
 }
 
 function parseUSInt(str, def = 0) {
@@ -126,6 +143,7 @@ const settingsHtml = `<div class="component">
       <td>Auto scroll to current LB</td>
       <td><input id="scrollableLBsAutoScroll" type="checkbox"></td>
     </tr>
+    <tr><th colspan="2"><label><input id="compareFilterActive" type="checkbox"> Compare Unlocks Filter</label></th></tr>
   </tbody></table>
 </div>`;
 
@@ -218,14 +236,6 @@ const EnhancedCheevosSort = (() => {
         allEqual: (a,b) => 0
     };
 
-    const createOption = (value, labelTxt) => {
-        const option = document.createElement('option');
-        option.id = value;
-        option.value = value;
-        option.innerHTML = labelTxt;
-        return option;
-    };
-
     let sortParams = GM_getValue('cheevosSortSettings', {
         mainSort: 'normal',
         descSort: false,
@@ -276,7 +286,7 @@ const EnhancedCheevosSort = (() => {
         const mainSelect = document.createElement('select');
         mainSelect.id = 'sortValue';
         for (const [sortName, sort] of Object.entries(MainSorts)) {
-            mainSelect.append(createOption(sortName, sort.label));
+            createOption(sortName, sort.label, mainSelect);
         }
         mainSelect.namedItem(sortParams.mainSort).selected = true;
         mainCompare = MainSorts.normal.compare;
@@ -309,7 +319,7 @@ const EnhancedCheevosSort = (() => {
             const groupSelect = document.createElement('select');
             groupSelect.id = 'sortGroups';
             for (const [sortName, sort] of Object.entries(SortGroupings)) {
-                groupSelect.append(createOption(sortName, sort.label));
+                createOption(sortName, sort.label, groupSelect);
             }
             groupSelect.namedItem(sortParams.sortGroup).selected = true;
 
@@ -544,9 +554,8 @@ const CollapseAchievementsList = (() => {
         let visible = true;
         button.addEventListener('click', () => {
             visible = !visible;
-            const method = visible ? 'remove' : 'add';
-            filterDiv.classList[method]('hidden');
-            achievementsList.classList[method]('hidden');
+            setVisible(filterDiv, visible);
+            setVisible(achievementsList, visible);
             button.title = visible ? 'Hide achievements list' : 'Show achievements list';
             GM_setValue('collapseLastState', !visible);
         });
@@ -1093,6 +1102,93 @@ const ScrollableLeaderboards = (() => {
     return { gamePage, settingsPage };
 })();
 
+const GameCompareFilter = (() => {
+
+    const HideFilters = {
+        'none': {
+            label: '--',
+            visibilityFunction: (c1, c2) => true
+        },
+        'same': {
+            label: 'Same status',
+            visibilityFunction: (c1, c2) => c1 != c2
+        },
+        'unlocked': {
+            label: 'Both unlocked',
+            visibilityFunction: (c1, c2) => c1 == 'badgeimg' || c2 == 'badgeimg'
+        },
+        'unlocked-hc': {
+            label: 'Both unlocked in hardcore',
+            visibilityFunction: (c1, c2) => c1 != 'goldimage' || c2 != 'goldimage'
+        },
+        'locked': {
+            label: 'Both locked',
+            visibilityFunction: (c1, c2) => c1 != 'badgeimg' || c2 != 'badgeimg'
+        }
+    };
+
+    const DefaultSettings = {
+        active: true
+    };
+
+    const Settings = loadSettings('compareFilter', DefaultSettings);
+
+    function saveSettings() {
+        GM_setValue('compareFilter', Settings);
+    }
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('compareFilterActive');
+        activeCheckbox.checked = Settings.active;
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            saveSettings();
+        });
+    }
+
+    const hideFilterHTML = `<div class="grid gap-y-1">
+  <label class="text-xs font-bold" for="hideSelect">Hide</label>
+  <select class="w-full sm:max-w-[240px]" id="hideSelect"></select>
+</div>`;
+
+    function comparePage() {
+        if (!Settings.active) return;
+        const embedDiv = document.querySelector('article div.embedded div.sm\\:flex');
+        if (!embedDiv) return;
+        const compareTable = document.querySelector('article table.table-highlight');
+        if (!compareTable) return;
+
+        // Adds HTML
+        const newDiv = document.createElement('div');
+        embedDiv.append(newDiv);
+        newDiv.outerHTML = hideFilterHTML;
+        const hideSelect = document.getElementById('hideSelect');
+        // no need to keep this one if it gives the same result as 'unlocked'
+        if (!compareTable.querySelector('.badgeimage') || !compareTable.querySelector('.goldimage')) delete HideFilters['unlocked-hc'];
+        for (const [name, status] of Object.entries(HideFilters)) {
+            createOption(name, status.label, hideSelect);
+        }
+
+        // Behavior
+        hideSelect.addEventListener('change', () => {
+            const filter = HideFilters[hideSelect.value];
+            compareTable.querySelectorAll('tr:not(.do-not-highlight)').forEach(row => {
+                const imgs = row.getElementsByTagName('img');
+                if (imgs.length < 2) return; // for the counter line (footer)
+                setVisible(row, filter.visibilityFunction(imgs[0]?.className, imgs[1]?.className));
+            });
+            Settings.lastStatus = hideSelect.value;
+            saveSettings();
+        });
+        if (Settings.lastStatus) {
+            hideSelect.value = Settings.lastStatus;
+            hideSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    return { comparePage, settingsPage };
+})();
+
 const Pages = {
     game: () => {
         EnhancedCheevosSort.gamePage();
@@ -1113,6 +1209,10 @@ const Pages = {
     leaderboardinfo: () => {
         ScrollableLeaderboards.gamePage();
     },
+    // only compare page is matched in the /user/* pattern for now
+    user: () => {
+        GameCompareFilter.comparePage();
+    },
     controlpanel: () => {
         const settingsDiv = getElementByXpath(document, '//div[h3[text()="Settings"]]');
         if (!settingsDiv) return;
@@ -1130,6 +1230,7 @@ const Pages = {
         LinkHighScore2Compare.settingsPage();
         CustomUnlockCounts.settingsPage();
         ScrollableLeaderboards.settingsPage();
+        GameCompareFilter.settingsPage();
     }
 };
 
