@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.6.1
+// @version      0.6.2
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -9,6 +9,7 @@
 // @match        https://retroachievements.org/system/*/games*
 // @match        https://retroachievements.org/user/*/developer/sets*
 // @match        https://retroachievements.org/controlpanel.php*
+// @exclude      https://retroachievements.org/game/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue

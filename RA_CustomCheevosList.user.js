@@ -10,6 +10,7 @@
 // @match        https://retroachievements.org/leaderboardinfo.php*
 // @match        https://retroachievements.org/user/*/game/*/compare*
 // @match        https://retroachievements.org/controlpanel.php*
+// @exclude      https://retroachievements.org/game/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue

@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         RA_GameResourceSearch
 // @namespace    RA
-// @version      0.2.3
+// @version      0.2.4
 // @description  Adds (customizable) links to game pages to search for resources on the game.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/controlpanel.php*
 // @match        https://retroachievements.org/setRequestList.php*
+// @exclude      https://retroachievements.org/game/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
@@ -498,6 +499,8 @@ function gamePage() {
     // Extract infos
     const navpath = document.querySelector('div.navpath');
     if (!navpath) return; // hubs
+    const asideMenu = document.querySelector('aside > div.component> ul');
+    if (!asideMenu) return;
     const navbarConsoleName = navpath.children[1].innerText.trim().split('/')[0];
     const consoleId = parseInt(navpath.children[1].href.split('/').at(-2));
     if (consoleId == 101) return; // Events
@@ -507,7 +510,7 @@ function gamePage() {
     if (tags.length == 0) tags.push('none');
 
     // Add HTML elements
-    const listItem = newElement('li', document.querySelector('aside > div.component> ul'), 'flex mb-2');
+    const listItem = newElement('li', asideMenu, 'flex mb-2');
     const searchLink = newElement('a', listItem, 'btn grow py-2 mr-2');
     newElement('span', searchLink, 'icon icon-md ml-1 mr-3', '🔍');
     searchLink.append('Search:');
