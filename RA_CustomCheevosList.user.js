@@ -846,13 +846,6 @@ const LinkHighScore2Compare = (() => {
         if (!currentUser) return;
         const gameId = window.location.pathname.split('/').at(-1);
 
-        const createCompareLink = (root) => {
-            const userId = root.querySelector('a').href.split('/').at(-1);
-            if (userId === currentUser) return;
-            const newLink = document.createElement('a');
-            newLink.href = `/gamecompare.php?ID=${gameId}&f=${userId}`;
-            return newLink;
-        };
         const highscoresDiv = document.getElementById('highscores');
         highscoresDiv?.querySelectorAll('tr:not(.do-not-highlight)').forEach(tr => {
             const scoreCell = tr.children.item(2);
@@ -866,7 +859,7 @@ const LinkHighScore2Compare = (() => {
             const userId = tr.querySelector('a').href.split('/').at(-1);
             if (userId === currentUser) return;
             const newLink = document.createElement('a');
-            newLink.href = `/gamecompare.php?ID=${gameId}&f=${userId}`;
+            newLink.href = `/user/${userId}/game/${gameId}/compare`;
             newLink.append(scoreSpan);
             scoreCell.append(newLink);
         });
