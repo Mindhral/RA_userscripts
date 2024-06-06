@@ -37,6 +37,14 @@ The number of badges and the height which trigger the scroll bar apparition can 
 
 ![scroll bar settings](/assets/ScrollProfileAwards_settings.png)
 
+### Highlight Awards Checkboxes
+
+Adds checkboxes in the *Game Awards* section of other users profile page to highlight awards that you have in common or the ones that you don't have. Your own profile needs to be visited first to gather the data.
+
+This feature doesn't differentiate between mastery and completion badges.
+
+![Highlight Awards - all](/assets/HighlightAwards_all.png) ![Highlight Awards - common](/assets/HighlightAwards_common.png) ![Highlight Awards - others](/assets/HighlightAwards_others.png)
+
 ### Mark Unearned Badges
 
 When achievements are added by a revision to a game previously mastered or completed, the mastery (or completion) status is lost on the game page, but the badge remains. These games can now be found on the *Completion Progress* page, using the filter *Games with awards for revised sets*.

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.3
+// @version      1.4
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -42,10 +42,14 @@ function loadSettings(key, defValues) {
     return settings;
 }
 
+function setVisible(element, visible) {
+    const method = visible ? 'remove' : 'add';
+    element?.classList[method]('hidden');
+}
+
 // Sets the visibility of the table row containing the given element
 function setRowVisibility(element, visible) {
-    const action = visible ? 'remove' : 'add';
-    element.closest('tr')?.classList[action]?.('hidden');
+    setVisible(element.closest('tr'), visible);
 }
 
 const settingsHtml = `<div class="component">
@@ -56,6 +60,7 @@ const settingsHtml = `<div class="component">
     <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
     <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
     <tr><td>Thin scrollbar</td><td><input id="scrollAwardsThinBar" type="checkbox"></td></tr>
+    <tr><th colspan="2"><label><input id="highlightAwardsActive" type="checkbox"> Highlight Awards Checkboxes</label></th></tr>
   </tbody></table>
   <table class="table-highlight"><tbody>
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
@@ -328,10 +333,90 @@ const ScrollAwards = (() => {
     return { profilePage, settingsPage };
 })();
 
+const HighlightAwards = (() => {
+    const DefaultSettings = {
+        active: true
+    };
+
+    const Settings = loadSettings('highlightAwards', DefaultSettings);
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('highlightAwardsActive');
+        activeCheckbox.checked = Settings.active;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            GM_setValue('highlightAwards', Settings);
+        });
+    }
+
+    function profilePage() {
+        if (!Settings.active) return;
+        const awardsDiv = document.querySelector('#gameawards .component');
+        if (!awardsDiv) return;
+
+        if (isOwnProfile()) {
+            localStorage.awardIds = JSON.stringify([...awardsDiv.children].map(d => parseInt(d.dataset.gameid)));
+            return;
+        }
+        const awardIds = new Set(JSON.parse(localStorage.awardIds ?? '[]'));
+        if (awardIds.size == 0) return;
+
+        const newPara = document.createElement('p');
+        awardsDiv.before(newPara);
+        newPara.outerHTML = `<div class="flex justify-between">
+  <span>
+    Highlight:
+    <label><input id="highlightCommon" type="checkbox"> common</label>
+    <label><input id="highlightDiff" type="checkbox"> others</label>
+  </span>
+  <span id="highlightCount" class="mr-6 hidden"></span>
+</div>`;
+
+        const commonCheck = document.getElementById('highlightCommon');
+        const diffCheck = document.getElementById('highlightDiff');
+        const highlightCountLabel = document.getElementById('highlightCount');
+
+        const highlight = (div, val) => {
+            if (val) {
+                div.style.removeProperty('opacity');
+            } else {
+                div.style.opacity = 0.2;
+            }
+        };
+
+        const refreshHighlight = () => {
+            const f = commonCheck.checked ? id => awardIds.has(id) : diffCheck.checked ? id => !awardIds.has(id) : id => true;
+            let count = 0;
+            [...document.querySelectorAll('#gameawards .component > div')].forEach(d => {
+                const gameId = parseInt(d.dataset.gameid);
+                const val = f(gameId);
+                if (val) count++;
+                highlight(d, val);
+            });
+            highlightCountLabel.innerText = `(${count})`;
+            setVisible(highlightCountLabel, commonCheck.checked || diffCheck.checked);
+        };
+
+        commonCheck.addEventListener('change', () => {
+            diffCheck.checked &&= !commonCheck.checked;
+            refreshHighlight();
+        });
+
+        diffCheck.addEventListener('change', () => {
+            commonCheck.checked &&= !diffCheck.checked;
+            refreshHighlight();
+        });
+    }
+
+    return { profilePage, settingsPage };
+})();
+
 function profilePage() {
     ScrollAwards.profilePage();
     HideMasteredProgress.profilePage();
     MarkUnearnedAwards.profilePage();
+    HighlightAwards.profilePage();
 }
 
 function settingsPage() {
@@ -345,6 +430,7 @@ function settingsPage() {
     ScrollAwards.settingsPage();
     HideMasteredProgress.settingsPage();
     MarkUnearnedAwards.settingsPage();
+    HighlightAwards.settingsPage();
 }
 
 const urlPathname = window.location.pathname;
