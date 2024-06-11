@@ -60,7 +60,7 @@ const DefaultSearches = [
     {
         id: 'gfaq',
         label:'GameFAQs',
-        url:'https://gamefaqs.gamespot.com/search?game=${gameName.replaceAll(" ", "+")}',
+        url:'https://gamefaqs.gamespot.com/search?game=${gameName}',
         consoleFilter: {
             type: 'exclude',
             ids: [...homebrewConsoles, 71] // + Arduboy
@@ -180,7 +180,7 @@ function getConsoles() {
 }
 
 function executeTemplate(template, consoleName, gameName) {
-    const escapedTemplate = template.replaceAll(/[`=;\\]/g, '\\$&').replace(/\$\{(.*?)\}/g,'${encodeURIComponent($1)}');;
+    const escapedTemplate = template.replaceAll(/[`=;\\]/g, '\\$&').replace(/\$\{(.*?)\}/g,'${encodeURIComponent($1)}');
     // consoleLongName is kept for retro-compatibility
     // <=> eval(`"use strict";\`${escapedTemplate}\``);
     const urlFunction = Function('consoleName', 'consoleLongName', 'gameName', `"use strict";return \`${escapedTemplate}\`;`);

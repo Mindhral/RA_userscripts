@@ -53,6 +53,17 @@ function setRowVisibility(element, visible) {
     setVisible(element.closest('tr'), visible);
 }
 
+function basicSettingsPage(chekboxId, settingsKey, settings) {
+    return () => {
+        const activeCheckbox = document.getElementById(chekboxId);
+        activeCheckbox.checked = settings.active;
+        activeCheckbox.addEventListener('change', () => {
+            settings.active = activeCheckbox.checked;
+            GM_setValue(settingsKey, settings);
+        });
+    }
+}
+
 const settingsHtml = `<div class="component">
   <h4>Profile page customization</h4>
   <table class="table-highlight"><tbody>
@@ -92,6 +103,8 @@ const HideMasteredProgress = (() => {
 
     const Settings = loadSettings('hideMasterProgress', DefaultSettings);
 
+    const settingsPage = basicSettingsPage('hideMasterProgrActive', 'hideMasterProgress', Settings);
+
     function profilePage() {
         if (!Settings.active) return;
         const completedRows = document.querySelectorAll('#usercompletedgamescomponent tr.completion-progress-completed-row');
@@ -102,11 +115,8 @@ const HideMasteredProgress = (() => {
         let initialValue = GM_getValue('hideProgressType', defaultValue);
         const changeVisibility = value => {
             completedRows.forEach(row => {
-                if (value === 'completed' || (value === 'mastered' && row.querySelector('div[title="Mastered"]'))) {
-                    row.classList.add('hidden');
-                } else {
-                    row.classList.remove('hidden');
-                }
+                const hide = value === 'completed' || (value === 'mastered' && row.querySelector('div[title="Mastered"]'));
+                setVisible(row, !hide);
             })
             GM_setValue('hideProgressType', value);
         };
@@ -128,15 +138,6 @@ const HideMasteredProgress = (() => {
         const span = document.createElement('span');
         span.append('Hide:\n', createRadioLabel('none'), createRadioLabel('mastered'), createRadioLabel('completed'));
         hideCompletedCheckbox.parentElement.replaceWith(span);
-    }
-
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('hideMasterProgrActive');
-        activeCheckbox.checked = Settings.active;
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('hideMasterProgress', Settings);
-        });
     }
 
     return { profilePage, settingsPage };
@@ -342,15 +343,7 @@ const HighlightAwards = (() => {
 
     const Settings = loadSettings('highlightAwards', DefaultSettings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('highlightAwardsActive');
-        activeCheckbox.checked = Settings.active;
-
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('highlightAwards', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('highlightAwardsActive', 'highlightAwards', Settings);
 
     function profilePage() {
         if (!Settings.active) return;
@@ -421,15 +414,7 @@ const LinkHighScore2Compare = (() => {
 
     const Settings = loadSettings('progressLink', DefaultSettings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('progressLinkActive');
-        activeCheckbox.checked = Settings.active;
-
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('progressLink', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('progressLinkActive', 'progressLink', Settings);
 
     function profilePage() {
         if (!Settings.active) return;

@@ -76,7 +76,7 @@ function createOption(value, labelTxt, select, title = null) {
 }
 
 function parseUSInt(str, def = 0) {
-    return parseInt(str?.replaceAll(',', '') ?? 0);
+    return parseInt(str?.replaceAll(',', '') ?? def);
 }
 
 const settingsHtml = `<div class="component">
@@ -117,7 +117,7 @@ const settingsHtml = `<div class="component">
       <td>Link CSS style</td>
       <td><input id="historyLinksStyle" type="text"> <div id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</div></td>
     </tr>
-    <tr><th colspan="2"><label><input id="highScoreLinksActive" type="checkbox"> Link High Scores To Compare Page</label></th></tr>
+    <tr><th colspan="2"><label><input id="highScoreLinksActive" type="checkbox"> Link High Scores to Compare Page</label></th></tr>
     <tr><th colspan="2"><label><input id="customUnlockCountsActive" type="checkbox"> Custom Unlock Counts</label></th></tr>
     <tr>
       <td>Main unlock data</td>
