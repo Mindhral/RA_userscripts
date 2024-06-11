@@ -14,14 +14,15 @@
 // @grant        GM_getValue
 // ==/UserScript==
 
+// authenticated user
+const getCurrentUser = () => document.querySelector('div.dropdown-menu-right div.dropdown-header')?.textContent;
+// only works on profile page
+const getPageUser = () => document.querySelector('article h1')?.textContent;
+
 // Checks whether the profile page is the user's own profile
 function isOwnProfile() {
-    const currentUserDiv = document.querySelector('div.dropdown-menu-right div.dropdown-header');
-    if (!currentUserDiv) return false; // not authenticated
-    const currentUser = currentUserDiv.textContent;
-    const pageUserDiv = document.querySelector('article h1');
-    const pageUser = pageUserDiv.textContent;
-    return currentUser === pageUser;
+    const currentUser = getCurrentUser();
+    return currentUser && currentUser === getPageUser();
 }
 
 function newElement(tagName, parent, className = null, innerHTML = null) {
@@ -61,6 +62,7 @@ const settingsHtml = `<div class="component">
     <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
     <tr><td>Thin scrollbar</td><td><input id="scrollAwardsThinBar" type="checkbox"></td></tr>
     <tr><th colspan="2"><label><input id="highlightAwardsActive" type="checkbox"> Highlight Awards Checkboxes</label></th></tr>
+    <tr><th colspan="2"><label><input id="progressLinkActive" type="checkbox"> Link Completion Progress to Compare Page</label></th></tr>
   </tbody></table>
   <table class="table-highlight"><tbody>
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
@@ -412,11 +414,48 @@ const HighlightAwards = (() => {
     return { profilePage, settingsPage };
 })();
 
+const LinkHighScore2Compare = (() => {
+    const DefaultSettings = {
+        active: true
+    };
+
+    const Settings = loadSettings('progressLink', DefaultSettings);
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('progressLinkActive');
+        activeCheckbox.checked = Settings.active;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            GM_setValue('progressLink', Settings);
+        });
+    }
+
+    function profilePage() {
+        if (!Settings.active) return;
+        if (!getCurrentUser()) return; // not authenticated
+        const pageUser = getPageUser();
+        document.querySelectorAll('#usercompletedgamescomponent tr').forEach(tr => {
+            const scoreCell = tr.children.item(1);
+            const barDiv = scoreCell.firstElementChild;
+            // creating the link
+            const gameId = tr.getElementsByTagName('a')[0].href.split('/').at(-1);
+            const newLink = document.createElement('a');
+            newLink.href = `/user/${pageUser}/game/${gameId}/compare`;
+            barDiv.replaceWith(newLink);
+            newLink.append(barDiv);
+        });
+    }
+
+    return { profilePage, settingsPage };
+})();
+
 function profilePage() {
     ScrollAwards.profilePage();
     HideMasteredProgress.profilePage();
     MarkUnearnedAwards.profilePage();
     HighlightAwards.profilePage();
+    LinkHighScore2Compare.profilePage();
 }
 
 function settingsPage() {
@@ -431,6 +470,7 @@ function settingsPage() {
     HideMasteredProgress.settingsPage();
     MarkUnearnedAwards.settingsPage();
     HighlightAwards.settingsPage();
+    LinkHighScore2Compare.settingsPage();
 }
 
 const urlPathname = window.location.pathname;

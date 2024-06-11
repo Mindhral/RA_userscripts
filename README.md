@@ -45,6 +45,12 @@ This feature doesn't differentiate between mastery and completion badges.
 
 ![Highlight Awards - all](/assets/HighlightAwards_all.png) ![Highlight Awards - common](/assets/HighlightAwards_common.png) ![Highlight Awards - others](/assets/HighlightAwards_others.png)
 
+### Link Completion Progress to Compare Page
+
+Adds links to *Compare Unlocks* page on the progress bars from the *Completion Progress* section.
+
+![completion progress links](/assets/CustomizeProfile_progressLinks.png)
+
 ### Mark Unearned Badges
 
 When achievements are added by a revision to a game previously mastered or completed, the mastery (or completion) status is lost on the game page, but the badge remains. These games can now be found on the *Completion Progress* page, using the filter *Games with awards for revised sets*.
@@ -160,9 +166,9 @@ The style of the link can be edited in the settings.
 
 ![history links settings](/assets/CustomCheevosList_historyLinks_settings.png) ![history links style example](/assets/CustomCheevosList_historyLinks_style.png)
 
-### Link High Scores To Compare Page
+### Link High Scores to Compare Page
 
-Adds links to Game Compare page on the scores from the high score section.
+Adds links to *Compare Unlocks* page on the scores from the high score section.
 
 ![high scores links](/assets/CustomCheevosList_highScoresLinks.png)
 
@@ -174,14 +180,14 @@ Allows to change the display of unlock count and rate for achievements on a game
 
 3 options are available:
 - displaying the hardcore values only (the values combining hardcore and softcore are still available by mouseover on the progress bar)
-- displaying the total (hardcore+softcore) only (hardcore values on mousover on the progress bar)
+- displaying the total (hardcore+softcore) only (hardcore values on mouseover on the progress bar)
 - displaying both in parallel
 
 | ![hardcore unlocks](/assets/CustomUnlockCounts_hardcore.png) | ![total unlocks](/assets/CustomUnlockCounts_total.png) | ![both unlock types](/assets/CustomUnlockCounts_both.png) |
 | -------- | -------- | -------- |
 | Hardcore |  Total   |   Both   |
 
-Hardcore data uses the hardcore unlocks, but also the hardcore players count as total (players having at least one hardcore unlock on the set). They are a bit longer than the rest to display, as they wait for the data to be available in the distribution chart.
+Hardcore data uses the hardcore unlocks, but also the hardcore players count as total (players having at least one hardcore unlock on the set). For subsets, this behavior is different than the normal one (for total values), which uses the player count for the game. They are a bit longer than the rest to display, as they wait for the data to be available in the distribution chart.
 
 Progress bars are not modified (except for the mouseover text), and the achievements page is not supported by this feature at the moment.
 
