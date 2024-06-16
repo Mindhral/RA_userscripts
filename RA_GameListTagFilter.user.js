@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         RA_GameListTagFilter
 // @namespace    RA
-// @version      0.1
+// @version      0.2
 // @description  Allows to filter games on a type tag (subset, hack, ...)
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/gameList.php*
 // @match        https://retroachievements.org/setRequestList.php*
-// @match        https://retroachievements.org/claimlist.php*
+// @match        https://retroachievements.org/claims/*
 // @match        https://retroachievements.org/gameSearch.php*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -63,21 +63,6 @@ const Pages = {
             return true;
         }
     },
-    claimlist:{
-        addSelect: select => {
-            const embeddedElements = document.getElementsByClassName('embedded');
-            if (embeddedElements.length == 0) return false;
-            const previousSibling = embeddedElements.item(embeddedElements.length - 1);
-            const newDiv = document.createElement('div');
-            newDiv.className = 'embedded';
-            const label = document.createElement('label');
-            label.innerHTML = 'Tag: ';
-            newDiv.append(label, select);
-            previousSibling.classList.add('mb-1');
-            previousSibling.after(newDiv);
-            return true;
-        }
-    },
     gameSearch: {
         addSelect: select => {
             const consoleSelect = document.querySelector('h3 + div select');
@@ -90,6 +75,7 @@ const Pages = {
         }
     }
 };
+Pages.claims = Pages.setRequestList;
 
 
 function textToInt(text) {
@@ -130,14 +116,13 @@ function updateTotals(rows) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
     const allRows = [...document.querySelectorAll('table.table-highlight tr:not(.do-not-highlight)')];
     if (allRows.length == 0) return;
     const allTags = getAllTags(allRows);
     if (allTags.length <= 2) return; // only '-' and another
 
     let currentTag = '-';
-    const pageName = window.location.pathname.match(/\/([^/]*).php/)[1];
+    const pageName = window.location.pathname.match(/\/([^/]*)(?:.php|\/)/)[1];
     const select = buildSelect(allTags, currentTag);
     if (!Pages[pageName].addSelect(select)) return;
 
