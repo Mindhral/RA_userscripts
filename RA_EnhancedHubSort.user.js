@@ -539,7 +539,7 @@ function customize() {
     });
     const inBacklogCheckbox = document.getElementById('inBacklogCheckbox');
     // we don't load that information in advance as it can change while the page is on screen
-    visibilityFunctions.push(row => !inBacklogCheckbox.checked || row.element.querySelector('button[id^="play-list"]').title.startsWith('Remove'));
+    visibilityFunctions.push(row => !inBacklogCheckbox.checked || row.element.querySelector('button[title^="Remove"]'));
     inBacklogCheckbox.addEventListener('change', checkVisibilities);
 
     const createFiltersObj = () => {
