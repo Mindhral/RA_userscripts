@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_GameListRandom
 // @namespace    RA
-// @version      0.2
+// @version      0.2.1
 // @description  On Game list pages (Want to play, All games), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated
 // @author       Mindhral
 // @match        https://retroachievements.org/gameList.php*
@@ -38,7 +38,7 @@ function addButton(label) {
 }
 
 function addRandomGameButton() {
-    const gamesCount = parseInt(document.querySelector('article > h2 + div')?.innerText.match(/\d+/)[0]) || 0
+    const gamesCount = parseInt(document.querySelector('article > h2 + p')?.innerText.match(/\d+/)[0]) || 0
     if (!gamesCount) return; // offset > gamesCount ?
     const button = addButton('Random game');
     if (!button) return;
@@ -96,6 +96,7 @@ function addShuffleButton() {
 document.addEventListener("DOMContentLoaded", () => {
     // special case of hubs list
     const consoleId = new URLSearchParams(window.location.search).get('c');
+    // Hubs and Events
     if(consoleId == '100' || consoleId == '101') return;
     // presence of pagination
     if (document.querySelector('article > div.text-right')) {
