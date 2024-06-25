@@ -904,6 +904,8 @@ const CustomUnlockCounts = (() => {
         if (!Settings.active) return;
         const allRows = document.querySelectorAll('#set-achievements-list li');
         if (allRows.length == 0) return;
+        const chartDiv = document.getElementById('chart_distribution');
+        if (!chartDiv) return;
 
         const totalPlayers = allRows[0].querySelector('span[title="Total players"]')?.innerText;
 
@@ -987,7 +989,6 @@ const CustomUnlockCounts = (() => {
             });
         });
 
-        const chartDiv = document.getElementById('chart_distribution');
         const replaceHcValues = () => {
             const tbody = chartDiv.getElementsByTagName('tbody')?.[0];
             if (!tbody) return false;
