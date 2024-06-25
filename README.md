@@ -114,7 +114,7 @@ Modifies the sorting of achievements on a game page.
 
 ![grouping save](/assets/EnhancedCheevosSort_save.png)
 
-### Enhanced Filters
+### Hardcore Unlocks Filter
 
 Replaces the filter which hides unlocked achievements on a game page by a filter which allows to choose to hide all unlocked achievements or just the ones unlocked in hardcore.
 
@@ -124,37 +124,25 @@ Replaces the filter which hides unlocked achievements on a game page by a filter
 
 ![hide unlocked](/assets/EnhancedCheevosFilters_hide_unlocked.png)
 
-### Link Unofficial Achievements
-
-Adds a link on game page to view the unofficial achievements for the game, if any. This reloads the page. The link is displayed whether there are unofficial achievements or not.
-
-![link to unofficial achievements](/assets/LinkUnofficalAchievements_link.png)
-
-### Collapse Achievements List
-
-Adds a collapse button above the achievements list, allowing to get faster to the following sections.
-
-![achievements list not collapsed](/assets/CollapseCheevosList_no.png)
-
-![achievements list collapsed](/assets/CollapseCheevosList_yes.png)
-
-A setting allows to choose whether to collapse the list on page load or not (never, always, remember the last state).
-
-### Custom Locked Badges
-
-Allows to replace black and white version of locked achievement badges by the colored version, or by a generic spoiler-free one. It works on the achievements list on a game page, the *Beaten Game Credit* pop-up on the same page, and on the achievement page.
-
-Optionally, the badge can be replaced by the colored version or the black and white version on mouseover.
-
-Both behaviors can be selected on settings page. Some combinations are disabled, as they would not make sense or would be redundant.
-
-![Custom locked badge settings](/assets/CustomLocked_settings.png)
-
 ### Beaten Game Credit Filter
 
 Adds a filter on *Beaten Game Credit* widgets to only show remaining achievements (not unlocked). If some achievements were unlocked in both modes (softcore and hardcore), a checkbox is available to only hide achievements obtained in hardcore.
 
 ![beaten game credit filter none](/assets/BeatenGameFilter_none.png) ![beaten game credit filter remaining](/assets/BeatenGameFilter_remaining.png) ![beaten game credit filter remaining hardcore](/assets/BeatenGameFilter_remaining_hc.png)
+
+### Compare Unlocks Filter
+
+Adds a filter to Compare Unlocks page to hide achievements rows depending on their status (locked, unlocked in any mode, unlocked in hardcore) for both players:
+
+![compare unlocks status filter](/assets/CompareUnlocksFilter_status.png)
+
+The last selected value is remembered.
+
+### Link Unofficial Achievements
+
+Adds a link on game page to view the unofficial achievements for the game, if any. This reloads the page. The link is displayed whether there are unofficial achievements or not.
+
+![link to unofficial achievements](/assets/LinkUnofficalAchievements_link.png)
 
 ### Links to User's History
 
@@ -171,6 +159,16 @@ The style of the link can be edited in the settings.
 Adds links to *Compare Unlocks* page on the scores from the high score section.
 
 ![high scores links](/assets/CustomCheevosList_highScoresLinks.png)
+
+### Collapse Achievements List
+
+Adds a collapse button above the achievements list, allowing to get faster to the following sections.
+
+![achievements list not collapsed](/assets/CollapseCheevosList_no.png)
+
+![achievements list collapsed](/assets/CollapseCheevosList_yes.png)
+
+A setting allows to choose whether to collapse the list on page load or not (never, always, remember the last state).
 
 ### Custom Unlock Counts
 
@@ -191,6 +189,16 @@ Hardcore data uses the hardcore unlocks, but also the hardcore players count as 
 
 Progress bars are not modified (except for the mouseover text), and the achievements page is not supported by this feature at the moment.
 
+### Custom Locked Badges
+
+Allows to replace black and white version of locked achievement badges by the colored version, or by a generic spoiler-free one. It works on the achievements list on a game page, the *Beaten Game Credit* pop-up on the same page, and on the achievement page.
+
+Optionally, the badge can be replaced by the colored version or the black and white version on mouseover.
+
+Both behaviors can be selected on settings page. Some combinations are disabled, as they would not make sense or would be redundant.
+
+![Custom locked badge settings](/assets/CustomLocked_settings.png)
+
 ### Custom Leaderboards Scrolling
 
 Modifies the scrolling of the leaderboards list found on a game, achievement or leaderboard pages.
@@ -204,14 +212,6 @@ Modifies the scrolling of the leaderboards list found on a game, achievement or 
 ![custom leaderboards scrolling highlight](/assets/CustomLBScroll_highlight.png)
 
 4. On a leaderboard page, a parameter allows to scroll to the current leaderboard on page load.
-
-### Compare Unlocks Filter
-
-Adds a filter to Compare Unlocks page to hide achievements rows depending on their status (locked, unlocked in any mode, unlocked in hardcore) for both players:
-
-![compare unlocks status filter](/assets/CompareUnlocksFilter_status.png)
-
-The last selected value is remembered.
 
 ## RA_GameListTagFilter
 

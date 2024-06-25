@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.3
+// @version      1.4
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -34,7 +34,7 @@ function setVisible(element, visible) {
 
 // Sets the visibility of the table row containing the given element
 function setRowVisibility(element, visible) {
-    setVisible(element.closest('tr'), visible);
+    setVisible(element.closest('tr, p'), visible);
 }
 
 function getElementByXpath(root, xpath) {
@@ -81,10 +81,42 @@ function parseUSInt(str, def = 0) {
 
 const settingsHtml = `<div class="component">
   <h4>Achievements list customization</h4>
-  <table class="table-highlight"><tbody>
-    <tr><th colspan="2"><label><input id="enhancedCheevosSortActive" type="checkbox"> Enhanced Sort Options</label></th></tr>
-    <tr><th colspan="2"><label><input id="enhancedCheevosFiltersActive" type="checkbox"> Enhanced Filters</label></th></tr>
-    <tr><th colspan="2"><label><input id="linkUnofficalActive" type="checkbox"> Link Unofficial Achievements</label></th></tr>
+  <table class="table-highlight">
+  <colgroup><col style="width: 300px;"></col></colgroup>
+  <tbody>
+    <tr><th colspan="2">Filtering and sorting</th></tr>
+    <tr>
+      <td><label for="enhancedCheevosSortActive">Enhanced Sort Options</label></td>
+      <td><input id="enhancedCheevosSortActive" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td><label for="enhancedCheevosFiltersActive">Hardcore Unlocks Filter</label></td>
+      <td><input id="enhancedCheevosFiltersActive" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td><label for="filterBeatenCreditListActive">Beaten Game Credit Filter</label></td>
+      <td><input id="filterBeatenCreditListActive" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td><label for="compareFilterActive">Compare Unlocks Filter</label></td>
+      <td><input id="compareFilterActive" type="checkbox"></td>
+    </tr>
+    <tr><th colspan="2">Links</th></tr>
+    <tr>
+      <td><label for="linkUnofficalActive">Link Unofficial Achievements</label></td>
+      <td><input id="linkUnofficalActive" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><label for="historyLinksActive">Links to User's History</label></td>
+      <td>
+        <p><input id="historyLinksActive" type="checkbox"></p>
+        <p>CSS Style: <input id="historyLinksStyle" type="text"> <span id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td><label for="highScoreLinksActive">Link High Scores to Compare Page</label></td>
+      <td><input id="highScoreLinksActive" type="checkbox"></td>
+    </tr>
     <tr><th colspan="2"><label><input id="collapseCheevosListActive" type="checkbox"> Collapse Achievements List</label></th></tr>
     <tr>
       <td>Collapse on page load</td>
@@ -92,6 +124,15 @@ const settingsHtml = `<div class="component">
         <label><input type="radio" name="collapseOnLoad" value="never"> never</label>
         <label><input type="radio" name="collapseOnLoad" value="remember"> remember</label>
         <label><input type="radio" name="collapseOnLoad" value="always"> always</label>
+      </td>
+    </tr>
+    <tr><th colspan="2"><label><input id="customUnlockCountsActive" type="checkbox"> Custom Unlock Counts</label></th></tr>
+    <tr>
+      <td>Main unlock data</td>
+      <td>
+        <label title="Hardcore unlocks displayed, total unlocks on the bar's mouseover"><input type="radio" name="unlockCountData" value="hardcore"> hardcore</label>
+        <label title="Total unlocks displayed, hardcore on the bar's mouseover"><input type="radio" name="unlockCountData" value="total"> total</label>
+        <label title="Both displayed in parallel"><input type="radio" name="unlockCountData" value="both"> both</label>
       </td>
     </tr>
     <tr><th colspan="2"><label><input id="customLockedActive" type="checkbox"> Custom Locked Badges</label></th></tr>
@@ -111,22 +152,6 @@ const settingsHtml = `<div class="component">
         <label title="Unlocked badge"><input type="radio" name="mouseoverLocked" value="colored"> colored</label>
       </td>
     </tr>
-    <tr><th colspan="2"><label><input id="filterBeatenCreditListActive" type="checkbox"> Beaten Game Credit Filter</label></th></tr>
-    <tr><th colspan="2"><label><input id="historyLinksActive" type="checkbox"> Links to User's History</label></th></tr>
-    <tr>
-      <td>Link CSS style</td>
-      <td><input id="historyLinksStyle" type="text"> <div id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</div></td>
-    </tr>
-    <tr><th colspan="2"><label><input id="highScoreLinksActive" type="checkbox"> Link High Scores to Compare Page</label></th></tr>
-    <tr><th colspan="2"><label><input id="customUnlockCountsActive" type="checkbox"> Custom Unlock Counts</label></th></tr>
-    <tr>
-      <td>Main unlock data</td>
-      <td>
-        <label title="Hardcore unlocks displayed, total unlocks on the bar's mouseover"><input type="radio" name="unlockCountData" value="hardcore"> hardcore</label>
-        <label title="Total unlocks displayed, hardcore on the bar's mouseover"><input type="radio" name="unlockCountData" value="total"> total</label>
-        <label title="Both displayed in parallel"><input type="radio" name="unlockCountData" value="both"> both</label>
-      </td>
-    </tr>
     <tr><th colspan="2"><label><input id="scrollableLBsActive" type="checkbox"> Custom Leaderboards Scrolling</label></th></tr>
     <tr>
       <td>Max height on game page</td>
@@ -144,8 +169,8 @@ const settingsHtml = `<div class="component">
       <td>Auto scroll to current LB</td>
       <td><input id="scrollableLBsAutoScroll" type="checkbox"></td>
     </tr>
-    <tr><th colspan="2"><label><input id="compareFilterActive" type="checkbox"> Compare Unlocks Filter</label></th></tr>
-  </tbody></table>
+  </tbody>
+  </table>
 </div>`;
 
 const EnhancedCheevosSort = (() => {
