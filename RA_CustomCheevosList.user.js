@@ -49,6 +49,11 @@ function getElementsByXpath(root, xpath) {
     return nodes;
 }
 
+// authenticated user
+const getCurrentUser = () => document.querySelector('div.dropdown-menu-right div.dropdown-header')?.textContent;
+
+const getGameId = () => window.location.pathname.split('/').at(-1);
+
 // Handling "Beaten Game Credit" modals when they are loaded (one per button)
 function handleBeatenModal(nodeCallback) {
     const newNodesCallback = records => records.forEach(record => nodeCallback(record.target));
@@ -73,6 +78,17 @@ function createOption(value, labelTxt, select, title = null) {
     if (title) option.title = title;
     select.append(option);
     return option;
+}
+
+function basicSettingsPage(chekboxId, settingsKey, settings) {
+    return () => {
+        const activeCheckbox = document.getElementById(chekboxId);
+        activeCheckbox.checked = settings.active;
+        activeCheckbox.addEventListener('change', () => {
+            settings.active = activeCheckbox.checked;
+            GM_setValue(settingsKey, settings);
+        });
+    }
 }
 
 function parseUSInt(str, def = 0) {
@@ -269,14 +285,7 @@ const EnhancedCheevosSort = (() => {
         groupLast: false
     });
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('enhancedCheevosSortActive');
-        activeCheckbox.checked = Settings.active;
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('enhancedSort', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('enhancedCheevosSortActive', 'enhancedSort', Settings);
 
     function gamePage() {
         if (!Settings.active) return;
@@ -423,14 +432,7 @@ const EnhancedCheevosFilters = (() => {
 
     const Settings = loadSettings('enhancedFilters', DefaultSettings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('enhancedCheevosFiltersActive');
-        activeCheckbox.checked = Settings.active;
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('enhancedFilters', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('enhancedCheevosFiltersActive', 'enhancedFilters', Settings);
 
     function gamePage() {
         if (!Settings.active) return;
@@ -492,14 +494,7 @@ const LinkUnofficalAchievements = (() => {
 
     const Settings = loadSettings('linkUnoffical', DefaultSettings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('linkUnofficalActive');
-        activeCheckbox.checked = Settings.active;
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('linkUnoffical', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('linkUnofficalActive', 'linkUnoffical', Settings);
 
     function gamePage() {
         if (!Settings.active) return;
@@ -690,14 +685,7 @@ const FilterBeatenCreditList = (() => {
 
     const Settings = loadSettings('filterBeatenCreditList', DefaultSettings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('filterBeatenCreditListActive');
-        activeCheckbox.checked = Settings.active;
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('filterBeatenCreditList', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('filterBeatenCreditListActive', 'filterBeatenCreditList', Settings);
 
     function gamePage() {
         if (!Settings.active) return;
@@ -830,7 +818,7 @@ const HistoryLinks = (() => {
         if (!Settings.active) return;
         const achievementsList = document.getElementById('set-achievements-list');
         if (achievementsList == null) return;
-        const currentUser = document.querySelector('div.dropdown-menu-right div.dropdown-header')?.textContent;
+        const currentUser = getCurrentUser();
         if (!currentUser) return;
         getElementsByXpath(achievementsList, '//p[contains(text(), "Unlocked")]').forEach(p => {
             p.innerHTML = p.innerText.replace(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/, (fullMatch, date) => {
@@ -853,23 +841,15 @@ const LinkHighScore2Compare = (() => {
 
     const Settings = loadSettings('highScoreLinks', DefaultSettings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('highScoreLinksActive');
-        activeCheckbox.checked = Settings.active;
-
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            GM_setValue('highScoreLinks', Settings);
-        });
-    }
+    const settingsPage = basicSettingsPage('highScoreLinksActive', 'highScoreLinks', Settings);
 
     function gamePage() {
         if (!Settings.active) return;
         const achievementsList = document.getElementById('set-achievements-list');
         if (achievementsList == null) return;
-        const currentUser = document.querySelector('div.dropdown-menu-right div.dropdown-header')?.textContent;
+        const currentUser = getCurrentUser();
         if (!currentUser) return;
-        const gameId = window.location.pathname.split('/').at(-1);
+        const gameId = getGameId();
 
         const highscoresDiv = document.getElementById('highscores');
         highscoresDiv?.querySelectorAll('tr:not(.do-not-highlight)').forEach(tr => {
@@ -1153,18 +1133,9 @@ const GameCompareFilter = (() => {
 
     const Settings = loadSettings('compareFilter', DefaultSettings);
 
-    function saveSettings() {
-        GM_setValue('compareFilter', Settings);
-    }
+    const saveSettings = () => GM_setValue('compareFilter', Settings);
 
-    function settingsPage() {
-        const activeCheckbox = document.getElementById('compareFilterActive');
-        activeCheckbox.checked = Settings.active;
-        activeCheckbox.addEventListener('change', () => {
-            Settings.active = activeCheckbox.checked;
-            saveSettings();
-        });
-    }
+    const settingsPage = basicSettingsPage('compareFilterActive', 'compareFilter', Settings);
 
     const hideFilterHTML = `<div class="grid gap-y-1">
   <label class="text-xs font-bold" for="hideSelect">Hide</label>
@@ -1198,7 +1169,7 @@ const GameCompareFilter = (() => {
                 setVisible(row, filter.visibilityFunction(imgs[0]?.className, imgs[1]?.className));
             });
             Settings.lastStatus = hideSelect.value;
-            saveSettings();
+            GM_setValue('compareFilter', Settings);
         });
         if (Settings.lastStatus) {
             hideSelect.value = Settings.lastStatus;
