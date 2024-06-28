@@ -124,6 +124,17 @@ Replaces the filter which hides unlocked achievements on a game page by a filter
 
 ![hide unlocked](/assets/EnhancedCheevosFilters_hide_unlocked.png)
 
+### Author Filter
+
+On sets with multiple authors, this makes the counter for each author clickable, to filter the achievements they created.
+
+> [!WARNING]
+> This requires a web API call (which is only done when you click on a counter for the first time after the page load).
+> In order to do that, the scripts stores your API Key in its own local storage when you enable the feature in the settings.
+> This storage should be isolated from other sites, extensions, and scripts, but can be read by someone with access to your OS profile's data and a bit of technical knowledge.
+
+![hide unlocked](/assets/CustomCheevosList_authorFilter.png)
+
 ### Beaten Game Credit Filter
 
 Adds a filter on *Beaten Game Credit* widgets to only show remaining achievements (not unlocked). If some achievements were unlocked in both modes (softcore and hardcore), a checkbox is available to only hide achievements obtained in hardcore.

@@ -15,6 +15,7 @@
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_deleteValue
 // ==/UserScript==
 
 // Loads the settings for the given key with default values
@@ -95,6 +96,52 @@ function parseUSInt(str, def = 0) {
     return parseInt(str?.replaceAll(',', '') ?? def);
 }
 
+const APIKey = (() => {
+    let key;
+    const needingFeatures = new Set();
+
+    const get = () => {
+        if (!key) key = GM_getValue('APIKey', null);
+        return key;
+    };
+
+    const neededFor = feature => {
+        if (needingFeatures.size == 0) {
+            key = document.querySelector('button[title*="API"] span').innerText;
+            GM_setValue('APIKey', key);
+        }
+        needingFeatures.add(feature);
+    };
+
+    const notNeededFor = feature => {
+        if (needingFeatures.delete(feature) && needingFeatures.size == 0) {
+            GM_deleteValue('APIKey');
+        }
+    }
+
+    return { get, neededFor: (feature, needed) => needed ? neededFor(feature) : notNeededFor(feature) };
+})();
+
+const withGameExtended = (() => {
+    let data;
+
+    return callback => {
+        if (data) {
+            callback(data);
+            return;
+        }
+        const flag = (new URLSearchParams(window.location.search).get('f') == 5) ? 5 : 3
+        fetch(`https://retroachievements.org/API/API_GetGameExtended.php?i=${getGameId()}&f=${flag}&z=${getCurrentUser()}&y=${APIKey.get()}`)
+        .then(response => response.json())
+        .then(json => {
+            data = json;
+            callback(data);
+        }).catch(error => {
+            console.log(error);
+        });
+    };
+})();
+
 const settingsHtml = `<div class="component">
   <h4>Achievements list customization</h4>
   <table class="table-highlight">
@@ -108,6 +155,10 @@ const settingsHtml = `<div class="component">
     <tr>
       <td><label for="enhancedCheevosFiltersActive">Hardcore Unlocks Filter</label></td>
       <td><input id="enhancedCheevosFiltersActive" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td><label for="authorFiltersActive">Author Filter</label> <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span></td>
+      <td><input id="authorFiltersActive" type="checkbox"></td>
     </tr>
     <tr>
       <td><label for="filterBeatenCreditListActive">Beaten Game Credit Filter</label></td>
@@ -482,6 +533,84 @@ const EnhancedCheevosFilters = (() => {
                                 createUnlockRadioLabel('none', null));
             checkboxLabel.replaceWith(unlockedSpan);
         })();
+    }
+
+    return { gamePage, settingsPage };
+})();
+
+const CheevosAuthorFilter = (() => {
+    const DefaultSettings = {
+        active: false
+    };
+
+    const Settings = loadSettings('cheevosAuthorFilter', DefaultSettings);
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('authorFiltersActive');
+        activeCheckbox.checked = Settings.active;
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            GM_setValue('cheevosAuthorFilter', Settings);
+            APIKey.neededFor('cheevosAuthorFilter', Settings.active);
+        });
+    };
+
+    const DefaultLinkTitle = 'Filter achievements from this author';
+
+    function gamePage() {
+        if (!Settings.active) return;
+        const achievementsList = document.getElementById('set-achievements-list');
+        if (achievementsList == null) return;
+
+        const authorsDiv = getElementByXpath(document, '//div[@id="achievement"]/div[span[text()="Authors:"]]');
+        if (!authorsDiv) return; // only 1 author
+        const authorSpans = authorsDiv.querySelectorAll('span[x-data]');
+        if (authorSpans.length < 2) return; // should not happen because of the plural Authors above
+        authorSpans.forEach(span => {
+            const author = span.innerText;
+            let nextNode = span.nextSibling;
+            // '(' + {count} + ')' or '), '
+            const countMatch = nextNode.wholeText.match(/\((\d+)(\).*)/);
+            while (nextNode?.nodeType == Node.TEXT_NODE) {
+                authorsDiv.removeChild(nextNode);
+                nextNode = span.nextSibling;
+            }
+            const newLink = document.createElement('a');
+            newLink.innerText = countMatch[1]; // the actual count
+            newLink.style.cursor = 'pointer';
+            newLink.title = DefaultLinkTitle;
+            newLink.addEventListener('click', () => filterAuthor(author, newLink));
+            span.after(' (', newLink, countMatch[2]);
+        });
+        addStyleBlock('.hidden-author { display:none; }');
+
+        let currentAuthor;
+        let currentLink;
+        function filterAuthor(author, link) {
+            if (currentLink) {
+                currentLink.style.removeProperty('text-decoration');
+                currentLink.title = DefaultLinkTitle;
+            }
+
+            if (author == currentAuthor) {
+                currentAuthor = null;
+                currentLink = null;
+            } else {
+                currentAuthor = author;
+                link.style['text-decoration'] = 'underline';
+                link.title = 'Cancel the filter';
+                currentLink = link;
+            }
+
+            withGameExtended(data => {
+                [...achievementsList.children].forEach(row => {
+                    const cheevosId = row.querySelector('a').href.split('/').at(-1);
+                    const cheevosAuthor = data.Achievements[cheevosId].Author;
+                    const method = (currentAuthor && cheevosAuthor != currentAuthor) ? 'add' : 'remove';
+                    row.classList[method]('hidden-author');
+                });
+            });
+        }
     }
 
     return { gamePage, settingsPage };
@@ -1184,6 +1313,7 @@ const Pages = {
     game: () => {
         EnhancedCheevosSort.gamePage();
         EnhancedCheevosFilters.gamePage();
+        CheevosAuthorFilter.gamePage();
         LinkUnofficalAchievements.gamePage();
         CollapseAchievementsList.gamePage();
         CustomLockedBadges.gamePage();
@@ -1213,6 +1343,7 @@ const Pages = {
 
         EnhancedCheevosSort.settingsPage();
         EnhancedCheevosFilters.settingsPage();
+        CheevosAuthorFilter.settingsPage();
         LinkUnofficalAchievements.settingsPage();
         CollapseAchievementsList.settingsPage();
         CustomLockedBadges.settingsPage();
