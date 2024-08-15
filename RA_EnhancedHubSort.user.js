@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.6.2
+// @version      0.6.3
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -539,7 +539,7 @@ function customize() {
     });
     const inBacklogCheckbox = document.getElementById('inBacklogCheckbox');
     // we don't load that information in advance as it can change while the page is on screen
-    visibilityFunctions.push(row => !inBacklogCheckbox.checked || row.element.querySelector('button[title^="Remove"]'));
+    visibilityFunctions.push(row => !inBacklogCheckbox.checked || row.element.querySelector('button[title^="Remove from Want"]'));
     inBacklogCheckbox.addEventListener('change', checkVisibilities);
 
     const createFiltersObj = () => {
