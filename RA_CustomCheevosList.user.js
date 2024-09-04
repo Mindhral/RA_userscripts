@@ -980,22 +980,17 @@ const LinkHighScore2Compare = (() => {
         if (!currentUser) return;
         const gameId = getGameId();
 
-        const highscoresDiv = document.getElementById('highscores');
-        highscoresDiv?.querySelectorAll('tr:not(.do-not-highlight)').forEach(tr => {
+        const highscoresRows = getElementsByXpath(document, '//h2[text()="Most Points Earned"]/..//tbody/tr');
+        highscoresRows.forEach(tr => {
             const scoreCell = tr.children.item(2);
-            const scoreSpan = scoreCell.firstElementChild;
-            // moving the help text and cursor from the score span to the entire cell
-            scoreCell.classList.add('cursor-help');
-            scoreSpan.classList.remove('cursor-help');
-            scoreCell.title = scoreSpan.title;
-            scoreSpan.removeAttribute('title');
+            const scorePara = scoreCell.querySelector('p');
             // creating the link
             const userId = tr.querySelector('a').href.split('/').at(-1);
             if (userId === currentUser) return;
             const newLink = document.createElement('a');
             newLink.href = `/user/${userId}/game/${gameId}/compare`;
-            newLink.append(scoreSpan);
-            scoreCell.append(newLink);
+            scorePara.replaceWith(newLink);
+            newLink.append(scorePara);
         });
     }
 

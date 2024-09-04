@@ -167,9 +167,9 @@ The style of the link can be edited in the settings.
 
 ### Link High Scores to Compare Page
 
-Adds links to *Compare Unlocks* page on the scores from the high score section.
+Adds links to *Compare Unlocks* page on the scores from the *Most Points Earned* or the dates from the *Latest Masters" section.
 
-![high scores links](/assets/CustomCheevosList_highScoresLinks.png)
+![high scores links](/assets/CustomCheevosList_highScoresLinks.png) ![high scores links](/assets/CustomCheevosList_highScoresLinks2.png)
 
 ### Collapse Achievements List
 
