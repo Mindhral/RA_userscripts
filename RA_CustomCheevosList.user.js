@@ -107,7 +107,7 @@ const APIKey = (() => {
 
     const neededFor = feature => {
         if (needingFeatures.size == 0) {
-            key = document.querySelector('button[title*="API"] span').innerText;
+            key = JSON.parse(document.getElementById('app').dataset.page).props.userSettings.apiKey;
             GM_setValue('APIKey', key);
         }
         needingFeatures.add(feature);
