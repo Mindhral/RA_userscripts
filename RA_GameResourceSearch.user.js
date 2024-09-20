@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         RA_GameResourceSearch
 // @namespace    RA
-// @version      0.2.4
+// @version      0.2.5
 // @description  Adds (customizable) links to game pages to search for resources on the game.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/game/*
-// @match        https://retroachievements.org/controlpanel.php*
+// @match        https://retroachievements.org/settings*
 // @match        https://retroachievements.org/setRequestList.php*
 // @exclude      https://retroachievements.org/game/*/*
 // @run-at       document-start
@@ -192,82 +192,82 @@ function setVisible(element, visible) {
     element.classList[method]('hidden');
 }
 
-const settingsDivHtml = `<div class="component">
-	<style>
-		.clickable { cursor: pointer; user-select: none; vertical-align: sub; font-size: 1.5em; }
-	</style>
-	<h4>Game Resource Search</h4>
-	<table class="table-highlight">
-		<tbody>
-			<tr>
-				<td><div class="flex">
-					<select id="grSearchSelect"></select>
-                    <span id="grSearchAdd" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new empty search">
-                    	<img style="width: 1.1em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAZCAYAAAA8CX6UAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAB7SURBVEhL7ZTRCoAgDEW1r4j6/0+rPsPuNqmR4Zy99OCBixPkOBUMIDkyI69EJAGZVYiRljIrskt5M+WxibzhhhSduUSKA1mkFNwidQ3U2SXr6ohk6pgsc132c516AK6aRTWaRTVok95XKxgimyGyGSKb/4n4P5LyCyGcQrkwJuTlwmgAAAAASUVORK5CYII" />
-                    </span>
-                    <span id="grSearchClone" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new search based on the current one">
-                    	<img style="width: 1.6em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAADNSURBVEhL3ZIBCsMgDEV1d2jZ/S832A7R5ds40tTqtxYGffAx0MSfpAaShdRTtCPq2WIRNCwT4++qWfRZw5WHnpegjbxFm4lYE3bibPQSTQgATPI+W6LxE6HD6r7NrnNxEeT571o7Uyb4ns2Ocm0zHtokx6CW70FNlwmodQz8XcjvfsL2EsReJSiTNLJRL811HQEzpg55u0lsx1YjDE1Swt+VmpTztAlTh7zu13WG/5ikHRY0wn3+yegTTvUIalxh0uQ+T5jaaQViXSF8AV7KhUyGTd36AAAAAElFTkSuQmCC" />
-                    </span>
-				</div></td>
-				<td><label><input id="grSearchActive" type="checkbox"> active</label></td>
-				<td>
-					<div id="grSearchDown" class="icon clickable" title="move search down in the list">🔽</div><div id="grSearchUp" class="icon clickable" title="move search up in the list">🔼</div>
-					<div id="grSearchSave" class="icon clickable" title="save current Search">💾</div>
-					<div id="grSearchReset" class="icon clickable" title="reset search to default" style="font-size: 2em">↻</div>
-					<div id="grSearchDelete" class="icon clickable hidden" title="delete search" style="font-size: 2em">🗑</div>
-				</td>
-			</tr>
-			<tr>
-				<td>Displayed name</td>
-				<td colspan="2"><input id="grSearchLabel" type="text" size="25" maxlength="25" placeholder="label"></td>
-			</tr>
-			<tr>
-				<td>Url pattern</td>
-				<td colspan="2">
-					<input id="grSearchURL" type="text" style="width: 95%;" placeholder="url">
-					<div class="icon" title="placeholders: \${gameName}, \${consoleName}" style="cursor: help;">💡</div>
-				</td>
-			</tr>
-			<tr>
-				<td>Console names</td>
-				<td>
-	                <select id="grSearchConsoleSelect"></select>
-                	<div class="icon" title="Load &quot;Most Requested&quot; page to refresh list" style="cursor: help;">💡</div>
-                </td>
-				<td>
-					<input id="grSearchConsoleName" type="text" placeholder="console name">
-					<div class="icon" title="Leave empty to keep default name" style="cursor: help;">💡</div>
-				</td>
-			</tr>
-			<tr>
-				<td>Console filter</td>
-				<td>
-					<label><input id="grSearchConsoleIncl" type="radio" name="grSearchConsoleRadio" checked=""> include</label>
-					<label><input id="grSearchConsoleExcl" type="radio" name="grSearchConsoleRadio"> exclude</label>
-				</td>
-				<td>
-					<input id="grSearchConsoleIds" type="text" placeholder="console ids">
-					<div class="icon" title="consoles ids separated by commas" style="cursor: help;">💡</div>
-				</td>
-			</tr>
-			<tr>
-				<td>Tag filter</td>
-				<td>
-					<label><input id="grSearchTagsIncl" type="radio" name="grSearchTagsRadio" checked=""> include</label>
-					<label><input id="grSearchTagsExcl" type="radio" name="grSearchTagsRadio"> exclude</label>
-				</td>
-				<td>
-					<input id="grSearchTagsList" type="text" placeholder="tags">
-					<div class="icon" title="comma separated list of tags, case insensitive, 'none' for games without tags" style="cursor: help;">💡</div>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+const settingsDivHtml = `<div class="text-card-foreground rounded-lg border border-embed-highlight bg-embed shadow-sm w-full">
+  <style>
+    .clickable { cursor: pointer; user-select: none; vertical-align: sub; font-size: 1.5em; }
+  </style>
+  <div class="flex flex-col space-y-1.5 p-6 pb-4">
+    <h4 class="mb-0 border-b-0 text-2xl font-semibold leading-none tracking-tight">Game Resource Search</h4>
+  </div>
+  <form><div class="p-6 pt-0"><table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
+    <tr>
+      <td><div class="flex">
+        <select id="grSearchSelect"></select>
+        <span id="grSearchAdd" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new empty search">
+          <img style="width: 1.1em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAZCAYAAAA8CX6UAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAAB7SURBVEhL7ZTRCoAgDEW1r4j6/0+rPsPuNqmR4Zy99OCBixPkOBUMIDkyI69EJAGZVYiRljIrskt5M+WxibzhhhSduUSKA1mkFNwidQ3U2SXr6ohk6pgsc132c516AK6aRTWaRTVok95XKxgimyGyGSKb/4n4P5LyCyGcQrkwJuTlwmgAAAAASUVORK5CYII" />
+        </span>
+        <span id="grSearchClone" style="cursor: pointer; margin: 0.2em 0 0 0.5em" title="new search based on the current one">
+          <img style="width: 1.6em;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAYAAADE6YVjAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAACxMAAAsTAQCanBgAAADNSURBVEhL3ZIBCsMgDEV1d2jZ/S832A7R5ds40tTqtxYGffAx0MSfpAaShdRTtCPq2WIRNCwT4++qWfRZw5WHnpegjbxFm4lYE3bibPQSTQgATPI+W6LxE6HD6r7NrnNxEeT571o7Uyb4ns2Ocm0zHtokx6CW70FNlwmodQz8XcjvfsL2EsReJSiTNLJRL811HQEzpg55u0lsx1YjDE1Swt+VmpTztAlTh7zu13WG/5ikHRY0wn3+yegTTvUIalxh0uQ+T5jaaQViXSF8AV7KhUyGTd36AAAAAElFTkSuQmCC" />
+        </span>
+      </div></td>
+      <td><label><input id="grSearchActive" type="checkbox"> active</label></td>
+      <td>
+        <div id="grSearchDown" class="icon clickable" title="move search down in the list">🔽</div><div id="grSearchUp" class="icon clickable" title="move search up in the list">🔼</div>
+        <div id="grSearchSave" class="icon clickable" title="save current Search">💾</div>
+        <div id="grSearchReset" class="icon clickable" title="reset search to default" style="font-size: 2em">↻</div>
+        <div id="grSearchDelete" class="icon clickable hidden" title="delete search" style="font-size: 2em">🗑</div>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Displayed name</th>
+      <td colspan="2"><input id="grSearchLabel" type="text" size="25" maxlength="25" placeholder="label"></td>
+    </tr>
+    <tr>
+      <th scope="row">Url pattern</th>
+      <td colspan="2">
+        <input id="grSearchURL" type="text" style="width: 95%;" placeholder="url">
+        <div class="icon" title="placeholders: \${gameName}, \${consoleName}" style="cursor: help;">💡</div>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Console names</th>
+      <td>
+        <select id="grSearchConsoleSelect"></select>
+        <div class="icon" title="Load &quot;Most Requested&quot; page to refresh list" style="cursor: help;">💡</div>
+      </td>
+      <td>
+        <input id="grSearchConsoleName" type="text" placeholder="console name">
+        <div class="icon" title="Leave empty to keep default name" style="cursor: help;">💡</div>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Console filter</th>
+      <td>
+        <label><input id="grSearchConsoleIncl" type="radio" name="grSearchConsoleRadio" checked=""> include</label>
+        <label><input id="grSearchConsoleExcl" type="radio" name="grSearchConsoleRadio"> exclude</label>
+      </td>
+      <td>
+        <input id="grSearchConsoleIds" type="text" placeholder="console ids">
+        <div class="icon" title="consoles ids separated by commas" style="cursor: help;">💡</div>
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Tag filter</th>
+      <td>
+        <label><input id="grSearchTagsIncl" type="radio" name="grSearchTagsRadio" checked=""> include</label>
+        <label><input id="grSearchTagsExcl" type="radio" name="grSearchTagsRadio"> exclude</label>
+      </td>
+      <td>
+        <input id="grSearchTagsList" type="text" placeholder="tags">
+        <div class="icon" title="comma separated list of tags, case insensitive, 'none' for games without tags" style="cursor: help;">💡</div>
+      </td>
+    </tr>
+  </tbody></table></div></form>
 </div>`
 
 function settingsPage() {
-    const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    const settingsDiv = xpathRes.iterateNext();
+    const xpathRes = document.evaluate("//div[h3[text()='Preferences']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const settingsDiv = xpathRes.iterateNext()?.parentElement;
     if (settingsDiv == null) return;
 
     // HTML creation
@@ -544,5 +544,5 @@ function gamePage() {
 }
 
 const urlPathname = window.location.pathname;
-const mainMethod = urlPathname.startsWith('/controlpanel.php') ? settingsPage : urlPathname.startsWith('/setRequestList.php') ? setRequestPage : gamePage;
+const mainMethod = urlPathname.startsWith('/settings') ? settingsPage : urlPathname.startsWith('/setRequestList.php') ? setRequestPage : gamePage;
 document.addEventListener("DOMContentLoaded", mainMethod);

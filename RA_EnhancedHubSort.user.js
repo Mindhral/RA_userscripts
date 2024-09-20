@@ -8,7 +8,7 @@
 // @match        https://retroachievements.org/game/*
 // @match        https://retroachievements.org/system/*/games*
 // @match        https://retroachievements.org/user/*/developer/sets*
-// @match        https://retroachievements.org/controlpanel.php*
+// @match        https://retroachievements.org/settings*
 // @exclude      https://retroachievements.org/game/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -652,17 +652,19 @@ function customize() {
     [savePageLink, saveDefaultLink, resetFiltersLink].forEach(link => link.addEventListener('click', ackIconClick));
 }
 
-const settingsHtml = `<div class="component">
-  <h4>Enhanced Hub Sort</h4>
-  <table class="table-highlight"><tbody>
+const settingsHtml = `<div class="text-card-foreground rounded-lg border border-embed-highlight bg-embed shadow-sm w-full">
+  <div class="flex flex-col space-y-1.5 p-6 pb-4">
+    <h4 class="mb-0 border-b-0 text-2xl font-semibold leading-none tracking-tight">Enhanced Hub Sort</h4>
+  </div>
+  <form><div class="p-6 pt-0"><table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr>
-      <td>Reset saved filters</td>
+      <th scope="row">Reset saved filters</th>
       <td>
         <button id="resetHubFilters" class="btn">Hubs</button> <button id="resetConsoleFilters" class="btn">Consoles</button> <button id="resetDevFilters" class="btn">Developers</button>
       </td>
     </tr>
     <tr>
-      <td>Console groups</td>
+      <th scope="row">Console groups</th>
       <td>
         <div>
           <select id="hubConsoleGroups" style="min-width: 10em;"></select>
@@ -680,12 +682,12 @@ const settingsHtml = `<div class="component">
         </div>
       </td>
     </tr>
-  </tbody></table>
+  </tbody></table></div></form>
 </div>`;
 
 function settingsPage() {
     // HTML creation
-    const settingsDiv = getElementByXpath(document, '//div[h3[text()="Settings"]]');
+    const settingsDiv = getElementByXpath(document, '//div[h3[text()="Preferences"]]')?.parentElement;
     if (!settingsDiv) return;
     const mainDiv = document.createElement('div');
     settingsDiv.insertAdjacentElement('afterend', mainDiv);
@@ -816,7 +818,7 @@ function settingsPage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (pageName == 'controlpanel.php') {
+    if (pageName == 'settings') {
         settingsPage();
         return;
     }

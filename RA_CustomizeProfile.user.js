@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.4
+// @version      1.4.1
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
-// @match        https://retroachievements.org/controlpanel.php*
+// @match        https://retroachievements.org/settings*
 // @exclude      https://retroachievements.org/user/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -64,9 +64,12 @@ function basicSettingsPage(chekboxId, settingsKey, settings) {
     }
 }
 
-const settingsHtml = `<div class="component">
-  <h4>Profile page customization</h4>
-  <table class="table-highlight"><tbody>
+const settingsHtml = `<div class="text-card-foreground rounded-lg border border-embed-highlight bg-embed shadow-sm w-full">
+  <div class="flex flex-col space-y-1.5 p-6 pb-4">
+    <h4 class="mb-0 border-b-0 text-2xl font-semibold leading-none tracking-tight">Profile page customization</h4>
+  </div>
+  <form><div class="p-6 pt-0">
+  <table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr><th colspan="2"><label><input id="hideMasterProgrActive" type="checkbox"> Hide Mastered Progression Option</label></th></tr>
     <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
     <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
@@ -75,7 +78,7 @@ const settingsHtml = `<div class="component">
     <tr><th colspan="2"><label><input id="highlightAwardsActive" type="checkbox"> Highlight Awards Checkboxes</label></th></tr>
     <tr><th colspan="2"><label><input id="progressLinkActive" type="checkbox"> Link Completion Progress to Compare Page</label></th></tr>
   </tbody></table>
-  <table class="table-highlight"><tbody>
+  <table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
     <tr><td>Only on own profile</td><td><input id="unEarnedOwnProfile" type="checkbox"></td></tr>
     <tr>
@@ -94,6 +97,7 @@ const settingsHtml = `<div class="component">
       </td>
     </tr>
   </tbody></table>
+  </div></form>
 </div>`;
 
 const HideMasteredProgress = (() => {
@@ -444,8 +448,8 @@ function profilePage() {
 }
 
 function settingsPage() {
-    const xpathRes = document.evaluate("//div[h3[text()='Settings']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    const settingsDiv = xpathRes.iterateNext();
+    const xpathRes = document.evaluate("//div[h3[text()='Preferences']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const settingsDiv = xpathRes.iterateNext()?.parentElement;
     if (!settingsDiv) return;
     const mainDiv = document.createElement('div');
     settingsDiv.insertAdjacentElement('afterend', mainDiv);
@@ -459,5 +463,5 @@ function settingsPage() {
 }
 
 const urlPathname = window.location.pathname;
-const mainMethod = urlPathname.startsWith('/controlpanel.php') ? settingsPage : profilePage;
+const mainMethod = urlPathname.startsWith('/settings') ? settingsPage : profilePage;
 document.addEventListener("DOMContentLoaded", mainMethod);

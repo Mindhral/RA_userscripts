@@ -9,7 +9,7 @@
 // @match        https://retroachievements.org/achievement/*
 // @match        https://retroachievements.org/leaderboardinfo.php*
 // @match        https://retroachievements.org/user/*/game/*/compare*
-// @match        https://retroachievements.org/controlpanel.php*
+// @match        https://retroachievements.org/settings*
 // @exclude      https://retroachievements.org/game/*/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
@@ -142,11 +142,13 @@ const withGameExtended = (() => {
     };
 })();
 
-const settingsHtml = `<div class="component">
-  <h4>Achievements list customization</h4>
-  <table class="table-highlight">
+const settingsHtml = `<div class="text-card-foreground rounded-lg border border-embed-highlight bg-embed shadow-sm w-full">
+  <div class="flex flex-col space-y-1.5 p-6 pb-4">
+    <h4 class="mb-0 border-b-0 text-2xl font-semibold leading-none tracking-tight">Achievements list customization</h4>
+  </div>
+  <form><div class="p-6 pt-0"><table>
   <colgroup><col style="width: 300px;"></col></colgroup>
-  <tbody>
+  <tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr><th colspan="2">Filtering and sorting</th></tr>
     <tr>
       <td><label for="enhancedCheevosSortActive">Enhanced Sort Options</label></td>
@@ -237,7 +239,7 @@ const settingsHtml = `<div class="component">
       <td><input id="scrollableLBsAutoScroll" type="checkbox"></td>
     </tr>
   </tbody>
-  </table>
+  </table></div></form>
 </div>`;
 
 const EnhancedCheevosSort = (() => {
@@ -980,15 +982,15 @@ const LinkHighScore2Compare = (() => {
         if (!currentUser) return;
         const gameId = getGameId();
 
-        const highscoresRows = getElementsByXpath(document, '//h2[text()="Most Points Earned"]/..//tbody/tr');
+        const highscoresRows = getElementsByXpath(document, '//h2[text()="Most Points Earned" or text()="Latest Masters"]/..//tbody/tr');
         highscoresRows.forEach(tr => {
-            const scoreCell = tr.children.item(2);
-            const scorePara = scoreCell.querySelector('p');
+            const scorePara = tr.children.item(2).querySelector('p,span');
             // creating the link
             const userId = tr.querySelector('a').href.split('/').at(-1);
             if (userId === currentUser) return;
             const newLink = document.createElement('a');
             newLink.href = `/user/${userId}/game/${gameId}/compare`;
+            newLink.title = 'Compare';
             scorePara.replaceWith(newLink);
             newLink.append(scorePara);
         });
@@ -1329,8 +1331,8 @@ const Pages = {
     user: () => {
         GameCompareFilter.comparePage();
     },
-    controlpanel: () => {
-        const settingsDiv = getElementByXpath(document, '//div[h3[text()="Settings"]]');
+    settings: () => {
+        const settingsDiv = getElementByXpath(document, '//div[h3[text()="Preferences"]]')?.parentElement;
         if (!settingsDiv) return;
         const mainDiv = document.createElement('div');
         settingsDiv.insertAdjacentElement('afterend', mainDiv);
