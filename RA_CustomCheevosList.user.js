@@ -16,6 +16,7 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
+// @grant        GM_addStyle
 // ==/UserScript==
 
 // Loads the settings for the given key with default values
@@ -61,12 +62,6 @@ function handleBeatenModal(nodeCallback) {
     const newNodesObserver = new MutationObserver(newNodesCallback);
     const newNodesConfig = { childList: true };
     document.querySelectorAll('body div[x-html="dynamicHtmlContent"]').forEach(div => newNodesObserver.observe(div, newNodesConfig));
-}
-
-function addStyleBlock(content) {
-    const styleBlock = document.createElement('style');
-    styleBlock.innerHTML = content;
-    document.head.appendChild(styleBlock);
 }
 
 function createOption(value, labelTxt, select, title = null) {
@@ -507,7 +502,7 @@ const EnhancedCheevosFilters = (() => {
                 }
             });
 
-            addStyleBlock('.hide-unlock .unlocked-row, .hide-hc-unlocks .hc-unlocked-row { display:none; }');
+            GM_addStyle('.hide-unlock .unlocked-row, .hide-hc-unlocks .hc-unlocked-row { display:none; }');
 
             let currentHidingClass;
             const createUnlockRadioLabel = (value, hidingClass) => {
@@ -584,7 +579,7 @@ const CheevosAuthorFilter = (() => {
             newLink.addEventListener('click', () => filterAuthor(author, newLink));
             span.after(' (', newLink, countMatch[2]);
         });
-        addStyleBlock('.hidden-author { display:none; }');
+        GM_addStyle('.hidden-author { display:none; }');
 
         let currentAuthor;
         let currentLink;
@@ -958,7 +953,7 @@ const HistoryLinks = (() => {
             });
         });
         if (Settings.style?.length > 0) {
-            addStyleBlock(`.historyLink { ${Settings.style }`);
+            GM_addStyle(`.historyLink { ${Settings.style }`);
         }
     }
 
@@ -1202,7 +1197,7 @@ const ScrollableLeaderboards = (() => {
         const maxHeight = pathname.startsWith('/game') ? Settings.gamePageMaxHeight : Settings.defaultMaxHeight;
         if (maxHeight <= 0) return;
 
-        addStyleBlock(`.lb-list { overflow-y: auto; max-height: ${maxHeight}em; scrollbar-width: ${Settings.thinScrollbar ? 'thin' : 'auto'}; scroll-snap-type: y mandatory; }
+        GM_addStyle(`.lb-list { overflow-y: auto; max-height: ${maxHeight}em; scrollbar-width: ${Settings.thinScrollbar ? 'thin' : 'auto'}; scroll-snap-type: y mandatory; }
         .lb-list > div { scroll-snap-align: start; }`);
 
         const lbDiv = lbTitle.nextElementSibling;
