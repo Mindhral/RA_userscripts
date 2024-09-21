@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.4.1
+// @version      1.4.2
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -448,6 +448,10 @@ function profilePage() {
 }
 
 function settingsPage() {
+    if (document.readyState != 'complete') {
+        window.addEventListener("load", settingsPage);
+        return;
+    }
     const xpathRes = document.evaluate("//div[h3[text()='Preferences']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     const settingsDiv = xpathRes.iterateNext()?.parentElement;
     if (!settingsDiv) return;

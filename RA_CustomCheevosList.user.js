@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.4
+// @version      1.4.1
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -1327,6 +1327,10 @@ const Pages = {
         GameCompareFilter.comparePage();
     },
     settings: () => {
+        if (document.readyState != 'complete') {
+            window.addEventListener("load", Pages.settings);
+            return;
+        }
         const settingsDiv = getElementByXpath(document, '//div[h3[text()="Preferences"]]')?.parentElement;
         if (!settingsDiv) return;
         const mainDiv = document.createElement('div');

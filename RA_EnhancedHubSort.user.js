@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_EnhancedHubSort
 // @namespace    RA
-// @version      0.6.3
+// @version      0.6.4
 // @description  Sorts entries in a hub locally, with additional sort and filtering options
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -686,6 +686,10 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
 </div>`;
 
 function settingsPage() {
+    if (document.readyState != 'complete') {
+        window.addEventListener("load", settingsPage);
+        return;
+    }
     // HTML creation
     const settingsDiv = getElementByXpath(document, '//div[h3[text()="Preferences"]]')?.parentElement;
     if (!settingsDiv) return;

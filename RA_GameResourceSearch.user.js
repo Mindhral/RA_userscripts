@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_GameResourceSearch
 // @namespace    RA
-// @version      0.2.5
+// @version      0.2.6
 // @description  Adds (customizable) links to game pages to search for resources on the game.
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -266,6 +266,10 @@ const settingsDivHtml = `<div class="text-card-foreground rounded-lg border bord
 </div>`
 
 function settingsPage() {
+    if (document.readyState != 'complete') {
+        window.addEventListener("load", settingsPage);
+        return;
+    }
     const xpathRes = document.evaluate("//div[h3[text()='Preferences']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
     const settingsDiv = xpathRes.iterateNext()?.parentElement;
     if (settingsDiv == null) return;
