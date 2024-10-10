@@ -1,109 +1,168 @@
 // ==UserScript==
 // @name         RA_GameListRandom
 // @namespace    RA
-// @version      0.2.1
-// @description  On Game list pages (Want to play, All games), adds a button to shuffle the list if it's single page or one to select a random game if it's paginated
+// @version      0.3
+// @description  On Want to play page, adds a button to select a random game with the current filter selection
 // @author       Mindhral
-// @match        https://retroachievements.org/gameList.php*
+// @match        https://retroachievements.org/game-list/play*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        none
 // ==/UserScript==
 
-function shuffle(array) {
-    let index = array.length;
-    while (index > 1) {
-        let newIdx = Math.floor(Math.random() * index);
-        index--;
-        [array[index], array[newIdx]] = [array[newIdx], array[index]];
-    }
-    return array;
+let paginationBlock;
+let filterIndex;
+let randomButton;
+let allGamesButton;
+
+function getElementsByXpath(root, xpath) {
+    const results = document.evaluate(xpath, root, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+    const nodes = [];
+    let node;
+    while (node = results.iterateNext()) nodes.push(node);
+    return nodes;
+}
+
+function setVisible(element, visible) {
+    const method = visible ? 'remove' : 'add';
+    element?.classList[method]('hidden');
+}
+
+function isVisible(element) {
+    return !element.classList.contains('hidden');
 }
 
 function getGamesRows() {
-    return [...document.querySelectorAll('table.table-highlight tr:not(.do-not-highlight)')];
+    return [...document.querySelectorAll('article table tbody tr')];
 }
 
 function addButton(label) {
-    const filtersDiv = document.querySelector('article div[align="right"]');
-    // dev pages get exluded here
+    let filtersDiv;
+    for (const gameCountPara of getElementsByXpath(document, '//p[contains(.,"games")]')) {
+        const match = gameCountPara.innerText.match(/^(\d+) of \d+ games$/);
+        if (match) filtersDiv = gameCountPara.parentElement;
+        break;
+    }
     if (!filtersDiv) return null;
+    const refButton = filtersDiv.querySelector('button:last-of-type');
 
     const button = document.createElement('button');
-    button.className = 'btn';
-    button.style['margin-right'] = '1em';
+    button.className = refButton?.className || 'btn';
     button.innerHTML = label;
     filtersDiv.prepend(button);
     return button;
 }
 
+function getGamesCount() {
+    for (const gameCountPara of getElementsByXpath(document, '//p[contains(.,"games")]')) {
+        const match = gameCountPara.innerText.match(/^(\d+) of \d+ games$/);
+        if (match) return match[1];
+    }
+}
+
+function getPagination() {
+    const paginationMatch = paginationBlock.parentElement.querySelector('p').innerText.match(/Page (\d+) of (\d+)$/);
+    const idxToInt = idx => parseInt(paginationMatch?.[idx]) || 1;
+    return {current: idxToInt(1), max: idxToInt(2)};
+}
+
+let itemsPerPage;
+function getItemsPerPage() {
+    if (itemsPerPage) return itemsPerPage;
+
+    const pagination = getPagination();
+    const rowsCount = getGamesRows().length;
+    if (pagination.max == 1) {
+        // only 1 page: we can't know the max value, but the rows count will work for the current situation
+        return rowsCount;
+    }
+    if (pagination.current < pagination.max) {
+        // not the last page: the rows count is the max value
+        itemsPerPage = rowsCount;
+    } else {
+        // last page: we divide the total rows for the prevous pages by their number
+        itemsPerPage = (getGamesCount() - rowsCount) / (pagination.max - 1);
+    }
+    return itemsPerPage;
+}
+
 function addRandomGameButton() {
-    const gamesCount = parseInt(document.querySelector('article > h2 + p')?.innerText.match(/\d+/)[0]) || 0
+    const gamesCount = getGamesCount();
     if (!gamesCount) return; // offset > gamesCount ?
-    const button = addButton('Random game');
-    if (!button) return;
-    button.addEventListener('click', () => {
-        const rndIdx = Math.floor(Math.random() * gamesCount);
+    randomButton = addButton('Random game');
+    if (!randomButton) return;
+    setVisible(randomButton, gamesCount > 0);
+    randomButton.addEventListener('click', () => {
+        const rndIdx = Math.floor(Math.random() * getGamesCount());
+        const targetPage = 1 + Math.floor(rndIdx / getItemsPerPage());
         const urlParams = new URLSearchParams(window.location.search);
-        const offset = parseInt(urlParams.get('o')) || 0;
-        if (rndIdx >= offset && rndIdx < offset + 50) {
-            const displayIdx = rndIdx - offset;
-            window.location.hash = 'g' + displayIdx;
-            filterGame(displayIdx);
+        const pagination = getPagination();
+        const filterIdx = rndIdx % getItemsPerPage();
+        if (targetPage == pagination.current) {
+            filterGame(filterIdx);
+            return;
+        }
+        const buttonIdx = (() => { switch (targetPage) {
+            case pagination.current - 1: return 2;
+            case pagination.current + 1 : return 3;
+            case 1: return 1;
+            case pagination.max: return 4;
+            default: return -1;
+        }})();
+        if (buttonIdx >= 0) {
+            filterIndex = filterIdx;
+            if (buttonIdx > 0) paginationBlock.querySelector(`button:nth-child(${buttonIdx})`).click();
         } else {
-            const pageGameOffset = rndIdx % 50;
             const newUrl = new URL(window.location);
-            urlParams.set('o', rndIdx - pageGameOffset);
-            newUrl.hash = 'g' + pageGameOffset;
+            urlParams.set('page[number]', targetPage);
             newUrl.search = urlParams;
+            newUrl.hash = 'g' + filterIdx;
             window.location = newUrl;
         }
     });
 }
 
-function filterGame(idx) {
-    getGamesRows().forEach((element, i) => {
-        const f = (i == idx) ? 'remove' : 'add';
-        element.classList[f]('hidden');
-    });
-
-    if (document.getElementById('allGamesButton')) return;
-    const allGamesButton = addButton('All games');
+function addAllGamesButton() {
+    allGamesButton = addButton('All games');
     allGamesButton.id = 'allGamesButton';
     allGamesButton.title = 'Show all games from the current page';
     allGamesButton.addEventListener('click', () => {
-        getGamesRows().forEach((element) => element.classList.remove('hidden'));
-        allGamesButton.remove();
+        getGamesRows().forEach((element) => setVisible(element, true));
+        setVisible(allGamesButton, false);
+        setVisible(paginationBlock, true);
+    });
+}
+
+function updateState() {
+    setVisible(randomButton, getGamesCount() > 0);
+    if (filterIndex) {
+        filterGame(filterIndex);
+        filterIndex = null;
+    } else if (isVisible(allGamesButton)) {
+        allGamesButton.click();
+    }
+}
+
+function filterGame(idx) {
+    getGamesRows().forEach((element, i) => setVisible(element, i == idx));
+
+    setVisible(paginationBlock, false);
+    setVisible(allGamesButton, true);
+}
+
+window.addEventListener("load", () => {
+    paginationBlock = document.querySelector('nav[aria-label="pagination"]');
+    addRandomGameButton();
+    addAllGamesButton();
+    setVisible(allGamesButton, false);
+
+    const newNodesObserver = new MutationObserver(updateState);
+    const newNodesConfig = { childList: true, subtree: true, characterData: true };
+    newNodesObserver.observe(document.querySelector('article tbody'), newNodesConfig);
+
+    const urlHash = window.location.hash;
+    if (urlHash.match(/^#g\d+$/)) {
+        filterGame(parseInt(urlHash.slice(2)));
         window.location.hash = '';
-        const offset = parseInt(new URLSearchParams(window.location.search).get('o')) || 0;
-    });
-}
-
-function addShuffleButton() {
-    const allRows = getGamesRows();
-    if (allRows.length == 0) return; // unsupported consoles, ...
-
-    const button = addButton('Shuffle');
-    if (!button) return; // dev pages
-    button.addEventListener('click', () => {
-        shuffle(allRows);
-        const lastIdx = allRows.length - 1;
-        const last = allRows[lastIdx];
-        for (let i = 0; i < lastIdx; i++) last.before(allRows[i]);
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    // special case of hubs list
-    const consoleId = new URLSearchParams(window.location.search).get('c');
-    // Hubs and Events
-    if(consoleId == '100' || consoleId == '101') return;
-    // presence of pagination
-    if (document.querySelector('article > div.text-right')) {
-        addRandomGameButton();
-        const urlHash = window.location.hash;
-        if (urlHash.match(/^#g\d+$/)) filterGame(parseInt(urlHash.slice(2)));
-    } else {
-        addShuffleButton();
     }
 });
