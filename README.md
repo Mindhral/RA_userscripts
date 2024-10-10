@@ -226,13 +226,13 @@ Modifies the scrolling of the leaderboards list found on a game, achievement or 
 
 ## RA_GameListTagFilter
 
-Adds a filter on games titles tags on game list pages: *All Games*, *Want to Play*, *Claim List*, *Most Requested*, *Hardest Games*.
+Adds a filter on games titles tags on some list pages: *All Games*, *Claim List*, *Most Requested*, *Hardest Games*.
 
-![n64 demo filter](/assets/GameListTagFilter_wanttoplay_homebrew.png)
+![n64 demo filter](/assets/GameListTagFilter_single_page.png)
 
 The filter is applied on the games already displayed, so the behavior is different from what could be expected from a filter executed on server when there is pagination:
 
-![claim homebrew page 1](/assets/GameListTagFilter_claim_homebrew.png)
+![claim homebrew page 1](/assets/GameListTagFilter_pagination.png)
 
 This script should be compatible with *RA_colorMarkGames*.
 
