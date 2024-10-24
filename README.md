@@ -198,7 +198,7 @@ Allows to change the display of unlock count and rate for achievements on a game
 
 Hardcore data uses the hardcore unlocks, but also the hardcore players count as total (players having at least one hardcore unlock on the set). For subsets, this behavior is different than the normal one (for total values), which uses the player count for the game. They are a bit longer than the rest to display, as they wait for the data to be available in the distribution chart.
 
-Progress bars are not modified (except for the mouseover text), and the achievements page is not supported by this feature at the moment.
+Progress bars are only modified with *hardcore* setting value (except for the mouseover text), and the achievements page is not supported by this feature at the moment.
 
 ### Custom Locked Badges
 

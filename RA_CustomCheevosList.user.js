@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.4.1
+// @version      1.5
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -1084,12 +1084,14 @@ const CustomUnlockCounts = (() => {
             };
 
             // handling the 3 different cases
+            // for now we only do what we can without the hardcore players count
             let hcProgressPara;
             hcUnlocksSpan?.remove();
             switch (Settings.unlockCountData) {
                 case 'hardcore':
                     progressBar.classList.add('cursor-help');
                     progressBar.title = `total unlocks: ${unlocks} of ${totalPlayers} (${ratePara.innerText.replace(/ .+/, '')})`;
+                    progressBar.children[1].remove();
                     changeToHcRate(ratePara);
                     changeLabelToHc(progressPara);
                     break;
@@ -1103,6 +1105,7 @@ const CustomUnlockCounts = (() => {
                     // completely handled after hardcore players count is available
             }
 
+            // will be called when the hardcore players count will be available
             hcTotalCallbacks.push(hardcorePlayers => {
                 const hcRate = Number(parseUSInt(hcUnlocks) * 100 / hardcorePlayers).toFixed(2) + '%';
                 const hardcorePlayersStr = hardcorePlayers.toLocaleString('en-US');
@@ -1111,6 +1114,8 @@ const CustomUnlockCounts = (() => {
                 if (Settings.unlockCountData == 'total') {
                     progressBar.classList.add('cursor-help');
                     progressBar.title = `hardcore: ${hcUnlocks} of ${hardcorePlayersStr} (${hcRate})`;
+                } else if (Settings.unlockCountData == 'hardcore') {
+                    progressBar.children[0].style.width = hcRate;
                 }
             });
         });
