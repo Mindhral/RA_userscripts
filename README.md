@@ -226,7 +226,7 @@ Modifies the scrolling of the leaderboards list found on a game, achievement or 
 
 ## RA_GameListTagFilter
 
-Adds a filter on games titles tags on some list pages: *All Games*, *Claim List*, *Most Requested*, *Hardest Games*.
+Adds a filter on games titles tags on some list pages: *Claim List*, *Most Requested*, *Hardest Games*.
 
 ![n64 demo filter](/assets/GameListTagFilter_single_page.png)
 

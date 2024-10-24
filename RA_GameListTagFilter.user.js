@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         RA_GameListTagFilter
 // @namespace    RA
-// @version      0.2
+// @version      0.2.1
 // @description  Allows to filter games on a type tag (subset, hack, ...)
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
-// @match        https://retroachievements.org/gameList.php*
 // @match        https://retroachievements.org/setRequestList.php*
 // @match        https://retroachievements.org/claims/*
 // @match        https://retroachievements.org/gameSearch.php*
