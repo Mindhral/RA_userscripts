@@ -238,7 +238,7 @@ This script should be compatible with *RA_colorMarkGames*.
 
 ## RA_GameListRandom
 
-On game list pages (only *Want to play* at the moment), adds a button to select a random game.
+On game list pages (only *Want to play* and *All Games* at the moment), adds a button to select a random game among those corresponding to the current filters criteria.
 
 The *Random game* button chooses an entry, goes to its page if necessary, and isolates it:
 

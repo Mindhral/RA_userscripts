@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         RA_GameListRandom
 // @namespace    RA
-// @version      0.3
+// @version      0.4
 // @description  On Want to play page, adds a button to select a random game with the current filter selection
 // @author       Mindhral
+// @match        https://retroachievements.org/games*
 // @match        https://retroachievements.org/game-list/play*
+// @exclude      https://retroachievements.org/games/*
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        none
@@ -32,6 +34,10 @@ function isVisible(element) {
     return !element.classList.contains('hidden');
 }
 
+function parseUSInt(str, def = 0) {
+    return parseInt(str?.replaceAll(',', '') ?? def);
+}
+
 function getGamesRows() {
     return [...document.querySelectorAll('article table tbody tr')];
 }
@@ -39,7 +45,7 @@ function getGamesRows() {
 function addButton(label) {
     let filtersDiv;
     for (const gameCountPara of getElementsByXpath(document, '//p[contains(.,"games")]')) {
-        const match = gameCountPara.innerText.match(/^(\d+) of \d+ games$/);
+        const match = gameCountPara.innerText.match(/^[\d,]+ of [\d,]+ games$/);
         if (match) filtersDiv = gameCountPara.parentElement;
         break;
     }
@@ -55,14 +61,14 @@ function addButton(label) {
 
 function getGamesCount() {
     for (const gameCountPara of getElementsByXpath(document, '//p[contains(.,"games")]')) {
-        const match = gameCountPara.innerText.match(/^(\d+) of \d+ games$/);
-        if (match) return match[1];
+        const match = gameCountPara.innerText.match(/^([\d,]+) of [\d,]+ games$/);
+        if (match) return parseUSInt(match[1]);
     }
 }
 
 function getPagination() {
     const paginationMatch = paginationBlock.parentElement.querySelector('p').innerText.match(/Page (\d+) of (\d+)$/);
-    const idxToInt = idx => parseInt(paginationMatch?.[idx]) || 1;
+    const idxToInt = idx => parseUSInt(paginationMatch?.[idx], 1);
     return {current: idxToInt(1), max: idxToInt(2)};
 }
 
@@ -124,6 +130,7 @@ function addRandomGameButton() {
 
 function addAllGamesButton() {
     allGamesButton = addButton('All games');
+    if (!allGamesButton) return;
     allGamesButton.id = 'allGamesButton';
     allGamesButton.title = 'Show all games from the current page';
     allGamesButton.addEventListener('click', () => {
