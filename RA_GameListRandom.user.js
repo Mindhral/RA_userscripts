@@ -120,6 +120,8 @@ function addRandomGameButton() {
             filterGame(filterIdx);
             return;
         }
+        allGamesButton.disabled = true;
+        randomButton.disabled = true;
         filterIndex = filterIdx;
         setNativeValue(pageInput, targetPage);
     });
@@ -141,6 +143,8 @@ function updateState() {
     setVisible(randomButton, getGamesCount() > 0);
     if (filterIndex != null) {
         filterGame(filterIndex);
+        allGamesButton.removeAttribute('disabled');
+        randomButton.removeAttribute('disabled');
         filterIndex = null;
     } else if (isVisible(allGamesButton)) {
         allGamesButton.click();
