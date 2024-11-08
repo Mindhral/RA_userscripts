@@ -139,7 +139,7 @@ function addAllGamesButton() {
 
 function updateState() {
     setVisible(randomButton, getGamesCount() > 0);
-    if (filterIndex) {
+    if (filterIndex != null) {
         filterGame(filterIndex);
         filterIndex = null;
     } else if (isVisible(allGamesButton)) {
