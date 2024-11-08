@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_GameListRandom
 // @namespace    RA
-// @version      0.4
+// @version      0.5
 // @description  On Want to play page, adds a button to select a random game with the current filter selection
 // @author       Mindhral
 // @match        https://retroachievements.org/games*
@@ -38,6 +38,16 @@ function parseUSInt(str, def = 0) {
     return parseInt(str?.replaceAll(',', '') ?? def);
 }
 
+// sets the value of an <input> element handled by React
+function setNativeValue(element, value) {
+    let lastValue = element.value;
+    element.value = value;
+    let event = new Event("input", { target: element, bubbles: true });
+    event.simulated = true; // React 15
+  	element._valueTracker?.setValue(lastValue); // React 16
+    element.dispatchEvent(event);
+}
+
 function getGamesRows() {
     return [...document.querySelectorAll('article table tbody tr')];
 }
@@ -67,9 +77,10 @@ function getGamesCount() {
 }
 
 function getPagination() {
-    const paginationMatch = paginationBlock.parentElement.querySelector('p').innerText.match(/Page (\d+) of (\d+)$/);
-    const idxToInt = idx => parseUSInt(paginationMatch?.[idx], 1);
-    return {current: idxToInt(1), max: idxToInt(2)};
+    const current = parseInt(paginationBlock.querySelector('input').value);
+    const paginationMatch = paginationBlock.innerText.match(/Page\s+of (\d+)$/);
+    const max = parseUSInt(paginationMatch?.[1], 1);
+    return {current, max};
 }
 
 let itemsPerPage;
@@ -98,6 +109,7 @@ function addRandomGameButton() {
     randomButton = addButton('Random game');
     if (!randomButton) return;
     setVisible(randomButton, gamesCount > 0);
+    const pageInput = paginationBlock.querySelector('input');
     randomButton.addEventListener('click', () => {
         const rndIdx = Math.floor(Math.random() * getGamesCount());
         const targetPage = 1 + Math.floor(rndIdx / getItemsPerPage());
@@ -108,23 +120,8 @@ function addRandomGameButton() {
             filterGame(filterIdx);
             return;
         }
-        const buttonIdx = (() => { switch (targetPage) {
-            case pagination.current - 1: return 2;
-            case pagination.current + 1 : return 3;
-            case 1: return 1;
-            case pagination.max: return 4;
-            default: return -1;
-        }})();
-        if (buttonIdx >= 0) {
-            filterIndex = filterIdx;
-            if (buttonIdx > 0) paginationBlock.querySelector(`button:nth-child(${buttonIdx})`).click();
-        } else {
-            const newUrl = new URL(window.location);
-            urlParams.set('page[number]', targetPage);
-            newUrl.search = urlParams;
-            newUrl.hash = 'g' + filterIdx;
-            window.location = newUrl;
-        }
+        filterIndex = filterIdx;
+        setNativeValue(pageInput, targetPage);
     });
 }
 
@@ -158,18 +155,25 @@ function filterGame(idx) {
 }
 
 window.addEventListener("load", () => {
-    paginationBlock = document.querySelector('nav[aria-label="pagination"]');
-    addRandomGameButton();
-    addAllGamesButton();
-    setVisible(allGamesButton, false);
+    const addButtons = () => {
+        paginationBlock = document.querySelector('nav[aria-label="pagination"]');
+        if (!paginationBlock) return false;
+        addRandomGameButton();
+        addAllGamesButton();
+        setVisible(allGamesButton, false);
 
-    const newNodesObserver = new MutationObserver(updateState);
-    const newNodesConfig = { childList: true, subtree: true, characterData: true };
-    newNodesObserver.observe(document.querySelector('article tbody'), newNodesConfig);
+        // listen for changes in the games list table: new/deleted lines, or line content change
+        // should trigger every time a new page is loaded, or the filter criteria change
+        const newNodesObserver = new MutationObserver(updateState);
+        const newNodesConfig = { childList: true, subtree: true, characterData: true };
+        newNodesObserver.observe(document.querySelector('article tbody'), newNodesConfig);
+        return true;
+    };
 
-    const urlHash = window.location.hash;
-    if (urlHash.match(/^#g\d+$/)) {
-        filterGame(parseInt(urlHash.slice(2)));
-        window.location.hash = '';
+    if (!addButtons()) {
+        const navNodeObserver = new MutationObserver(() => {
+            if (addButtons()) navNodeObserver.disconnect();
+        });
+        navNodeObserver.observe(document.querySelector('article'), { childList: true, subtree: true });
     }
 });
