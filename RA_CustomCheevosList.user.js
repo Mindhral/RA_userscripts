@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.5
+// @version      1.6
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -147,7 +147,10 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
     <tr><th colspan="2">Filtering and sorting</th></tr>
     <tr>
       <td><label for="enhancedCheevosSortActive">Enhanced Sort Options</label></td>
-      <td><input id="enhancedCheevosSortActive" type="checkbox"></td>
+      <td>
+        <p><input id="enhancedCheevosSortActive" type="checkbox"></p>
+        <p><label>Allow normal sorting without grouping <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span> <input id="enhancedCheevosSortAllowAPI" type="checkbox"></label></p>
+      </td>
     </tr>
     <tr>
       <td><label for="enhancedCheevosFiltersActive">Hardcore Unlocks Filter</label></td>
@@ -239,31 +242,41 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
 
 const EnhancedCheevosSort = (() => {
 
+    const Compares = {
+        fromValue: f => (a, b) => f(a) - f(b),
+        reverse: c => (a, b) => c(b, a),
+        compose: (c1, c2) => (a,b) => {
+            const res1 = c1(a,b);
+            return res1 == 0 ? c2(a,b) : res1;
+        },
+        allEqual: (a,b) => 0
+    };
+
     const MainSorts = {
         'normal': {
             label: 'Normal',
             extractInfo: r1 => { },
-            compare: (r1, r2) => r1.index - r2.index
+            compare: Compares.fromValue(r => r.index)
         },
         'won-by': {
             label: 'Won by',
             extractInfo: r1 => { r1.wonBy = parseUSInt(r1.element.querySelector('span[title="Total unlocks"]').innerText) },
-            compare: (r1, r2) => r1.wonBy - r2.wonBy
+            compare: Compares.fromValue(r => r.wonBy)
         },
         'won-by-hc': {
             label: 'Won by (hardcore)',
             extractInfo: r1 => { r1.wonByHc = parseUSInt(r1.element.querySelector('span[title="Hardcore unlocks"]')?.innerText?.replaceAll(/[\(\)]/g,'')) || 0 },
-            compare: (r1, r2) => r1.wonByHc - r2.wonByHc
+            compare: Compares.fromValue(r => r.wonByHc)
         },
         'points': {
             label: 'Points',
             extractInfo: r1 => { r1.points = parseInt(r1.element.querySelector('span.TrueRatio')?.previousElementSibling?.innerText?.replace(/\((\d+)\)/,'$1')) || 0 },
-            compare: (r1, r2) => r1.points - r2.points
+            compare: Compares.fromValue(r => r.points)
         },
         'retropoints': {
             label: 'RetroPoints',
             extractInfo: r1 => { r1.retroPoints = parseUSInt(r1.element.querySelector('span.TrueRatio')?.innerText?.replace(/\(([\d,]+)\)/,'$1')) || 0 },
-            compare: (r1, r2) => r1.retroPoints - r2.retroPoints
+            compare: Compares.fromValue(r => r.retroPoints)
         },
         'title': {
             label: 'Title',
@@ -276,10 +289,7 @@ const EnhancedCheevosSort = (() => {
                 const order = { 'Progression': 0, 'Win Condition': 1, 'Missable': 2 };
                 return r => { r.type = order[r.element.querySelector('button div[aria-label]')?.ariaLabel] ?? 3 };
             })(),
-            compare: (r1, r2) => {
-                const comp = r1.type - r2.type;
-                return comp == 0 ? r1.index - r2.index : comp;
-            }
+            compare: Compares.compose(Compares.fromValue(r => r.type), Compares.fromValue(r => r.index))
         },
         'unlock-date': {
             label: 'Unlock date',
@@ -288,7 +298,7 @@ const EnhancedCheevosSort = (() => {
                 const match = r.element.querySelector('li.unlocked-row p.leading-4 + p')?.innerText?.match(/Unlocked\s+(.+)([ap]m)/i);
                 if (match != null) r.unlockDate = Date.parse(match[1] + ' ' + match[2]);
             },
-            compare: (r1, r2) => r1.unlockDate - r2.unlockDate
+            compare: Compares.fromValue(r => r.unlockDate)
         }
     };
 
@@ -312,19 +322,11 @@ const EnhancedCheevosSort = (() => {
     };
 
     const DefaultSettings = {
-        active: true
+        active: true,
+        allowAPI: false
     };
 
     const Settings = loadSettings('enhancedSort', DefaultSettings);
-
-    const Compares = {
-        reverse: c => (a, b) => c(b, a),
-        compose: (c1, c2) => (a,b) => {
-            const res1 = c1(a,b);
-            return res1 == 0 ? c2(a,b) : res1;
-        },
-        allEqual: (a,b) => 0
-    };
 
     let sortParams = GM_getValue('cheevosSortSettings', {
         mainSort: 'normal',
@@ -333,7 +335,30 @@ const EnhancedCheevosSort = (() => {
         groupLast: false
     });
 
-    const settingsPage = basicSettingsPage('enhancedCheevosSortActive', 'enhancedSort', Settings);
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('enhancedCheevosSortActive');
+        activeCheckbox.checked = Settings.active;
+        const allowAPICheckbox = document.getElementById('enhancedCheevosSortAllowAPI');
+        allowAPICheckbox.checked = Settings.allowAPI;
+
+        function saveSettings() {
+            GM_setValue('enhancedSort', Settings);
+        }
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(allowAPICheckbox, Settings.active);
+            saveSettings();
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+
+        allowAPICheckbox.addEventListener('change', () => {
+            Settings.allowAPI = allowAPICheckbox.checked;
+            saveSettings();
+            APIKey.neededFor('enhancedSort', Settings.allowAPI);
+        });
+        allowAPICheckbox.dispatchEvent(new Event('change'));
+    };
 
     function gamePage() {
         if (!Settings.active) return;
@@ -421,25 +446,44 @@ const EnhancedCheevosSort = (() => {
                 if (!sortParams.groupLast) groupCompare = Compares.reverse(groupCompare);
                 sortRows();
             };
+            var realIndexUsed = false;
+            const updateIndexIfNeeded = () => {
+                if (realIndexUsed) return;
+                if (sortParams.mainSort != 'normal' || sortParams.sortGroup != 'groupNone') return;
+                withGameExtended(data => {
+                    rowInfos.forEach(rowInfo => {
+                        rowInfo.cheevosId = rowInfo.element.querySelector('a').href.split('/').at(-1);
+                        rowInfo.displayOrder = data.Achievements[rowInfo.cheevosId].DisplayOrder;
+                    });
+                    MainSorts.normal.compare = Compares.compose(Compares.fromValue(r => r.displayOrder), Compares.fromValue(r => r.cheevosId))
+                    updateCompare();
+                    updateUnlockCompare();
+                });
+                realIndexUsed = true;
+            }
             groupSelect.addEventListener('change', () => {
                 sortParams.sortGroup = groupSelect.selectedOptions[0].value;
+                if (Settings.allowAPI) updateIndexIfNeeded();
                 updateUnlockCompare();
             });
             groupLastCheckbox.addEventListener('change', () => {
                 sortParams.groupLast = groupLastCheckbox.checked;
                 updateUnlockCompare();
             });
+            if (Settings.allowAPI) mainSelect.addEventListener('change', updateIndexIfNeeded);
 
             // implementing constraints between controls
-            mainSelect.addEventListener('change', () => {
-                const noneItem = groupSelect.namedItem('groupNone');
-                noneItem.disabled = (sortParams.mainSort === 'normal');
-                noneItem.title = noneItem.disabled ? 'unavailable with normal sort' : '';
-                if (noneItem.disabled && noneItem.selected) {
-                    groupSelect.selectedIndex = 0;
-                    sortParams.sortGroup = groupSelect.selectedOptions[0].value;
-                }
-            });
+            if (!Settings.allowAPI) {
+                mainSelect.addEventListener('change', () => {
+                    const noneItem = groupSelect.namedItem('groupNone');
+                    noneItem.disabled = (sortParams.mainSort === 'normal');
+                    noneItem.title = noneItem.disabled ? 'unavailable with normal sort' : '';
+                    if (noneItem.disabled && noneItem.selected) {
+                        groupSelect.selectedIndex = 0;
+                        sortParams.sortGroup = groupSelect.selectedOptions[0].value;
+                    }
+                });
+            }
             groupSelect.addEventListener('change', () => {
                 groupLastCheckbox.disabled = (sortParams.sortGroup === 'groupNone');
             });
@@ -464,8 +508,12 @@ const EnhancedCheevosSort = (() => {
 
         sortParams = new Proxy(sortParams, {
             set(obj, prop,val) {
-                iconSpan.classList.remove('hidden')
                 Reflect.set(...arguments);
+                if (sortParams.mainSort == 'normal' && sortParams.sortGroup == 'groupNone') {
+                    iconSpan.classList.add('hidden');
+                } else {
+                    iconSpan.classList.remove('hidden');
+                }
             }
         });
     }
@@ -550,6 +598,7 @@ const CheevosAuthorFilter = (() => {
             GM_setValue('cheevosAuthorFilter', Settings);
             APIKey.neededFor('cheevosAuthorFilter', Settings.active);
         });
+        activeCheckbox.dispatchEvent(new Event('change'));
     };
 
     const DefaultLinkTitle = 'Filter achievements from this author';

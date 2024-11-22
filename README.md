@@ -2,13 +2,20 @@
 
 These are user scripts for Retroachievements web site, providing new or modified features.
 
+> [!NOTE]
+> The developers of Retroachievements web site don't have any responsibility to theses scripts nor obligation to maintain compatibility with them.
+
 They were made with [Tampermonkey](https://www.tampermonkey.net/), but may work with equivalents such as [Greasemonkey](https://addons.mozilla.org/fr/firefox/addon/greasemonkey/) or [ViolentMonkey](https://violentmonkey.github.io/) (not tested).
 To use them, install the extension, then open the raw file from this repository, which should open it in the extension and ask if you want to install it. Update should be automatic should there be new versions in the future (if it is not disabled in the extension's parameters).
 
 The scripts were developed on Firefox for Windows, but also tested on Firefox for Android (on a tablet) and Edge for Windows.
 Each script is made for the version of the site which is online at the time of the script's release. Any future update of the site may render them inoperant or useless. Should it happen, I will try to maintain this repository by updating or deleting the scripts in question if my schedule allows it.
-> [!NOTE]
-> The developers of Retroachievements web site don't have any responsibility to theses scripts nor obligation to maintain compatibility with them.
+
+<a name="api-warning"></a>
+> [!WARNING]
+> Some features requires calls to the website public API. In order to do that, the scripts stores your API Key in its own local storage when you enable the feature in the settings.
+This storage should be isolated from other sites, extensions, and scripts, but can be read by someone with access to your OS profile's data and a bit of technical knowledge.
+This shouldn't be a problem for most, but these features are always disabled by default to be sure that people are aware they use it.
 
 ## RA_CustomizeProfile
 
@@ -98,7 +105,7 @@ Modifies the sorting of achievements on a game page.
 
    ![group unlocks](/assets/EnhancedCheevosSort_group_unlocks.png)
 
-   3. only separate hardcore unlocks (with *Normal* sort, softcore unlocks and locked achievements stay separated from each other, so this only have an effect with "last" option active)
+   3. only separate hardcore unlocks
 
    ![group hardcore](/assets/EnhancedCheevosSort_group_HC.png)
 
@@ -106,11 +113,17 @@ Modifies the sorting of achievements on a game page.
 
    ![group hardcore, softcore](/assets/EnhancedCheevosSort_group_HCSC.png)
 
-   5. no unlock grouping (not available in normal sort, as the info is not available in HTML code)
+   5. no unlock grouping
 
    ![group none](/assets/EnhancedCheevosSort_group_none.png)
+   
+   6. by default, it is not possible to use the normal sorting with no unlock grouping, as it requires an API call. It can be enabled in the settings:
+   
+      ![sort settings](/assets/EnhancedCheevosSort_settings.png)
+      
+	  See [this note](#api-warning) for more details about features requiring the API.
 
-4. Save current sorting parameters as default. This is saved in script storage, locally (synchronization of this storage doesn't seem to work in Tampermonkey at the moment).
+4. Save current sorting parameters as default. This is saved in script storage, locally (synchronization of this storage doesn't seem to work in Tampermonkey at the moment). A parameter combination requiring an API call cannot be saved, to avoid adding workload to the server every time a page is loaded.
 
 ![grouping save](/assets/EnhancedCheevosSort_save.png)
 
@@ -130,8 +143,7 @@ On sets with multiple authors, this makes the counter for each author clickable,
 
 > [!WARNING]
 > This requires a web API call (which is only done when you click on a counter for the first time after the page load).
-> In order to do that, the scripts stores your API Key in its own local storage when you enable the feature in the settings.
-> This storage should be isolated from other sites, extensions, and scripts, but can be read by someone with access to your OS profile's data and a bit of technical knowledge.
+> See [this note](#api-warning) for more details.
 
 ![hide unlocked](/assets/CustomCheevosList_authorFilter.png)
 
