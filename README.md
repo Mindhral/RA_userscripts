@@ -31,6 +31,32 @@ It's possible to filter completed sets in the *Completion Progress* section on p
 
 ![none](/assets/HideMasteredSets_none.png) ![mastered](/assets/HideMasteredSets_mastered.png) ![completed](/assets/HideMasteredSets_completed.png)
 
+### Link Completion Progress to Compare Page
+
+Adds links to *Compare Unlocks* page on the progress bars from the *Completion Progress* section.
+
+![completion progress links](/assets/CustomizeProfile_progressLinks.png)
+
+### Custom Cheevos Sort
+
+Adds a button above the achievements list of each game in *Last X Games Played* section to switch the sorting of these achievements.
+
+![custom cheevos sort - original order](/assets/CustomizeProfile_cheeevosSort_original.png)
+
+The new sorting can be parameterized in the Settings page.
+
+![custom cheevos sort - settings](/assets/CustomizeProfile_cheeevosSort_settings.png)
+
+The only sorting currently possible is to use the "natural" order as defined by the set developer(s).
+
+> [!WARNING]
+> This requires a web API call (which is done once per game at most, when you click on its sort button for the first time after the page load).
+> See [this note](#api-warning) for more details.
+
+![custom cheevos sort - display order](/assets/CustomizeProfile_cheeevosSort_displayOrder.png)
+
+The only option is to choose whether or not to separate the unlocked achievements and how. The available values are exactly the same as for the *unlock grouping* feature from [Enhanced Sort Options](#enhanced-sort-options) (except for the *Last* checkbox, absent here).
+
 ### Scrollable Game Awards
 
 If the number of badges in the *Game Awards* section of profile page exceeds a certain number, this feature adds a scroll bar to that section.
@@ -51,12 +77,6 @@ Adds checkboxes in the *Game Awards* section of other users profile page to high
 This feature doesn't differentiate between mastery and completion badges.
 
 ![Highlight Awards - all](/assets/HighlightAwards_all.png) ![Highlight Awards - common](/assets/HighlightAwards_common.png) ![Highlight Awards - others](/assets/HighlightAwards_others.png)
-
-### Link Completion Progress to Compare Page
-
-Adds links to *Compare Unlocks* page on the progress bars from the *Completion Progress* section.
-
-![completion progress links](/assets/CustomizeProfile_progressLinks.png)
 
 ### Mark Unearned Badges
 

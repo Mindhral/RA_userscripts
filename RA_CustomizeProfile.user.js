@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.4.2
+// @version      1.5
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -12,6 +12,7 @@
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_deleteValue
 // ==/UserScript==
 
 // authenticated user
@@ -64,6 +65,52 @@ function basicSettingsPage(chekboxId, settingsKey, settings) {
     }
 }
 
+const APIKey = (() => {
+    let key;
+    const needingFeatures = new Set();
+
+    const get = () => {
+        if (!key) key = GM_getValue('APIKey', null);
+        return key;
+    };
+
+    const neededFor = feature => {
+        if (needingFeatures.size == 0) {
+            key = JSON.parse(document.getElementById('app').dataset.page).props.userSettings.apiKey;
+            GM_setValue('APIKey', key);
+        }
+        needingFeatures.add(feature);
+    };
+
+    const notNeededFor = feature => {
+        if (needingFeatures.delete(feature) && needingFeatures.size == 0) {
+            GM_deleteValue('APIKey');
+        }
+    }
+
+    return { get, neededFor: (feature, needed) => needed ? neededFor(feature) : notNeededFor(feature) };
+})();
+
+const withGameExtended = (() => {
+    const data = {};
+
+    return (gameId, callback) => {
+        if (data[gameId]) {
+            callback(data[gameId]);
+            return;
+        }
+        const flag = (new URLSearchParams(window.location.search).get('f') == 5) ? 5 : 3
+        fetch(`https://retroachievements.org/API/API_GetGameExtended.php?i=${gameId}&f=${flag}&z=${getCurrentUser()}&y=${APIKey.get()}`)
+        .then(response => response.json())
+        .then(json => {
+            data[gameId] = json;
+            callback(json);
+        }).catch(error => {
+            console.log(error);
+        });
+    };
+})();
+
 const settingsHtml = `<div class="text-card-foreground rounded-lg border border-embed-highlight bg-embed shadow-sm w-full">
   <div class="flex flex-col space-y-1.5 p-6 pb-4">
     <h4 class="mb-0 border-b-0 text-2xl font-semibold leading-none tracking-tight">Profile page customization</h4>
@@ -71,12 +118,14 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
   <form><div class="p-6 pt-0">
   <table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr><th colspan="2"><label><input id="hideMasterProgrActive" type="checkbox"> Hide Mastered Progression Option</label></th></tr>
+    <tr><th colspan="2"><label><input id="progressLinkActive" type="checkbox"> Link Completion Progress to Compare Page</label></th></tr>
+    <tr><th colspan="2"><label><input id="customCheevosSortActive" type="checkbox"> Custom Cheevos Sort <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span></label></th></tr>
+    <tr><td>Separate unlocks for display order</td><td><select id="cheevosSortGrouping" /></td></tr>
     <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
     <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
     <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
     <tr><td>Thin scrollbar</td><td><input id="scrollAwardsThinBar" type="checkbox"></td></tr>
     <tr><th colspan="2"><label><input id="highlightAwardsActive" type="checkbox"> Highlight Awards Checkboxes</label></th></tr>
-    <tr><th colspan="2"><label><input id="progressLinkActive" type="checkbox"> Link Completion Progress to Compare Page</label></th></tr>
   </tbody></table>
   <table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr><th colspan="2"><label><input id="markUnearnedActive" type="checkbox"> Mark Unearned Badges</label></th></tr>
@@ -439,12 +488,121 @@ const LinkHighScore2Compare = (() => {
     return { profilePage, settingsPage };
 })();
 
+const CustomCheevosSort = (() => {
+    const SortGroupings = {
+        unlocks: {
+            label: 'one group',
+            getRowValue: r => r.unlocked ? 0 : 1
+        },
+        hardcore: {
+            label: 'hardcore only',
+            getRowValue: r => r.hcUnlocked ? 0 : 1
+        },
+        hcSc: {
+            label: 'hardcore, softcore',
+            getRowValue: r => r.hcUnlocked ? 0 : r.unlocked ? 1 : 2
+        },
+        none: {
+            label: 'none',
+            getRowValue: r => 0
+        }
+    };
+
+    const Compares = {
+        fromValue: f => (a, b) => f(a) - f(b),
+        compose: (c1, c2) => (a, b) => {
+            const res1 = c1(a, b);
+            return res1 == 0 ? c2(a, b) : res1;
+        }
+    };
+
+    const DefaultSettings = {
+        active: false,
+        sortGroup: 'none'
+    };
+
+    const Settings = loadSettings('customCheevosSort', DefaultSettings);
+
+    function saveSettings() {
+        GM_setValue('customCheevosSort', Settings);
+    }
+
+    function settingsPage() {
+        const activeCheckbox = document.getElementById('customCheevosSortActive');
+        activeCheckbox.checked = Settings.active;
+        const groupSelect = document.getElementById('cheevosSortGrouping');
+        for (const [sortName, sort] of Object.entries(SortGroupings)) {
+            const option = newElement('option', groupSelect, null, sort.label);
+            option.value = sortName;
+            option.setAttribute('name', sortName);
+        }
+        groupSelect.namedItem(Settings.sortGroup).selected = true;
+
+        activeCheckbox.addEventListener('change', () => {
+            Settings.active = activeCheckbox.checked;
+            setRowVisibility(groupSelect, Settings.active);
+            saveSettings();
+            APIKey.neededFor('customCheevosSort', Settings.active);
+        });
+        activeCheckbox.dispatchEvent(new Event('change'));
+        groupSelect.addEventListener('change', () => {
+            Settings.sortGroup = groupSelect.selectedOptions[0].value;
+            saveSettings();
+        });
+    }
+
+    function profilePage() {
+        if (!Settings.active) return;
+
+        const originalCompare = Compares.fromValue(c => c.index);
+        const displayCompare = Compares.compose(Compares.fromValue(c => c.displayOrder), Compares.fromValue(c => c.id));
+        const customCompare = Compares.compose(Compares.fromValue(SortGroupings[Settings.sortGroup].getRowValue), displayCompare);
+
+        const badgeContainers = document.querySelectorAll('div.transition-all > hr + div');
+        badgeContainers.forEach(container => {
+            const newDiv = document.createElement('div');
+            container.before(newDiv);
+            newDiv.outerHTML = '<div title="Use dev display order" class="btn" style="font-size: 1em;padding: .2em .2em;position: absolute;top: 1em;right: -2px;">⬆⬇</div>';
+            const sortBtn = container.previousElementSibling;
+
+            const gameDiv = container.parentElement.parentElement;
+            const gameId = gameDiv.querySelector('a').href.split('/').at(-1);
+            let cheevosList;
+            let isOriginalSort = true;
+
+            const switchSort = () => {
+                if (!cheevosList) {
+                    withGameExtended(gameId, data => {
+                        cheevosList = [...container.children].map((span, index) => {
+                            const cheevosId = span.querySelector('a').href.split('/').at(-1);
+                            const img = span.querySelector('img');
+                            const unlocked = !img.src.endsWith('_lock.png');
+                            const hcUnlocked = img.classList.contains('goldimage');
+                            return { element: span, id: cheevosId, index, displayOrder: data.Achievements[cheevosId].DisplayOrder, unlocked, hcUnlocked };
+                        });
+                        switchSort();
+                    });
+                    return;
+                }
+                isOriginalSort = !isOriginalSort;
+                const compare = isOriginalSort ? originalCompare : customCompare;
+                cheevosList.sort(compare);
+                cheevosList.map(r => r.element).forEach(e => container.append(e));
+            };
+            sortBtn.addEventListener('click', switchSort);
+        });
+    }
+
+    return { profilePage, settingsPage };
+})();
+
 function profilePage() {
     ScrollAwards.profilePage();
     HideMasteredProgress.profilePage();
     MarkUnearnedAwards.profilePage();
     HighlightAwards.profilePage();
     LinkHighScore2Compare.profilePage();
+    CustomCheevosSort.profilePage();
 }
 
 function settingsPage() {
@@ -464,6 +622,7 @@ function settingsPage() {
     MarkUnearnedAwards.settingsPage();
     HighlightAwards.settingsPage();
     LinkHighScore2Compare.settingsPage();
+    CustomCheevosSort.settingsPage();
 }
 
 const urlPathname = window.location.pathname;
