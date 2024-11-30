@@ -54,6 +54,10 @@ function setRowVisibility(element, visible) {
     setVisible(element.closest('tr'), visible);
 }
 
+function getElementByXpath(root, xpath) {
+    return document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+}
+
 function basicSettingsPage(chekboxId, settingsKey, settings) {
     return () => {
         const activeCheckbox = document.getElementById(chekboxId);
@@ -118,7 +122,15 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
   <form><div class="p-6 pt-0">
   <table><tbody class="[&>tr>td]:!px-0 [&>tr>td]:py-2 [&>tr>th]:!px-0 [&>tr]:!bg-embed">
     <tr><th colspan="2"><label><input id="hideMasterProgrActive" type="checkbox"> Hide Mastered Progression Option</label></th></tr>
-    <tr><th colspan="2"><label><input id="progressLinkActive" type="checkbox"> Link Completion Progress to Compare Page</label></th></tr>
+    <tr><th colspan="2">Link Progress Bars to Compare Page</th></tr>
+    <tr>
+      <td><label for="completionProgressLinkActive">In Completion Progress</label></td>
+      <td><input id="completionProgressLinkActive" type="checkbox"></td>
+    </tr>
+    <tr>
+      <td><label for="lastGamesProgressLinkActive">In Last Played Games</label></td>
+      <td><input id="lastGamesProgressLinkActive" type="checkbox"></td>
+    </tr>
     <tr><th colspan="2"><label><input id="customCheevosSortActive" type="checkbox"> Custom Cheevos Sort <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span></label></th></tr>
     <tr><td>Separate unlocks for display order</td><td><select id="cheevosSortGrouping" /></td></tr>
     <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
@@ -460,29 +472,68 @@ const HighlightAwards = (() => {
     return { profilePage, settingsPage };
 })();
 
-const LinkHighScore2Compare = (() => {
+const LinkProgress2Compare = (() => {
     const DefaultSettings = {
-        active: true
+        completionProgress: true,
+        lastPlayedGames: true
     };
 
     const Settings = loadSettings('progressLink', DefaultSettings);
 
-    const settingsPage = basicSettingsPage('progressLinkActive', 'progressLink', Settings);
+    function saveSettings() {
+        GM_setValue('progressLink', Settings);
+    }
+    // Migration
+    if (Settings.active != null) {
+        Settings.completionProgress = Settings.active;
+        delete Settings.active;
+        saveSettings();
+    }
+
+    function settingsPage() {
+        const progressActiveCheckbox = document.getElementById('completionProgressLinkActive');
+        progressActiveCheckbox.checked = Settings.completionProgress;
+        const lastGamesActiveCheckbox = document.getElementById('lastGamesProgressLinkActive');
+        lastGamesActiveCheckbox.checked = Settings.lastPlayedGames;
+
+        progressActiveCheckbox.addEventListener('change', () => {
+            Settings.completionProgress = progressActiveCheckbox.checked;
+            saveSettings();
+        });
+
+        lastGamesActiveCheckbox.addEventListener('change', () => {
+            Settings.lastPlayedGames = lastGamesActiveCheckbox.checked;
+            saveSettings();
+        });
+    }
 
     function profilePage() {
-        if (!Settings.active) return;
+        if (!Settings.completionProgress && !Settings.lastPlayedGames) return;
         if (!getCurrentUser()) return; // not authenticated
         const pageUser = getPageUser();
-        document.querySelectorAll('#usercompletedgamescomponent tr').forEach(tr => {
-            const scoreCell = tr.children.item(1);
-            const barDiv = scoreCell.firstElementChild;
+        const addCompareLink = (parent, barDiv) => {
             // creating the link
-            const gameId = tr.getElementsByTagName('a')[0].href.split('/').at(-1);
+            const gameId = parent.getElementsByTagName('a')[0].href.split('/').at(-1);
             const newLink = document.createElement('a');
             newLink.href = `/user/${pageUser}/game/${gameId}/compare`;
+            newLink.style.color = 'inherit';
             barDiv.replaceWith(newLink);
             newLink.append(barDiv);
-        });
+        };
+        if (Settings.completionProgress) {
+            document.querySelectorAll('#usercompletedgamescomponent tr').forEach(tr => {
+                const scoreCell = tr.children.item(1);
+                const barDiv = scoreCell.firstElementChild;
+                addCompareLink(tr, barDiv);
+            });
+        }
+        if (Settings.lastPlayedGames) {
+            const gameListDiv = getElementByXpath(document, '//div[h2[contains(text(), "Games Played")]]/div');
+            [...gameListDiv.children].forEach(div => {
+                const barDiv = div.querySelector('div[role="progressbar"]');
+                addCompareLink(div, barDiv.parentElement);
+            });
+        }
     }
 
     return { profilePage, settingsPage };
@@ -601,7 +652,7 @@ function profilePage() {
     HideMasteredProgress.profilePage();
     MarkUnearnedAwards.profilePage();
     HighlightAwards.profilePage();
-    LinkHighScore2Compare.profilePage();
+    LinkProgress2Compare.profilePage();
     CustomCheevosSort.profilePage();
 }
 
@@ -610,8 +661,7 @@ function settingsPage() {
         window.addEventListener("load", settingsPage);
         return;
     }
-    const xpathRes = document.evaluate("//div[h3[text()='Preferences']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    const settingsDiv = xpathRes.iterateNext()?.parentElement;
+    const settingsDiv = getElementByXpath(document, "//div[h3[text()='Preferences']]")?.parentElement;
     if (!settingsDiv) return;
     const mainDiv = document.createElement('div');
     settingsDiv.insertAdjacentElement('afterend', mainDiv);
@@ -621,7 +671,7 @@ function settingsPage() {
     HideMasteredProgress.settingsPage();
     MarkUnearnedAwards.settingsPage();
     HighlightAwards.settingsPage();
-    LinkHighScore2Compare.settingsPage();
+    LinkProgress2Compare.settingsPage();
     CustomCheevosSort.settingsPage();
 }
 

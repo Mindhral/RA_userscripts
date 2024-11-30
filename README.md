@@ -31,11 +31,15 @@ It's possible to filter completed sets in the *Completion Progress* section on p
 
 ![none](/assets/HideMasteredSets_none.png) ![mastered](/assets/HideMasteredSets_mastered.png) ![completed](/assets/HideMasteredSets_completed.png)
 
-### Link Completion Progress to Compare Page
+### Link Progress Bars to Compare Page
 
-Adds links to *Compare Unlocks* page on the progress bars from the *Completion Progress* section.
+Adds links to *Compare Unlocks* page on the progress bars from the *Completion Progress* and the *Last X Games Played* sections.
 
 ![completion progress links](/assets/CustomizeProfile_progressLinks.png)
+
+![completion progress links](/assets/CustomizeProfile_progressLinks_lastGames.png)
+
+Both can be deactivated in the Settings with two different options.
 
 ### Custom Cheevos Sort
 
