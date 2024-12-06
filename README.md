@@ -272,18 +272,6 @@ The filter is applied on the games already displayed, so the behavior is differe
 
 This script should be compatible with *RA_colorMarkGames*.
 
-## RA_GameListRandom
-
-On game list pages (only *Want to play* and *All Games* at the moment), adds a button to select a random game among those corresponding to the current filters criteria.
-
-The *Random game* button chooses an entry, goes to its page if necessary, and isolates it:
-
-![console random](/assets/GameListRandom_toplay_random.png)
-
-Once a game is selected, one can either redraw using the same button or display all the games on the current page again:
-
-![console selected](/assets/GameListRandom_toplay_selected.png)
-
 ## RA_EnhancedHubSort
 
 Modifies the sorting of entries on a Hub page (including consoles games lists) and adds some filtering.
@@ -416,5 +404,6 @@ The date should be formatted according to the browser's locale.
 - RA_EnhancedCheevosFilters: now included with RA_CustomCheevosList
 - RA_EnhancedCheevosSort: now included with RA_CustomCheevosList
 - RA_LinkUnofficalAchievements: now included with RA_CustomCheevosList
+- RA_GameListRandom: the feature is provided by RAWeb since version 6.21
 
 [^1]: Unless synchronization of scripts storage is added to Tampermonkey, these parameters are local.
