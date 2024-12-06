@@ -272,13 +272,12 @@ function settingsPage() {
         setTimeout(settingsPage, 100);
         return;
     }
-    const xpathRes = document.evaluate("//div[h3[text()='Preferences']]", document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-    const settingsDiv = xpathRes.iterateNext()?.parentElement;
-    if (settingsDiv == null) return;
+    const settingsContainer = document.querySelector('article h1 + div');
+    if (settingsContainer == null) return;
 
     // HTML creation
     const mainDiv = document.createElement('div');
-    settingsDiv.insertAdjacentElement('afterend', mainDiv);
+    settingsContainer.append(mainDiv);
     mainDiv.outerHTML = settingsDivHtml;
     const searchSelect = document.getElementById('grSearchSelect');
     Settings.searches.forEach(search => {

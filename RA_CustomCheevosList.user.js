@@ -541,8 +541,8 @@ const EnhancedCheevosFilters = (() => {
             const unlockedRows = achievementsList.querySelectorAll('li.unlocked-row');
             if (unlockedRows.length == 0) return;
             const initialValue = 'none';
-            const checkboxLabel = getElementByXpath(filterDiv, '//label[text()[contains(., "Hide unlocked achievements")]]');
-            if (checkboxLabel == null) return;
+            const checkboxLabel = document.querySelector('input[type="checkbox"][\\@change="toggleUnlockedRows"]')?.parentElement;
+            if (!checkboxLabel) return;
 
             unlockedRows.forEach(row => {
                 if (row.getElementsByClassName('goldimagebig').length > 0) {
@@ -608,10 +608,11 @@ const CheevosAuthorFilter = (() => {
         const achievementsList = document.getElementById('set-achievements-list');
         if (achievementsList == null) return;
 
-        const authorsDiv = getElementByXpath(document, '//div[@id="achievement"]/div[span[text()="Authors:"]]');
-        if (!authorsDiv) return; // only 1 author
-        const authorSpans = authorsDiv.querySelectorAll('span[x-data]');
-        if (authorSpans.length < 2) return; // should not happen because of the plural Authors above
+        //const authorsDiv = getElementByXpath(document, '//div[@id="achievement"]/div[span[text()="Authors:"]]');
+        const authorsDiv = getElementByXpath(document, '//div[@id="achievement"]/div[span/a[contains(@href, "/user/")]]');
+        if (!authorsDiv) return;
+        const authorSpans = authorsDiv.querySelectorAll(':scope > span[x-data]');
+        if (authorSpans.length < 2) return; // only 1 author
         authorSpans.forEach(span => {
             const author = span.innerText;
             let nextNode = span.nextSibling;
@@ -995,7 +996,9 @@ const HistoryLinks = (() => {
         if (achievementsList == null) return;
         const currentUser = getCurrentUser();
         if (!currentUser) return;
-        getElementsByXpath(achievementsList, '//p[contains(text(), "Unlocked")]').forEach(p => {
+        // getElementsByXpath(achievementsList, '//p[contains(text(), "Unlocked")]').forEach(p => {
+        document.querySelectorAll('ul#set-achievements-list p.text-neutral-400\\/70').forEach(p => {
+            // TODO: fix for localization when it happens
             p.innerHTML = p.innerText.replace(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/, (fullMatch, date) => {
                 const timestamp = new Date(date + ' UTC').getTime() / 1000;
                 return `Unlocked <a class="historyLink" href="/historyexamine.php?d=${timestamp}&amp;u=${currentUser}">${date}</a>`;
@@ -1026,7 +1029,8 @@ const LinkHighScore2Compare = (() => {
         if (!currentUser) return;
         const gameId = getGameId();
 
-        const highscoresRows = getElementsByXpath(document, '//h2[text()="Most Points Earned" or text()="Latest Masters"]/..//tbody/tr');
+        //const highscoresRows = getElementsByXpath(document, '//h2[text()="Most Points Earned" or text()="Latest Masters"]/..//tbody/tr');
+        const highscoresRows = getElementsByXpath(document, '//aside//div[contains(@class,"component")]//div/table/tbody[.//a[contains(@href,"/user/")]]/tr');
         highscoresRows.forEach(tr => {
             const scorePara = tr.children.item(2).querySelector('p,span');
             // creating the link
@@ -1095,7 +1099,7 @@ const CustomUnlockCounts = (() => {
             const hcUnlocks = hcUnlocksSpan?.innerText?.replaceAll(/[\(\)]/g,'') ?? '0';
 
             // identifiy blocks
-            const ratePara = getElementByXpath(row, './/p[contains(text(), "% unlock rate")]');
+            const ratePara = getElementByXpath(row, './/p[contains(text(), "%")]');
             const progressPara = row.querySelector('p[id^="progress-label-"]');
             const progressBar = row.querySelector('div[role="progressbar"]');
 
@@ -1244,8 +1248,8 @@ const ScrollableLeaderboards = (() => {
     function gamePage() {
         if (!Settings.active) return;
 
-        const lbTitle = getElementByXpath(document, '//aside//h2[text()="Leaderboards"]');
-        if (!lbTitle) return;
+        const lbDiv = document.querySelector('aside h2 + div a[href^="/leaderboardinfo.php"]')?.closest('h2 + div');
+        if (!lbDiv) return;
 
         const pathname = window.location.pathname;
         const maxHeight = pathname.startsWith('/game') ? Settings.gamePageMaxHeight : Settings.defaultMaxHeight;
@@ -1254,8 +1258,6 @@ const ScrollableLeaderboards = (() => {
         GM_addStyle(`.lb-list { overflow-y: auto; max-height: ${maxHeight}em; scrollbar-width: ${Settings.thinScrollbar ? 'thin' : 'auto'}; scroll-snap-type: y mandatory; }
         .lb-list > div { scroll-snap-align: start; }`);
 
-        const lbDiv = lbTitle.nextElementSibling;
-        if (!lbDiv) return;
         lbDiv.classList.remove('max-h-[980px]');
         lbDiv.classList.add('lb-list');
 
@@ -1387,10 +1389,10 @@ const Pages = {
             setTimeout(Pages.settings, 100);
             return;
         }
-        const settingsDiv = getElementByXpath(document, '//div[h3[text()="Preferences"]]')?.parentElement;
-        if (!settingsDiv) return;
+        const settingsContainer = document.querySelector('article h1 + div');
+        if (settingsContainer == null) return;
         const mainDiv = document.createElement('div');
-        settingsDiv.insertAdjacentElement('afterend', mainDiv);
+        settingsContainer.append(mainDiv);
         mainDiv.outerHTML = settingsHtml;
 
         EnhancedCheevosSort.settingsPage();

@@ -348,10 +348,10 @@ function customize() {
     }
     const consoleSelect = document.getElementById('consoleSelect');
     if (pageName == 'user') {
-        const filtersDiv = getElementByXpath(origSortDiv, './/div[label[normalize-space()="Filters"]]');
+        const filtersDiv = origSortDiv.querySelector('input[type="checkbox"][onchange^="handleFilter"]').closest('div.grid');
         consoleSelect.parentElement.parentElement.replaceWith(filtersDiv);
     } else {
-        const groupConsolesCheckbox = getElementByXpath(origSortDiv, './/label[normalize-space()="Group by console"]/input');
+        const groupConsolesCheckbox = origSortDiv.querySelector('input[type="checkbox"][onchange*="console"]');
         const groupConsolesLabel = document.getElementById('groupConsolesLabel');
         if (groupConsolesCheckbox) {
             groupConsolesLabel.insertAdjacentElement('afterbegin', groupConsolesCheckbox);
@@ -693,10 +693,10 @@ function settingsPage() {
         return;
     }
     // HTML creation
-    const settingsDiv = getElementByXpath(document, '//div[h3[text()="Preferences"]]')?.parentElement;
-    if (!settingsDiv) return;
+    const settingsContainer = document.querySelector('article h1 + div');
+    if (settingsContainer == null) return;
     const mainDiv = document.createElement('div');
-    settingsDiv.insertAdjacentElement('afterend', mainDiv);
+    settingsContainer.append(mainDiv);
     mainDiv.outerHTML = settingsHtml;
 
     /* Reset butons for saved filters */

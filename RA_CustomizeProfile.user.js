@@ -54,10 +54,6 @@ function setRowVisibility(element, visible) {
     setVisible(element.closest('tr'), visible);
 }
 
-function getElementByXpath(root, xpath) {
-    return document.evaluate(xpath, root, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-}
-
 function basicSettingsPage(chekboxId, settingsKey, settings) {
     return () => {
         const activeCheckbox = document.getElementById(chekboxId);
@@ -528,7 +524,7 @@ const LinkProgress2Compare = (() => {
             });
         }
         if (Settings.lastPlayedGames) {
-            const gameListDiv = getElementByXpath(document, '//div[h2[contains(text(), "Games Played")]]/div');
+            const gameListDiv = document.querySelector('article div[role="progressbar"]').closest('h2 + div');
             [...gameListDiv.children].forEach(div => {
                 const barDiv = div.querySelector('div[role="progressbar"]');
                 addCompareLink(div, barDiv.parentElement);
@@ -663,10 +659,10 @@ function settingsPage() {
         setTimeout(settingsPage, 100);
         return;
     }
-    const settingsDiv = getElementByXpath(document, "//div[h3[text()='Preferences']]")?.parentElement;
-    if (!settingsDiv) return;
+    const settingsContainer = document.querySelector('article h1 + div');
+    if (settingsContainer == null) return;
     const mainDiv = document.createElement('div');
-    settingsDiv.insertAdjacentElement('afterend', mainDiv);
+    settingsContainer.append(mainDiv);
     mainDiv.outerHTML = settingsHtml;
 
     ScrollAwards.settingsPage();
