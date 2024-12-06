@@ -657,8 +657,10 @@ function profilePage() {
 }
 
 function settingsPage() {
-    if (document.readyState != 'complete') {
-        window.addEventListener("load", settingsPage);
+    // check that react already updated the content
+    const localeSelect = document.querySelector('button#locale-select + select');
+    if (localeSelect.children.length == 0) {
+        setTimeout(settingsPage, 100);
         return;
     }
     const settingsDiv = getElementByXpath(document, "//div[h3[text()='Preferences']]")?.parentElement;
