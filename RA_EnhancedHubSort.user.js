@@ -155,15 +155,15 @@ const Status2 = {
 }
 
 const sortBlockHTML = `<div class="my-4">
-<div class="embedded p-4 w-full"><div class="grid sm:flex sm:divide-x-2 divide-embed-highlight">
-  <div class="grid gap-y-1 sm:pr-[40px]">
+<div class="embedded p-4 w-full"><div class="grid sm:flex gap-y-4 sm:divide-x-2 divide-embed-highlight sm:*:px-4 xl:*:px-8 first:*:pl-0 last:*:pr-0">
+  <div class="grid gap-y-1">
     <label class="font-bold text-xs">Sort by</label>
     <div class="flex flex-wrap items-center gap-x-1">
       <select id="sortSelect"></select>
       <label class="text-2xs"><input id="descSort" type="checkbox"> Reverse</label>
     </div>
   </div>
-  <div class="grid gap-y-1 sm:px-4">
+  <div class="grid gap-y-1">
     <div class="flex">
       <label class="font-bold text-xs">Console</label>
       <label id="groupConsolesLabel" title="Group tables by console (reloads the page)" class="text-2xs" style="margin-left: 2em;"> Group 🔄</label>
@@ -172,14 +172,14 @@ const sortBlockHTML = `<div class="my-4">
       <select id="consoleSelect" style="max-width: 15em;"><option value="all">All</option></select>
     </div>
   </div>
-  <div class="grid gap-y-1 sm:px-4">
+  <div class="grid gap-y-1">
     <label class="font-bold text-xs">Tag</label>
     <div>
       <select id="tagSelect"><option value="all">All</option></select>
       <select id="tagsMSelect" multiple class="hidden" style="vertical-align: top;" title="Ctrl+click or Shift+click for multiple selection"></select>
     </div>
   </div>
-  <div class="grid gap-y-1 sm:px-4">
+  <div class="grid gap-y-1">
     <label class="font-bold text-xs">Status</label>
     <div class="flex flex-wrap items-center gap-x-1">
       <select id="statusSelect1"></select>
@@ -350,6 +350,12 @@ function customize() {
     if (pageName == 'user') {
         const filtersDiv = origSortDiv.querySelector('input[type="checkbox"][onchange^="handleFilter"]').closest('div.grid');
         consoleSelect.parentElement.parentElement.replaceWith(filtersDiv);
+
+        [...filtersDiv.getElementsByTagName('input')].forEach(input => {
+            const label = input.parentElement;
+            label.append(' 🔄');
+            label.title = 'Reloads the page';
+        });
     } else {
         const groupConsolesCheckbox = origSortDiv.querySelector('input[type="checkbox"][onchange*="console"]');
         const groupConsolesLabel = document.getElementById('groupConsolesLabel');
@@ -394,17 +400,6 @@ function customize() {
         createOption(name, status.label, statusSelect2, status.title);
     }
 
-    const soleDevLabel = getElementByXpath(origSortDiv, './/label[normalize-space()="Sole developer"]');
-    if (soleDevLabel) {
-        const soleDevDiv = document.createElement('div');
-        const sortDivChild = sortDiv.firstElementChild;
-        soleDevDiv.className = sortDivChild.lastElementChild.className;
-        soleDevDiv.classList.add('text-2xs');
-        soleDevLabel.append(' 🔄');
-        soleDevLabel.title = 'Reloads the page';
-        soleDevDiv.append(soleDevLabel);
-        sortDivChild.append(soleDevDiv);
-    }
     origSortDiv.remove();
     // games counter
     const countVisible = () => (gameTables.flatMap(t => t.rowsData).filter(r => r.visible).length).toLocaleString('en-US');
