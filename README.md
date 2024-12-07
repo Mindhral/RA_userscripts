@@ -43,11 +43,11 @@ Both can be deactivated in the Settings with two different options.
 
 ### Custom Cheevos Sort
 
-Adds a button above the achievements list of each game in *Last X Games Played* section to switch the sorting of these achievements.
+Adds a button above the achievements list of each game in *Last X Games Played* section (and optionally on *Completion Progress* page) to switch the sorting of these achievements.
 
 ![custom cheevos sort - original order](/assets/CustomizeProfile_cheeevosSort_original.png)
 
-The new sorting can be parameterized in the Settings page.
+The new sorting can be parameterized in the Settings page, as well as whether or not the button should also be added on *Completion Progress* page.
 
 ![custom cheevos sort - settings](/assets/CustomizeProfile_cheeevosSort_settings.png)
 
@@ -59,7 +59,7 @@ The only sorting currently possible is to use the "natural" order as defined by 
 
 ![custom cheevos sort - display order](/assets/CustomizeProfile_cheeevosSort_displayOrder.png)
 
-The only option is to choose whether or not to separate the unlocked achievements and how. The available values are exactly the same as for the *unlock grouping* feature from [Enhanced Sort Options](#enhanced-sort-options) (except for the *Last* checkbox, absent here).
+The only sorting option is to choose whether or not to separate the unlocked achievements and how. The available values are exactly the same as for the *unlock grouping* feature from [Enhanced Sort Options](#enhanced-sort-options) (except for the *Last* checkbox, absent here).
 
 ### Scrollable Game Awards
 

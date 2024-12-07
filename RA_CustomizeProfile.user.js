@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         RA_CustomizeProfile
 // @namespace    RA
-// @version      1.5
+// @version      1.6
 // @description  Provides a set of options to customize the profile pages
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
 // @match        https://retroachievements.org/user/*
 // @match        https://retroachievements.org/settings*
-// @exclude      https://retroachievements.org/user/*/*
+// @exclude     /https:\/\/retroachievements.org\/user\/.*\/(game\/|tickets|posts|developer).*/
 // @run-at       document-start
 // @icon         https://static.retroachievements.org/assets/images/favicon.webp
 // @grant        GM_setValue
@@ -129,6 +129,10 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
     </tr>
     <tr><th colspan="2"><label><input id="customCheevosSortActive" type="checkbox"> Custom Cheevos Sort <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span></label></th></tr>
     <tr><td>Separate unlocks for display order</td><td><select id="cheevosSortGrouping" /></td></tr>
+    <tr>
+      <td><label for="cheevosSortCompletionPage">Also on Completion Progress page</label></td>
+      <td><input id="cheevosSortCompletionPage" type="checkbox"></td>
+    </tr>
     <tr><th colspan="2"><label><input id="scrollAwardsActive" type="checkbox"> Scrollable Game Awards</label></th></tr>
     <tr><td>Minimum number of games for showing the scroll bar</td><td><input id="scrollAwardsMinGames" type="number" style="width: 7em;"></td></tr>
     <tr><td>Maximum height of the section with the scroll bar</td><td><input id="scrollAwardsMaxHeight" type="number" min="10" style="width: 7em;"><span title="em: font-size of the element" style="cursor: help;"> em</span></td></tr>
@@ -565,7 +569,8 @@ const CustomCheevosSort = (() => {
 
     const DefaultSettings = {
         active: false,
-        sortGroup: 'none'
+        sortGroup: 'none',
+        completionPage: true
     };
 
     const Settings = loadSettings('customCheevosSort', DefaultSettings);
@@ -584,16 +589,23 @@ const CustomCheevosSort = (() => {
             option.setAttribute('name', sortName);
         }
         groupSelect.namedItem(Settings.sortGroup).selected = true;
+        const completionPageCheckbox = document.getElementById('cheevosSortCompletionPage');
+        completionPageCheckbox.checked = Settings.completionPage;
 
         activeCheckbox.addEventListener('change', () => {
             Settings.active = activeCheckbox.checked;
             setRowVisibility(groupSelect, Settings.active);
+            setRowVisibility(completionPageCheckbox, Settings.active);
             saveSettings();
             APIKey.neededFor('customCheevosSort', Settings.active);
         });
         activeCheckbox.dispatchEvent(new Event('change'));
         groupSelect.addEventListener('change', () => {
             Settings.sortGroup = groupSelect.selectedOptions[0].value;
+            saveSettings();
+        });
+        completionPageCheckbox.addEventListener('change', () => {
+            Settings.completionPage = completionPageCheckbox.checked;
             saveSettings();
         });
     }
@@ -620,7 +632,7 @@ const CustomCheevosSort = (() => {
             const switchSort = () => {
                 if (!cheevosList) {
                     withGameExtended(gameId, data => {
-                        cheevosList = [...container.children].map((span, index) => {
+                        cheevosList = [...container.querySelectorAll('span')].map((span, index) => {
                             const cheevosId = span.querySelector('a').href.split('/').at(-1);
                             const img = span.querySelector('img');
                             const unlocked = !img.src.endsWith('_lock.png');
@@ -634,13 +646,19 @@ const CustomCheevosSort = (() => {
                 isOriginalSort = !isOriginalSort;
                 const compare = isOriginalSort ? originalCompare : customCompare;
                 cheevosList.sort(compare);
-                cheevosList.map(r => r.element).forEach(e => container.append(e));
+                cheevosList.map(r => r.element).forEach(e => e.parentElement.append(e));
             };
             sortBtn.addEventListener('click', switchSort);
         });
     }
 
-    return { profilePage, settingsPage };
+    function completionPage() {
+        if (!Settings.completionPage) return;
+
+        profilePage();
+    }
+
+    return { profilePage, settingsPage, completionPage };
 })();
 
 function profilePage() {
@@ -650,6 +668,10 @@ function profilePage() {
     HighlightAwards.profilePage();
     LinkProgress2Compare.profilePage();
     CustomCheevosSort.profilePage();
+}
+
+function completionPage() {
+    CustomCheevosSort.completionPage();
 }
 
 function settingsPage() {
@@ -674,5 +696,5 @@ function settingsPage() {
 }
 
 const urlPathname = window.location.pathname;
-const mainMethod = urlPathname.startsWith('/settings') ? settingsPage : profilePage;
+const mainMethod = urlPathname.startsWith('/settings') ? settingsPage : urlPathname.endsWith('/progress') ? completionPage : profilePage;
 document.addEventListener("DOMContentLoaded", mainMethod);
