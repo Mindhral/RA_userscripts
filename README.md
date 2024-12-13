@@ -193,7 +193,7 @@ Adds a link on game page to view the unofficial achievements for the game, if an
 
 ### Links to User's History
 
-Replaces the dates on achievements unlocks by links to the user's history for that date.
+On game page and achievement page, replaces the dates on achievements unlocks by links to the user's history for that date.
 
 ![history links](/assets/CustomCheevosList_historyLinks.png)
 

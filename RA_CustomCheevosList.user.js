@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RA_CustomCheevosList
 // @namespace    RA
-// @version      1.6
+// @version      1.7
 // @description  Provides a set of options to customize the achievements list on a game page
 // @author       Mindhral
 // @homepage     https://github.com/Mindhral/RA_userscripts
@@ -990,16 +990,13 @@ const HistoryLinks = (() => {
         });
     }
 
-    function gamePage() {
+    function addLinks(dateParaFinder) {
         if (!Settings.active) return;
-        const achievementsList = document.getElementById('set-achievements-list');
-        if (achievementsList == null) return;
         const currentUser = getCurrentUser();
         if (!currentUser) return;
-        // getElementsByXpath(achievementsList, '//p[contains(text(), "Unlocked")]').forEach(p => {
-        document.querySelectorAll('ul#set-achievements-list p.text-neutral-400\\/70').forEach(p => {
-            // TODO: fix for localization when it happens
-            p.innerHTML = p.innerText.replace(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/, (fullMatch, date) => {
+        dateParaFinder().forEach(datePara => {
+            // TODO: fix for localization when it happens?
+            datePara.innerHTML = datePara.innerText.replace(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/, (fullMatch, date) => {
                 const timestamp = new Date(date + ' UTC').getTime() / 1000;
                 return `Unlocked <a class="historyLink" href="/historyexamine.php?d=${timestamp}&amp;u=${currentUser}">${date}</a>`;
             });
@@ -1009,7 +1006,20 @@ const HistoryLinks = (() => {
         }
     }
 
-    return { gamePage, settingsPage };
+    function gamePage() {
+        addLinks(() => {
+            return document.querySelectorAll('ul#set-achievements-list p.text-neutral-400\\/70');
+        });
+    }
+
+    function achievementPage() {
+        addLinks(() => {
+            const datePara = document.querySelector('#achievement li p.text-neutral-400\\/70');
+            return datePara ? [ datePara ] : [];
+        });
+    }
+
+    return { gamePage, settingsPage, achievementPage };
 })();
 
 const LinkHighScore2Compare = (() => {
@@ -1374,6 +1384,7 @@ const Pages = {
     achievement: () => {
         CustomLockedBadges.gamePage();
         ScrollableLeaderboards.gamePage();
+        HistoryLinks.achievementPage();
     },
     leaderboardinfo: () => {
         ScrollableLeaderboards.gamePage();
