@@ -1102,16 +1102,16 @@ const CustomUnlockCounts = (() => {
         const hcTotalCallbacks = [];
 
         allRows.forEach(row => {
-            // values
-            const unlocks = row.querySelector('span[title="Total unlocks"]').innerText;
-            if (!unlocks || unlocks == '0') return;
-            const hcUnlocksSpan = row.querySelector('span[title="Hardcore unlocks"]');
-            const hcUnlocks = hcUnlocksSpan?.innerText?.replaceAll(/[\(\)]/g,'') ?? '0';
-
             // identifiy blocks
-            const ratePara = getElementByXpath(row, './/p[contains(text(), "%")]');
             const progressPara = row.querySelector('p[id^="progress-label-"]');
+            const ratePara = getElementByXpath(progressPara.parentElement, './/p[contains(text(), "%")]');
             const progressBar = row.querySelector('div[role="progressbar"]');
+
+            // values
+            const unlocks = progressPara.querySelector('span[title="Total unlocks"]').innerText;
+            if (!unlocks || unlocks == '0') return;
+            const hcUnlocksSpan = progressPara.querySelector('span[title="Hardcore unlocks"]');
+            const hcUnlocks = hcUnlocksSpan?.innerText?.replaceAll(/[\(\)]/g,'') ?? '0';
 
             // elements containing the hardcore players count or hardcore unlock rate
             // for now, it will be written as "??" or "??%"
