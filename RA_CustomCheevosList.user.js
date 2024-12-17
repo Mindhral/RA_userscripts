@@ -175,7 +175,16 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
       <td><label for="historyLinksActive">Links to User's History</label></td>
       <td><input id="historyLinksActive" type="checkbox"></td>
     </tr>
+    <tr><td></td><td>
+      <label title="Transform the unlock date into a link to the user's history"><input type="radio" name="historyLinkMode" value="link" /> link only</label>
+      <label title="Button to copy the link to the user's history as a forum tag"><input type="radio" name="historyLinkMode" value="copy" /> "copy" button</label>
+      <label><input type="radio" name="historyLinkMode" value="both" /> both</label>
+    </td></tr>
     <tr><td></td><td>Link CSS Style: <input id="historyLinksStyle" type="text"> <span id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</span></td></tr>
+    <tr><td></td><td>Forum tags:
+      <label title="The unlock date as a link to history"><input type="radio" name="historyLinkTagTemplate" value="date"> 2024-12-31</label>
+      <label title="A link to the achievement followed by the unlock date as a link to history"><input type="radio" name="historyLinkTagTemplate" value="ach-date"> achievement (2024-12-31)</label>
+    </td></tr>
     <tr>
       <td><label for="highScoreLinksActive">Link High Scores to Compare Page</label></td>
       <td><input id="highScoreLinksActive" type="checkbox"></td>
@@ -955,7 +964,9 @@ const FilterBeatenCreditList = (() => {
 const HistoryLinks = (() => {
     const DefaultSettings = {
         active: false,
-        style:''
+        mode: 'link',
+        style:'',
+        tagTemplate: 'date'
     };
 
     const Settings = loadSettings('historyLinks', DefaultSettings);
@@ -969,13 +980,25 @@ const HistoryLinks = (() => {
         activeCheckbox.checked = Settings.active;
         const historyLinksStyleText = document.getElementById('historyLinksStyle');
         historyLinksStyleText.value = Settings.style;
+        const modeRadios = [...document.querySelectorAll('input[name="historyLinkMode"]')];
+        modeRadios.filter(r => r.value == Settings.mode)[0].checked = true;
+        const templateRadios = [...document.querySelectorAll('input[name="historyLinkTagTemplate"]')];
+        templateRadios.filter(r => r.value == Settings.tagTemplate)[0].checked = true;
 
         activeCheckbox.addEventListener('change', () => {
             Settings.active = activeCheckbox.checked;
-            setRowVisibility(historyLinksStyleText, Settings.active);
+            setRowVisibility(modeRadios[0], Settings.active);
+            setRowVisibility(historyLinksStyleText, Settings.active && Settings.mode != 'copy');
+            setRowVisibility(templateRadios[0], Settings.active && Settings.mode != 'link');
             saveSettings();
         });
         activeCheckbox.dispatchEvent(new Event('change'));
+        modeRadios.forEach(r => r.addEventListener('change', () => {
+            Settings.mode = r.value;
+            setRowVisibility(historyLinksStyleText, Settings.mode != 'copy');
+            setRowVisibility(templateRadios[0], Settings.active && Settings.mode != 'link');
+            saveSettings();
+        }));
         historyLinksStyleText.addEventListener('change', () => {
             Settings.style = historyLinksStyleText.value.trim();
             saveSettings();
@@ -984,6 +1007,10 @@ const HistoryLinks = (() => {
             historyLinksStyleText.value = 'color: inherit;text-decoration: underline;';
             historyLinksStyleText.dispatchEvent(new Event('change'));
         });
+        templateRadios.forEach(r => r.addEventListener('change', () => {
+            Settings.tagTemplate = r.value;
+            saveSettings();
+        }));
     }
 
     function addLinks(dateParaFinder) {
@@ -992,14 +1019,33 @@ const HistoryLinks = (() => {
         if (!currentUser) return;
         dateParaFinder().forEach(datePara => {
             // TODO: fix for localization when it happens?
-            datePara.innerHTML = datePara.innerText.replace(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/, (fullMatch, date) => {
-                const timestamp = new Date(date + ' UTC').getTime() / 1000;
-                return `Unlocked <a class="historyLink" href="/historyexamine.php?d=${timestamp}&amp;u=${currentUser}">${date}</a>`;
-            });
+            const dateMatch = datePara.innerText.match(/Unlocked ([A-Z][a-z]+ [0-9]+ [0-9]{4})/);
+            if (!dateMatch) return;
+            const dateStr = dateMatch[1];
+            const date = new Date(dateStr + ' UTC');
+            const timestamp = date.getTime() / 1000;
+            if (Settings.mode != 'copy') {
+                datePara.innerHTML = datePara.innerText.replace(dateStr, `<a class="historyLink" href="/historyexamine.php?d=${timestamp}&amp;u=${currentUser}">${dateStr}</a>`);
+                if (Settings.style?.length > 0) {
+                    GM_addStyle(`.historyLink { ${Settings.style }`);
+                }
+            }
+            if (Settings.mode != 'link') {
+                datePara.innerHTML += '<div class="icon" title="copy history link as forum tag" style="cursor: pointer;vertical-align: top;">🔗</div>'
+                const copyIcon = datePara.querySelector('div.icon');
+                copyIcon.addEventListener('click', () => {
+                    const dateTag = `[url=https://retroachievements.org/historyexamine.php?d=${timestamp}&u=${currentUser}]${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}[/url]`;
+                    let forumTags = dateTag;
+                    if (Settings.tagTemplate == 'ach-date') {
+                        const achId = datePara.parentElement.querySelector('a').href.split('/').at(-1);
+                        forumTags = `[ach=${achId}] (${dateTag})`;
+                    }
+                    navigator.clipboard.writeText(forumTags);
+                    copyIcon.style.cursor = 'grabbing';
+                    setTimeout(() => { copyIcon.style.cursor = 'pointer' }, 500);
+                });
+            }
         });
-        if (Settings.style?.length > 0) {
-            GM_addStyle(`.historyLink { ${Settings.style }`);
-        }
     }
 
     function gamePage() {

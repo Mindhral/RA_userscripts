@@ -197,6 +197,10 @@ On game page and achievement page, replaces the dates on achievements unlocks by
 
 ![history links](/assets/CustomCheevosList_historyLinks.png)
 
+Alternatively, it can add a button after the date to copy a formatted link for the forum in the clipboard, or add both. The forum tag can be preceded by another one linking the achievement itself.
+
+![history links settings](/assets/CustomCheevosList_historyLinks_button.png) ![history links settings](/assets/CustomCheevosList_historyLinks_forum.png)
+
 The style of the link can be edited in the settings.
 
 ![history links settings](/assets/CustomCheevosList_historyLinks_settings.png) ![history links style example](/assets/CustomCheevosList_historyLinks_style.png)
