@@ -147,11 +147,9 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
     <tr><th colspan="2">Filtering and sorting</th></tr>
     <tr>
       <td><label for="enhancedCheevosSortActive">Enhanced Sort Options</label></td>
-      <td>
-        <p><input id="enhancedCheevosSortActive" type="checkbox"></p>
-        <p><label>Allow normal sorting without grouping <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span> <input id="enhancedCheevosSortAllowAPI" type="checkbox"></label></p>
-      </td>
+      <td><input id="enhancedCheevosSortActive" type="checkbox"></td>
     </tr>
+    <tr><td></td><td><label>Allow normal sorting without grouping <span class="icon" title="Needs to store your API Key in the script local storage" style="cursor: help;">💡</span> <input id="enhancedCheevosSortAllowAPI" type="checkbox"></label></td></tr>
     <tr>
       <td><label for="enhancedCheevosFiltersActive">Hardcore Unlocks Filter</label></td>
       <td><input id="enhancedCheevosFiltersActive" type="checkbox"></td>
@@ -174,12 +172,10 @@ const settingsHtml = `<div class="text-card-foreground rounded-lg border border-
       <td><input id="linkUnofficalActive" type="checkbox"></td>
     </tr>
     <tr>
-      <td style="vertical-align: top;"><label for="historyLinksActive">Links to User's History</label></td>
-      <td>
-        <p><input id="historyLinksActive" type="checkbox"></p>
-        <p>CSS Style: <input id="historyLinksStyle" type="text"> <span id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</span></p>
-      </td>
+      <td><label for="historyLinksActive">Links to User's History</label></td>
+      <td><input id="historyLinksActive" type="checkbox"></td>
     </tr>
+    <tr><td></td><td>Link CSS Style: <input id="historyLinksStyle" type="text"> <span id="historyLinksStyleExample" class="icon cursor-pointer" title="click for an example with underline and no link color">💡</span></td></tr>
     <tr>
       <td><label for="highScoreLinksActive">Link High Scores to Compare Page</label></td>
       <td><input id="highScoreLinksActive" type="checkbox"></td>
